@@ -1,4 +1,4 @@
-# Raven Telematics Dashboard
+# Raven Data API Test App
 
 A simple application to view vehicle data from Raven video telematics devices. This serves as a demonstration and starting point for developers looking to integrate with the Raven API.
 
@@ -23,11 +23,11 @@ This project is a self-contained web application built with React and TypeScript
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+    git clone https://github.com/travisgrayraven/Raven-Data-API-tool.git
     ```
 2.  **Navigate to the project directory:**
     ```bash
-    cd YOUR_REPOSITORY
+    cd Raven-Data-API-tool
     ```
 3.  **Open `index.html` in your web browser.**
     You can do this by dragging the file into your browser window or using a simple local server.

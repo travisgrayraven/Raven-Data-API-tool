@@ -7,18 +7,9 @@ interface VehicleTableProps {
 }
 
 export const VehicleTable: React.FC<VehicleTableProps> = ({ ravens }) => {
-  if (ravens.length === 0) {
-    return (
-        <div className="mt-8 bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-            <h2 className="text-xl font-semibold text-white mb-2">No Vehicles Found</h2>
-            <p className="text-gray-400">The API returned an empty list of vehicles.</p>
-        </div>
-    );
-  }
-
   return (
     <div className="mt-8 bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-      <h2 className="text-xl font-semibold text-white p-4 bg-gray-900/50">Vehicle Details</h2>
+      <h2 className="text-xl font-semibold text-white p-4 bg-gray-900/50">Raven Vehicle Details</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-700">

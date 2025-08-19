@@ -65,7 +65,7 @@ export const VehicleMap: React.FC<VehicleMapProps> = ({ ravens }) => {
 
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-       <h2 className="text-xl font-semibold text-white p-4 bg-gray-900/50">Vehicle Locations</h2>
+       <h2 className="text-xl font-semibold text-white p-4 bg-gray-900/50">Raven Vehicle Locations</h2>
        <div ref={mapContainerRef} style={{ height: '500px', width: '100%' }} className="rounded-b-lg bg-gray-700" />
     </div>
   );

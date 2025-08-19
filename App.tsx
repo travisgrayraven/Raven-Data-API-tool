@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import type { ApiCredentials, RavenDetails, ApiLogEntry } from './types';
 import { getToken, getRavens, getRavenDetails } from './services/ravenApi';
@@ -131,14 +130,14 @@ const App: React.FC = () => {
             <div className="max-w-7xl mx-auto">
                 <header className="text-center mb-10">
                     <h1 className="text-4xl font-extrabold text-white tracking-tight">
-                        Raven Telematics Dashboard
+                        Raven Data API Test App
                     </h1>
                     <p className="mt-2 text-lg text-gray-400">
                         Vehicle Fleet Overview
                     </p>
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
                         <a 
-                            href="https://github.com/google-gemini-vignettes/raven-telematics-dashboard" 
+                            href="https://github.com/travisgrayraven/Raven-Data-API-tool" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
@@ -156,6 +155,19 @@ const App: React.FC = () => {
                                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
                             </svg>
                             View Source Code
+                        </a>
+                        <a 
+                            href="https://docs.klashwerks.com/developers/846b420d-2d51-4966-873a-00a58769e6b0/data-api/" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+                            aria-label="View Raven Data API documentation"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-box-arrow-up-right" viewBox="0 0 16 16" aria-hidden="true">
+                                <path fillRule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
+                                <path fillRule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
+                            </svg>
+                            Raven Data API
                         </a>
                     </div>
                 </header>
@@ -192,7 +204,8 @@ const App: React.FC = () => {
                             {ravens.length > 0 ? (
                                 <div className="bg-gray-800 rounded-lg shadow-lg p-8 text-center">
                                     <h2 className="text-xl font-semibold text-white mb-2">Data Fetched Successfully</h2>
-                                    <p className="text-gray-400">{ravens.length} vehicle(s) found. See details in the API log below.</p>
+                                    <p className="text-gray-400">{`Found details for ${ravens.length} vehicle(s).`}</p>
+                                    <p className="text-gray-400 mt-2">You can inspect the data in the API Exchange Log below.</p>
                                 </div>
                             ) : (
                                 <div className="bg-gray-800 rounded-lg shadow-lg p-8 text-center">
