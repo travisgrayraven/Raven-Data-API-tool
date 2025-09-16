@@ -1,0 +1,21 @@
+{
+  "short_name": "RavenView",
+  "name": "Raven Fleet Manager",
+  "description": "A simple application to view vehicle data from Raven video telematics devices.",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#4f46e5",
+  "background_color": "#111827"
+}
