@@ -1,5 +1,7 @@
 
 
+
+
 import React from 'react';
 import type { RavenDetails } from '../types';
 
@@ -50,14 +52,14 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
 
     if (raven.unplugged) {
         statusText = 'Unplugged';
-        statusColor = 'text-yellow-600 dark:text-yellow-400';
+        statusColor = 'text-safety-orange dark:text-safety-orange';
         statusIcon = (
              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
         );
         statusTitle = 'Device is unplugged from the vehicle.';
     } else if (!raven.online) {
         statusText = 'Offline';
-        statusColor = 'text-gray-500 dark:text-gray-400';
+        statusColor = 'text-charcoal-grey dark:text-light-grey';
         statusIcon = (
              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
         );
@@ -71,7 +73,7 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
         statusTitle = `Vehicle is driving. Last report: ${formattedLastReport}.`;
     } else { // Parked
         statusText = 'Parked';
-        statusColor = 'text-blue-600 dark:text-blue-400';
+        statusColor = 'text-raven-blue dark:text-sky-blue';
         statusIcon = (
              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z" /><path strokeLinecap="round" strokeLinejoin="round" d="M10 10h1.5a2.5 2.5 0 110 5H10v-5z" /></svg>
         );
@@ -82,9 +84,9 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
     let fuelColorClass = 'bg-green-600 dark:bg-green-500';
     if (fuel !== undefined) {
         if (fuel < 10) {
-            fuelColorClass = 'bg-red-600 dark:bg-red-500';
+            fuelColorClass = 'bg-alert-red dark:bg-alert-red';
         } else if (fuel < 20) {
-            fuelColorClass = 'bg-yellow-500 dark:bg-yellow-400';
+            fuelColorClass = 'bg-safety-orange dark:bg-safety-orange';
         }
     }
 
@@ -92,7 +94,7 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
     return (
         <div
             onClick={onSelect}
-            className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-5 cursor-pointer transform hover:scale-105 transition-transform duration-200 flex flex-col group h-full border border-transparent hover:border-indigo-500"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 cursor-pointer transform hover:scale-105 transition-transform duration-200 flex flex-col group h-full border border-transparent hover:border-raven-blue"
             role="button"
             tabIndex={0}
             onKeyPress={(e) => e.key === 'Enter' && onSelect()}
@@ -104,7 +106,7 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
                     <h3 className="text-lg font-bold truncate pr-2 text-gray-900 dark:text-white" title={title}>
                         {title}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate pr-2" title={subTitle}>
+                    <p className="text-sm text-charcoal-grey dark:text-soft-grey truncate pr-2" title={subTitle}>
                         {subTitle}
                     </p>
                 </div>
@@ -136,7 +138,7 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
                 {fuel !== undefined ? (
                     <div className="flex items-center gap-2" title={`Fuel Level: ${Math.round(fuel)}%`}>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
-                        <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2.5 ml-1">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 ml-1">
                             <div className={`${fuelColorClass} h-2.5 rounded-full`} style={{ width: `${fuel}%` }}></div>
                         </div>
                         <span className="font-mono w-10 text-right">{Math.round(fuel)}%</span>

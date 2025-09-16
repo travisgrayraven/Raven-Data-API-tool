@@ -1,6 +1,8 @@
 
 
 
+
+
 import React, { useState, useRef } from 'react';
 import type { Geofence, ApiContextType, GeofenceFormData } from '../types';
 import { createGeofence, processWithConcurrency } from '../services/ravenApi';
@@ -235,7 +237,7 @@ export const BulkGeofenceActions: React.FC<BulkGeofenceActionsProps> = ({ geofen
         <div className="flex items-center gap-2 flex-wrap">
              <button
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700"
+                className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
                 title="Download a CSV template file"
             >
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
@@ -244,7 +246,7 @@ export const BulkGeofenceActions: React.FC<BulkGeofenceActionsProps> = ({ geofen
              <button
                 onClick={handleDownloadAll}
                 disabled={geofences.length === 0}
-                className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Download all geofences as a CSV file"
             >
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12.586l4.293-4.293a1 1 0 011.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 011.414-1.414L10 12.586zM3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" /></svg>
@@ -260,18 +262,18 @@ export const BulkGeofenceActions: React.FC<BulkGeofenceActionsProps> = ({ geofen
             />
             <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700"
+                className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
                 title="Upload geofences from a CSV file"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
                 Upload CSV
             </button>
             
-            <div className="border-l border-gray-300 dark:border-slate-600 h-6 mx-2"></div>
+            <div className="border-l border-gray-300 dark:border-gray-600 h-6 mx-2"></div>
 
              <button 
                 onClick={onCreateGeofence}
-                className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue"
             >
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110 2h5V4a1 1 0 011-1z" clipRule="evenodd" /></svg>
                 Create Geofence

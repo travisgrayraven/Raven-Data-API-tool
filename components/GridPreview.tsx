@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import type { RavenDetails, ApiContextType } from '../types';
 
@@ -69,12 +68,12 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                 }
             `}</style>
             <div className="flex justify-center mb-6">
-                <div className="inline-flex rounded-md shadow-sm bg-gray-100 dark:bg-slate-800 p-1" role="group">
+                <div className="inline-flex rounded-md shadow-sm bg-gray-100 dark:bg-gray-700/50 p-1" role="group">
                     <button
                         type="button"
                         onClick={() => setActiveCamera('road')}
                         className={`px-6 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                            activeCamera === 'road' ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700/50'
+                            activeCamera === 'road' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
                         }`}
                     >
                         Road
@@ -83,7 +82,7 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                         type="button"
                         onClick={() => setActiveCamera('cabin')}
                         className={`px-6 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                            activeCamera === 'cabin' ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700/50'
+                            activeCamera === 'cabin' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
                         }`}
                     >
                         Cabin
@@ -94,28 +93,37 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
             {ravens.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {ravens.map(raven => (
-                        <div key={raven.uuid} className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4">
+                        <div key={raven.uuid} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
                              <h3 className="text-md font-bold text-center truncate mb-2 text-gray-900 dark:text-white" title={raven.name}>
                                 {raven.name}
                             </h3>
                             <div className="w-full bg-black rounded-md overflow-hidden aspect-video">
-                                <rc-live-preview-viewer
-                                    ref={el => {
-                                        if (el) viewerRefs.current.set(raven.uuid, el);
-                                        else viewerRefs.current.delete(raven.uuid);
-                                    }}
-                                    apidomain={apiDomain}
-                                    sessiontoken={sessionToken}
-                                    ravenid={raven.uuid}
-                                    activecamera={activeCamera}
-                                    inactivitytimeoutseconds="300"
-                                />
+                                {raven.online ? (
+                                    <rc-live-preview-viewer
+                                        ref={el => {
+                                            if (el) viewerRefs.current.set(raven.uuid, el);
+                                            else viewerRefs.current.delete(raven.uuid);
+                                        }}
+                                        apidomain={apiDomain}
+                                        sessiontoken={sessionToken}
+                                        ravenid={raven.uuid}
+                                        activecamera={activeCamera}
+                                        inactivitytimeoutseconds="300"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-center p-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M11.106 12.212a3 3 0 0 1 4.242 0M13.924 9.388a1.5 1.5 0 0 1 2.122 0M3 3l18 18" />
+                                        </svg>
+                                        <p className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300">Device Offline</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                 <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 text-center">
+                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
                     <h2 className="text-xl font-semibold mb-2">No Vehicles Found</h2>
                     <p className="text-gray-600 dark:text-gray-400">No vehicles match the current filter criteria.</p>
                 </div>

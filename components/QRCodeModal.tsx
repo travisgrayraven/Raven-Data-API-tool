@@ -40,7 +40,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ url, isOpen, onClose }
       aria-labelledby="qr-modal-title"
     >
       <div 
-        className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-8 text-center relative max-w-sm w-full mx-4"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-8 text-center relative max-w-sm w-full mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <button

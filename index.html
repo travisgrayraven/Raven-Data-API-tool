@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Raven Data API Test App</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="theme-color" content="#1461D1" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512-512.png">
@@ -21,6 +21,16 @@
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
           },
+          colors: {
+            'raven-blue': '#1461D1',
+            'soft-grey': '#CFD1D6',
+            'charcoal-grey': '#787882',
+            'light-grey': '#ACAFB6',
+            'sky-blue': '#7CACD9',
+            'alert-red': '#D61F26',
+            'safety-orange': '#F47722',
+            'signal-yellow': '#FDEA01',
+          }
         },
       },
     }
@@ -49,7 +59,7 @@
 </script>
 <script defer src='https://cdn.ravenconnected.com/rc-web-components/0.13.0.min.js'></script>
 </head>
-  <body class="bg-gray-100 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
+  <body class="bg-gray-50 dark:bg-black text-gray-800 dark:text-gray-100 transition-colors duration-300">
     <div id="root"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>

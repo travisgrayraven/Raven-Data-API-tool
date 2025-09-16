@@ -5,9 +5,9 @@ import type { RavenSettings } from '../types';
 const Accordion: React.FC<{ title: string; children: React.ReactNode, startOpen?: boolean }> = ({ title, children, startOpen = false }) => {
     const [isOpen, setIsOpen] = useState(startOpen);
     return (
-        <div className="border border-gray-200 dark:border-slate-700 rounded-md mb-2">
+        <div className="border border-soft-grey dark:border-gray-700 rounded-md mb-2">
             <button
-                className="w-full flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-600/50 text-left font-semibold"
+                className="w-full flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 text-left font-semibold"
                 onClick={() => setIsOpen(!isOpen)}
             >
                 {title}
@@ -18,7 +18,7 @@ const Accordion: React.FC<{ title: string; children: React.ReactNode, startOpen?
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            {isOpen && <div className="p-4 border-t border-gray-200 dark:border-slate-700">{children}</div>}
+            {isOpen && <div className="p-4 border-t border-soft-grey dark:border-gray-700">{children}</div>}
         </div>
     );
 };
@@ -38,7 +38,7 @@ const SettingsCheckbox: React.FC<ControlProps> = ({ label, path, value, onChange
         <input
             id={path}
             type="checkbox"
-            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            className="h-4 w-4 rounded border-gray-300 text-raven-blue focus:ring-raven-blue"
             checked={!!value}
             onChange={(e) => onChange(path, e.target.checked)}
         />
@@ -52,7 +52,7 @@ const SettingsDropdown: React.FC<ControlProps & { options: { value: string, labe
             id={path}
             value={value || ''}
             onChange={(e) => onChange(path, e.target.value)}
-            className="mt-1 sm:mt-0 block w-full sm:w-1/2 py-2 px-3 border border-gray-300 bg-white dark:bg-slate-900 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 sm:mt-0 block w-full sm:w-1/2 py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-raven-blue focus:border-raven-blue sm:text-sm"
         >
             {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
@@ -67,7 +67,7 @@ const SettingsNumberInput: React.FC<ControlProps> = ({ label, path, value, onCha
             type="number"
             value={value || 0}
             onChange={(e) => onChange(path, parseInt(e.target.value, 10))}
-            className="mt-1 sm:mt-0 block w-full sm:w-1/2 py-2 px-3 border border-gray-300 bg-white dark:bg-slate-900 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 sm:mt-0 block w-full sm:w-1/2 py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-raven-blue focus:border-raven-blue sm:text-sm"
         />
     </div>
 );
@@ -85,7 +85,7 @@ const SettingsSlider: React.FC<ControlProps & { min: number, max: number }> = ({
             max={max}
             value={value || 50}
             onChange={(e) => onChange(path, parseInt(e.target.value, 10))}
-            className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1"
+            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer mt-1"
         />
     </div>
 );
@@ -122,11 +122,11 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ settings, onSettingC
                 <h4 className="font-semibold text-md mb-2">Road Camera</h4>
                 <SettingsCheckbox label="Audio Recording" path="camera.road_camera.audio_recording" value={getValue('camera.road_camera.audio_recording')} onChange={onSettingChange} />
                 <SettingsCheckbox label="Camera Enabled" path="camera.road_camera.camera_enabled" value={getValue('camera.road_camera.camera_enabled')} onChange={onSettingChange} />
-                <hr className="my-4 dark:border-slate-600"/>
+                <hr className="my-4 dark:border-gray-700"/>
                 <h4 className="font-semibold text-md mb-2">Cabin Camera</h4>
                 <SettingsCheckbox label="Audio Recording" path="camera.cabin_camera.audio_recording" value={getValue('camera.cabin_camera.audio_recording')} onChange={onSettingChange} />
                 <SettingsCheckbox label="Camera Enabled" path="camera.cabin_camera.camera_enabled" value={getValue('camera.cabin_camera.camera_enabled')} onChange={onSettingChange} />
-                <hr className="my-4 dark:border-slate-600"/>
+                <hr className="my-4 dark:border-gray-700"/>
                 <SettingsDropdown 
                     label="Video Recording Profile" 
                     path="camera.video_recording_profile" 

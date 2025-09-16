@@ -1,6 +1,8 @@
 
 
 
+
+
 import React, { useEffect, useRef } from 'react';
 import type { Geofence } from '../types';
 
@@ -83,7 +85,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({ geofences, onSelectGeo
                 const isActive = status.color === 'green';
 
                 const style = { 
-                    color: isActive ? '#3388ff' : '#888888',
+                    color: isActive ? '#1461D1' : '#787882',
                     weight: isActive ? 3 : 2,
                     opacity: isActive ? 0.8 : 0.6,
                     fillOpacity: isActive ? 0.2 : 0.1
@@ -121,7 +123,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({ geofences, onSelectGeo
 
     if (geofences.length === 0) {
         return (
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
                 <h2 className="text-xl font-semibold mb-2">No Geofences Found</h2>
                 <p className="text-gray-600 dark:text-gray-400">There are no geofences associated with this account. Use the buttons above to create one or upload a CSV file.</p>
             </div>
@@ -133,22 +135,22 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({ geofences, onSelectGeo
             <div ref={mapContainer} className="h-[60vh] w-full rounded-lg shadow-md z-0" />
 
             <div className="mt-8">
-                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
-                    <ul className="divide-y divide-gray-200 dark:divide-slate-700">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                    <ul className="divide-y divide-soft-grey dark:divide-gray-700">
                         {geofences.map(geofence => {
                             const status = getGeofenceStatus(geofence);
                             return (
                                 <li 
                                     key={geofence.uuid} 
                                     onClick={() => onSelectGeofence(geofence)}
-                                    className="p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors duration-200"
+                                    className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors duration-200"
                                     role="button"
                                     tabIndex={0}
                                     onKeyPress={(e) => e.key === 'Enter' && onSelectGeofence(geofence)}
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-md font-semibold text-indigo-600 dark:text-indigo-400 truncate">{geofence.name}</p>
+                                            <p className="text-md font-semibold text-raven-blue truncate">{geofence.name}</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{geofence.description || '(No description)'}</p>
                                             <div className="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-4">
                                                 <span>Created: {new Date(geofence.start).toLocaleDateString()}</span>
@@ -159,7 +161,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({ geofences, onSelectGeo
                                             </div>
                                         </div>
                                         <div className="flex-shrink-0 flex flex-col items-end gap-2 text-sm">
-                                            <p className="text-gray-600 dark:text-gray-300 font-mono capitalize text-xs bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-md">
+                                            <p className="text-gray-600 dark:text-gray-300 font-mono capitalize text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">
                                                 {geofence.shape_type ? geofence.shape_type.toLowerCase() : 'N/A'}
                                             </p>
                                             {status.color === 'green' ? (

@@ -117,12 +117,28 @@ interface RcLivePreviewViewerProps extends React.HTMLAttributes<HTMLElement> {
     inactivitytimeoutseconds?: string;
 }
 
+// Add props for the streaming video player component
+interface RcStreamingVideoPlayerProps extends React.HTMLAttributes<HTMLElement> {
+    apidomain?: string;
+    sessiontoken?: string;
+    ravenid?: string;
+    activecamera?: 'road' | 'cabin';
+    starttimestamp?: string;
+    seekintervalseconds?: string;
+    audiosupported?: boolean;
+    muted?: boolean;
+    inactivitytimeoutseconds?: string;
+    forcereporting?: boolean;
+}
+
+
 // Extend JSX to include the custom web component
 declare global {
     namespace JSX {
-        // FIX: Corrected typo `IntrinisicElements` to `IntrinsicElements`.
+        // FIX: Corrected a typo in the JSX namespace from `IntrinisicElements` to `IntrinsicElements` to allow TypeScript to recognize the custom web components.
         interface IntrinsicElements {
             'rc-live-preview-viewer': React.DetailedHTMLProps<RcLivePreviewViewerProps, HTMLElement>;
+            'rc-streaming-video-player': React.DetailedHTMLProps<RcStreamingVideoPlayerProps, HTMLElement>;
         }
     }
 }

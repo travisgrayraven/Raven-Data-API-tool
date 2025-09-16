@@ -1,5 +1,8 @@
 
 
+
+
+
 import React, { useState, useEffect } from 'react';
 import type { Geofence } from '../types';
 
@@ -101,7 +104,7 @@ export const GeofenceDetailModal: React.FC<GeofenceDetailModalProps> = ({ geofen
       aria-labelledby="geofence-modal-title"
     >
       <div 
-        className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-6 sm:p-8 text-left relative w-full max-w-lg mx-4"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 sm:p-8 text-left relative w-full max-w-lg mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start">
@@ -124,7 +127,7 @@ export const GeofenceDetailModal: React.FC<GeofenceDetailModalProps> = ({ geofen
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
                     />
                 ) : (
                     <p className="mt-1 text-lg">{geofence.name}</p>
@@ -138,7 +141,7 @@ export const GeofenceDetailModal: React.FC<GeofenceDetailModalProps> = ({ geofen
                         value={formData.description}
                         onChange={handleInputChange}
                         rows={3}
-                        className="mt-1 block w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
                     />
                  ) : (
                     <p className="mt-1 text-md text-gray-700 dark:text-gray-200">{geofence.description || <span className="italic text-gray-400 dark:text-gray-500">No description</span>}</p>
@@ -156,7 +159,7 @@ export const GeofenceDetailModal: React.FC<GeofenceDetailModalProps> = ({ geofen
                         <label htmlFor="is_active" className="relative inline-flex items-center cursor-pointer">
                           {/* FIX: Use derived isFormDataActive for checked state. */}
                           <input type="checkbox" id="is_active" className="sr-only peer" checked={isFormDataActive} onChange={handleActiveToggle} />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-raven-blue"></div>
                         </label>
                     </div>
                  ) : (
@@ -171,16 +174,16 @@ export const GeofenceDetailModal: React.FC<GeofenceDetailModalProps> = ({ geofen
             {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
         </div>
 
-        <div className="mt-8 pt-4 border-t border-gray-200 dark:border-slate-700 flex justify-end gap-3">
+        <div className="mt-8 pt-4 border-t border-soft-grey dark:border-gray-700 flex justify-end gap-3">
           {isEditing ? (
             <>
-              <button onClick={handleCancel} disabled={isSaving} className="py-2 px-4 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 disabled:opacity-50">Cancel</button>
-              <button onClick={handleSave} disabled={isSaving} className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400">
+              <button onClick={handleCancel} disabled={isSaving} className="py-2 px-4 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">Cancel</button>
+              <button onClick={handleSave} disabled={isSaving} className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50">
                 {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </>
           ) : (
-            <button onClick={() => setIsEditing(true)} className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
+            <button onClick={() => setIsEditing(true)} className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90">Edit</button>
           )}
         </div>
 

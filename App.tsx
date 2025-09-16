@@ -244,7 +244,7 @@ const App: React.FC = () => {
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
-                <header className="mb-8 pb-4 border-b border-gray-200 dark:border-slate-700">
+                <header className="mb-8 pb-4 border-b border-soft-grey dark:border-gray-700">
                     <div className="flex justify-between items-center">
                          <div className="flex items-center gap-4">
                             {/* White logo for dark mode */}
@@ -264,16 +264,16 @@ const App: React.FC = () => {
 
                 <main>
                     {error && (
-                        <div className="bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg relative mb-6" role="alert">
+                        <div className="bg-alert-red/10 dark:bg-alert-red/20 border border-alert-red/50 dark:border-alert-red/70 text-alert-red dark:text-red-300 px-4 py-3 rounded-lg relative mb-6" role="alert">
                             <strong className="font-bold">Error: </strong>
                             <span className="block sm:inline">{error}</span>
                         </div>
                     )}
                     {renderContent()}
                 </main>
-                <footer className="mt-8 py-4 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-slate-700">
+                <footer className="mt-8 py-4 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-soft-grey dark:border-gray-700">
                     <p>
-                        © <a href="https://ravenconnected.com/" target="_blank" rel="noopener noreferrer" className="hover:underline text-indigo-600 dark:text-indigo-400">Raven Connected Inc.</a> 2025
+                        © <a href="https://ravenconnected.com/" target="_blank" rel="noopener noreferrer" className="hover:underline text-raven-blue dark:text-raven-blue">Raven Connected Inc.</a> 2025
                     </p>
                 </footer>
             </div>

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -34,7 +35,7 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({ theme, setTheme, o
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-1 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-900 rounded-md transition-colors duration-300"
+          className="p-1 text-gray-500 dark:text-gray-400 hover:text-raven-blue dark:hover:text-sky-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue dark:focus:ring-offset-black rounded-md transition-colors duration-300"
           aria-label="Open user settings"
           aria-haspopup="true"
           aria-expanded={isOpen}
@@ -45,15 +46,15 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({ theme, setTheme, o
           </svg>
         </button>
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-20">
-            <div className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-between">
+          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-20">
+            <div className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
                 <span className="font-medium">Theme</span>
                 <ThemeToggle theme={theme} setTheme={setTheme} />
             </div>
-            <div className="border-t border-gray-200 dark:border-slate-700 my-1"></div>
+            <div className="border-t border-soft-grey dark:border-gray-700 my-1"></div>
             <button
               onClick={() => handleActionClick(onReset)}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
               Reset Credentials

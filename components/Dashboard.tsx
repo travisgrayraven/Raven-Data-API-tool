@@ -1,15 +1,14 @@
 
-
-
 import React, { useState, useMemo, useEffect } from 'react';
 import type { RavenDetails, Geofence, ApiContextType, GeofenceFormData } from '../types';
 import { RavenCard } from './RavenCard';
 import { DashboardMap } from './DashboardMap';
 import { GeofenceMap } from './GeofenceMap';
 import { GeofenceEditor } from './GeofenceEditor';
-import { createGeofence, updateGeofence, deleteGeofence } from '../services/ravenApi';
+import { createGeofence, updateGeofence, deleteGeofence, setDriverMessage, processWithConcurrency } from '../services/ravenApi';
 import { BulkGeofenceActions } from './BulkGeofenceActions';
 import { GridPreview } from './GridPreview';
+import { BulkMessageModal } from './BulkMessageModal';
 
 
 interface DashboardProps {
@@ -35,6 +34,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     mode: 'create' | 'edit';
     geofence: Geofence | null;
   } | { isOpen: false }>({ isOpen: false });
+  
+  const [isBulkMessageModalOpen, setIsBulkMessageModalOpen] = useState(false);
+  const [bulkSendResult, setBulkSendResult] = useState<{success: number, error: number} | null>(null);
+  const [isSendingBulkMessage, setIsSendingBulkMessage] = useState(false);
 
   // Auto-refresh logic
   useEffect(() => {
@@ -210,18 +213,61 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     onSetGeofences(geofences.filter(g => g.uuid !== geofenceUuid));
     setEditorConfig({ isOpen: false });
   };
+  
+  const handleCloseBulkMessageModal = () => {
+    setIsBulkMessageModalOpen(false);
+    // Delay resetting results so they don't vanish on close animation
+    setTimeout(() => {
+        setBulkSendResult(null);
+        setIsSendingBulkMessage(false);
+    }, 300);
+  };
+  
+  const handleSendBulkMessage = async (message: string, duration: number) => {
+    if (!api) {
+        console.error("API context not available for bulk message.");
+        return;
+    }
+    
+    setIsSendingBulkMessage(true);
+    setBulkSendResult(null);
+    
+    const durationInSeconds = duration * 60;
+
+    const processor = async (raven: RavenDetails): Promise<{ success: boolean }> => {
+        try {
+            await setDriverMessage(api, raven.uuid, message, durationInSeconds);
+            return { success: true };
+        } catch (error) {
+            console.error(`Failed to send message to ${raven.name} (${raven.uuid})`, error);
+            return { success: false };
+        }
+    };
+
+    const results = await processWithConcurrency(
+        filteredAndSortedRavens,
+        processor,
+        5 // Concurrency limit
+    );
+
+    const successCount = results.filter(r => r.success).length;
+    const errorCount = results.length - successCount;
+
+    setBulkSendResult({ success: successCount, error: errorCount });
+    setIsSendingBulkMessage(false); // This will transition the modal to the result screen
+  };
 
 
   return (
     <div>
-        <div className="border-b border-gray-200 dark:border-slate-700 mb-6">
+        <div className="border-b border-soft-grey dark:border-gray-700 mb-6">
             <nav className="-mb-px flex space-x-8" aria-label="Tabs">
                  <button
                     onClick={() => setActiveTab('map')}
                     className={`${
                         activeTab === 'map'
-                        ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-slate-500'
+                        ? 'border-raven-blue text-raven-blue'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600'
                     } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                 >
                     Map
@@ -230,8 +276,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                     onClick={() => setActiveTab('grid')}
                     className={`${
                         activeTab === 'grid'
-                        ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-slate-500'
+                        ? 'border-raven-blue text-raven-blue'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600'
                     } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                 >
                     Grid
@@ -240,8 +286,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                     onClick={() => setActiveTab('geofences')}
                     className={`${
                         activeTab === 'geofences'
-                        ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-slate-500'
+                        ? 'border-raven-blue text-raven-blue'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600'
                     } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                 >
                     Geofences
@@ -250,9 +296,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
         </div>
         
         {ravens.length === 0 && (activeTab === 'map' || activeTab === 'grid') ? (
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
                 <h2 className="text-xl font-semibold mb-2">No Vehicles Found</h2>
-                <p className="text-gray-600 dark:text-gray-400">The API returned an empty list of vehicles.</p>
+                <p className="text-charcoal-grey dark:text-soft-grey">The API returned an empty list of vehicles.</p>
             </div>
         ) : (
             <>
@@ -270,12 +316,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                                     placeholder="Search by name..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 text-base focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
                                 />
                             </div>
                             <div className="w-full sm:w-auto">
                                 <label htmlFor="filter" className="sr-only">Filter by last report time</label>
-                                <select id="filter" value={filter} onChange={(e) => setFilter(e.target.value as FilterOption)} className="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="filter" value={filter} onChange={(e) => setFilter(e.target.value as FilterOption)} className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
                                     <option value="30d">Last 30 days</option>
                                     <option value="7d">Last 7 days</option>
                                     <option value="48h">Last 48 hours</option>
@@ -287,26 +333,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                             </div>
                             <div className="w-full sm:w-auto">
                                 <label htmlFor="sort" className="sr-only">Sort by</label>
-                                <select id="sort" value={sortBy} onChange={(e) => setSortBy(e.target.value as 'persona' | 'time')} className="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="sort" value={sortBy} onChange={(e) => setSortBy(e.target.value as 'persona' | 'time')} className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
                                     <option value="persona">Sort by Name</option>
                                     <option value="time">Sort by Last Report</option>
                                 </select>
                             </div>
                             <div className="flex items-center gap-2">
                                 {activeTab === 'map' && (
+                                  <>
+                                    <button
+                                        onClick={() => {
+                                            setBulkSendResult(null); // Reset on open
+                                            setIsBulkMessageModalOpen(true);
+                                        }}
+                                        disabled={isRefreshing || filteredAndSortedRavens.length === 0}
+                                        className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
+                                        title="Send message to all filtered vehicles"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15h14a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>
+                                        <span>Bulk Message</span>
+                                    </button>
                                     <button
                                         onClick={handleExportToCSV}
-                                        className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-400 disabled:cursor-not-allowed"
+                                        className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-charcoal-grey hover:bg-charcoal-grey/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-charcoal-grey disabled:bg-charcoal-grey/50 disabled:cursor-not-allowed"
                                         title="Export to CSV"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                                         <span>CSV</span>
                                     </button>
+                                  </>
                                 )}
                                 <button 
                                     onClick={onRefreshData} 
                                     disabled={isRefreshing}
-                                    className="flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+                                    className="flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
                                     title="Refresh Data"
                                 >
                                     {isRefreshing ? (
@@ -332,9 +392,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                                 ))}
                             </div>
                         ) : (
-                            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 text-center">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
                                 <h2 className="text-xl font-semibold mb-2">No Vehicles Found</h2>
-                                <p className="text-gray-600 dark:text-gray-400">No vehicles match the current filter criteria.</p>
+                                <p className="text-charcoal-grey dark:text-soft-grey">No vehicles match the current filter criteria.</p>
                             </div>
                         )}
                     </div>
@@ -372,6 +432,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 onClose={() => setEditorConfig({ isOpen: false })}
                 onSave={handleSaveGeofence}
                 onDelete={handleDeleteGeofence}
+            />
+        )}
+        {isBulkMessageModalOpen && (
+            <BulkMessageModal
+                isOpen={isBulkMessageModalOpen}
+                onClose={handleCloseBulkMessageModal}
+                onSubmit={handleSendBulkMessage}
+                vehicleCount={filteredAndSortedRavens.length}
+                isSending={isSendingBulkMessage}
+                sendResult={bulkSendResult}
             />
         )}
     </div>

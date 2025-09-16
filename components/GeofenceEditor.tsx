@@ -1,5 +1,8 @@
 
 
+
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import type { Geofence, GeofenceFormData } from '../types';
 
@@ -269,13 +272,13 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4" onClick={triggerClose}>
       <div 
-        className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="geofence-editor-title"
       >
-        <header className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-slate-700 flex-shrink-0">
+        <header className="flex justify-between items-center p-4 border-b border-soft-grey dark:border-gray-700 flex-shrink-0">
             <h2 id="geofence-editor-title" className="text-xl font-bold">{mode === 'create' ? 'Create Geofence' : 'Edit Geofence'}</h2>
             <button onClick={triggerClose} className="p-1 text-2xl" aria-label="Close editor">&times;</button>
         </header>
@@ -285,19 +288,19 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
                  <div ref={mapContainerRef} className="h-full w-full" />
             </main>
 
-            <aside className="w-full md:w-1/3 p-4 space-y-4 overflow-y-auto order-1 md:order-2 border-b md:border-b-0 md:border-l border-gray-200 dark:border-slate-700">
+            <aside className="w-full md:w-1/3 p-4 space-y-4 overflow-y-auto order-1 md:order-2 border-b md:border-b-0 md:border-l border-soft-grey dark:border-gray-700">
                 {!editedLayer && mode === 'create' && (
-                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
-                        <p className="text-sm text-blue-700 dark:text-blue-300">Use the tools on the map to draw a shape for your geofence.</p>
+                    <div className="text-center p-4 bg-raven-blue/10 dark:bg-raven-blue/20 rounded-lg">
+                        <p className="text-sm text-raven-blue dark:text-sky-blue">Use the tools on the map to draw a shape for your geofence.</p>
                     </div>
                 )}
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium">Name</label>
-                    <input type="text" name="name" id="name" value={formData.name} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"/>
+                    <input type="text" name="name" id="name" value={formData.name} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue"/>
                 </div>
                 <div>
                     <label htmlFor="description" className="block text-sm font-medium">Description</label>
-                    <textarea name="description" id="description" value={formData.description} onChange={handleInputChange} rows={3} className="mt-1 block w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                    <textarea name="description" id="description" value={formData.description} onChange={handleInputChange} rows={3} className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue" />
                 </div>
                  {editedLayer && (editedLayer instanceof L.Circle) && (
                     <div>
@@ -308,14 +311,14 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
                           id="radius"
                           value={radius}
                           onChange={handleRadiusChange}
-                          className="mt-1 block w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                          className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
                           min="1"
                         />
                     </div>
                 )}
                 <div>
                     <label htmlFor="notification" className="block text-sm font-medium">Notifications</label>
-                    <select name="notification" id="notification" value={formData.notification} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <select name="notification" id="notification" value={formData.notification} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
                         <option value="">None</option>
                         <option value="ENTER">On Enter</option>
                         <option value="EXIT">On Exit</option>
@@ -325,7 +328,7 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
                 <div>
                     <label htmlFor="end" className="block text-sm font-medium">Expiration Date</label>
                     <div className="flex items-center">
-                        <input type="date" name="end" id="end" value={formData.end} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:[color-scheme:dark]" />
+                        <input type="date" name="end" id="end" value={formData.end} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue dark:[color-scheme:dark]" />
                         {formData.end && (
                             <button onClick={() => setFormData(prev => ({...prev, end: ''}))} className="ml-2 p-1 text-gray-400 hover:text-gray-600" title="Clear date">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -338,13 +341,13 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
             </aside>
         </div>
 
-        <footer className="flex justify-between items-center gap-3 p-4 border-t border-gray-200 dark:border-slate-700 flex-shrink-0">
+        <footer className="flex justify-between items-center gap-3 p-4 border-t border-soft-grey dark:border-gray-700 flex-shrink-0">
             <div>
                 {mode === 'edit' && (
                     <button 
                         onClick={handleDelete} 
                         disabled={isLoading} 
-                        className="py-2 px-4 border border-red-500 rounded-md shadow-sm text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 disabled:opacity-50"
+                        className="py-2 px-4 border border-alert-red rounded-md shadow-sm text-sm font-medium text-alert-red hover:bg-alert-red/10 disabled:opacity-50"
                     >
                         {isDeleting ? 'Deleting...' : 'Delete'}
                     </button>
@@ -352,7 +355,7 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
             </div>
             <div className="flex gap-3">
                 <button onClick={triggerClose} disabled={isLoading} className="py-2 px-4 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm text-sm font-medium">Cancel</button>
-                <button onClick={handleSave} disabled={isLoading} className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400">
+                <button onClick={handleSave} disabled={isLoading} className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 disabled:bg-raven-blue/50">
                     {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
             </div>
