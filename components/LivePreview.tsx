@@ -92,15 +92,13 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
             {/* 
-                Inject a style tag to visually hide the camera toggle button within the web component
-                and to fix the corner radius to match its container.
+                Inject a style tag to visually hide the camera toggle button within the web component.
             */}
             <style>{`
                 rc-live-preview-viewer,
                 rc-streaming-video-player {
                     --media-control-background-color: transparent;
                     --media-control-active-background-color: transparent;
-                    border-radius: 0.375rem; /* Corresponds to Tailwind's rounded-md */
                 }
             `}</style>
 
@@ -132,7 +130,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
                 <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1 min-w-0">
                         <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.roadCamera')}</h4>
-                        <div className="w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
+                        <div className="relative w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
                             <rc-live-preview-viewer
                                 ref={roadViewerRef}
                                 apidomain={apiDomain}
@@ -145,7 +143,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
                     </div>
                     <div className="flex-1 min-w-0">
                         <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.cabinCamera')}</h4>
-                        <div className="w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
+                        <div className="relative w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
                             <rc-live-preview-viewer
                                 ref={cabinViewerRef}
                                 apidomain={apiDomain}
@@ -160,7 +158,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
             ) : (
                 <div>
                     <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.stream')}</h4>
-                    <div className="w-full max-w-2xl mx-auto bg-black rounded-md overflow-hidden aspect-video">
+                    <div className="relative w-full max-w-2xl mx-auto bg-black rounded-md overflow-hidden aspect-video">
                         <rc-streaming-video-player
                             ref={streamViewerRef}
                             apidomain={apiDomain}

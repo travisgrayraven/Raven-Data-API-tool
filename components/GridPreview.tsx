@@ -76,7 +76,6 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                 rc-live-preview-viewer {
                     --media-control-background-color: transparent;
                     --media-control-active-background-color: transparent;
-                    border-radius: 0.375rem; /* Corresponds to Tailwind's rounded-md */
                 }
             `}</style>
             <div className="flex justify-center mb-6">
@@ -109,7 +108,7 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                              <h3 className="text-md font-bold text-center truncate mb-2 text-gray-900 dark:text-white" title={raven.name}>
                                 {raven.name}
                             </h3>
-                            <div className="w-full bg-black rounded-md overflow-hidden aspect-video">
+                            <div className="relative w-full bg-black rounded-md overflow-hidden aspect-video">
                                 {raven.online ? (
                                     <rc-live-preview-viewer
                                         ref={el => {
