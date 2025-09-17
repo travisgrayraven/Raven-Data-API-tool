@@ -44,12 +44,24 @@
       max-width: none !important;
     }
     /* Custom styles for Marker Clusters to override defaults */
-    /* Change small clusters from green to blue for better visibility */
-    .leaflet-container .marker-cluster-small {
+    /* Change cluster colors to match theme and ensure text is always white */
+    .leaflet-container .marker-cluster-small,
+    .leaflet-container .marker-cluster-medium,
+    .leaflet-container .marker-cluster-large {
       background-color: rgba(20, 97, 209, 0.5); /* Raven Blue, 50% opacity */
     }
     .leaflet-container .marker-cluster-small div {
       background-color: rgba(20, 97, 209, 0.6); /* Raven Blue, 60% opacity */
+    }
+    .leaflet-container .marker-cluster-medium div {
+      background-color: rgba(20, 97, 209, 0.7); /* Raven Blue, 70% opacity */
+    }
+    .leaflet-container .marker-cluster-large div {
+      background-color: rgba(20, 97, 209, 0.8); /* Raven Blue, 80% opacity */
+    }
+    /* Ensure cluster number is always white, regardless of theme */
+    .leaflet-container .marker-cluster span {
+      color: white !important;
     }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
