@@ -9,7 +9,7 @@ import { createGeofence, updateGeofence, deleteGeofence, setDriverMessage, proce
 import { BulkGeofenceActions } from './BulkGeofenceActions';
 import { GridPreview } from './GridPreview';
 import { BulkMessageModal } from './BulkMessageModal';
-
+import { useTranslation } from '../i18n/i18n';
 
 interface DashboardProps {
   ravens: RavenDetails[];
@@ -34,10 +34,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     mode: 'create' | 'edit';
     geofence: Geofence | null;
   } | { isOpen: false }>({ isOpen: false });
+  const [geofenceEditorTrigger, setGeofenceEditorTrigger] = useState<HTMLElement | null>(null);
   
   const [isBulkMessageModalOpen, setIsBulkMessageModalOpen] = useState(false);
+  const [bulkMessageTrigger, setBulkMessageTrigger] = useState<HTMLElement | null>(null);
   const [bulkSendResult, setBulkSendResult] = useState<{success: number, error: number} | null>(null);
   const [isSendingBulkMessage, setIsSendingBulkMessage] = useState(false);
+  const { t } = useTranslation();
 
   // Auto-refresh logic
   useEffect(() => {
@@ -174,8 +177,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
   };
   
   const handleOpenEditor = (mode: 'create' | 'edit', geofence: Geofence | null = null) => {
+    setGeofenceEditorTrigger(document.activeElement as HTMLElement);
     setEditorConfig({ isOpen: true, mode, geofence });
   };
+
+  const handleCloseEditor = () => {
+    setEditorConfig({ isOpen: false });
+    geofenceEditorTrigger?.focus();
+  }
   
   const handleSaveGeofence = async (geofenceData: GeofenceFormData, layer: any) => {
       if (!api) throw new Error("API context not available.");
@@ -203,7 +212,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
           const newGeofence = await createGeofence(api, { ...geofenceData, layer });
           onSetGeofences([newGeofence, ...geofences]);
       }
-      setEditorConfig({ isOpen: false });
+      handleCloseEditor();
   };
 
   const handleDeleteGeofence = async (geofenceUuid: string) => {
@@ -211,11 +220,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     
     await deleteGeofence(api, geofenceUuid);
     onSetGeofences(geofences.filter(g => g.uuid !== geofenceUuid));
-    setEditorConfig({ isOpen: false });
+    handleCloseEditor();
+  };
+
+  const handleOpenBulkMessageModal = () => {
+    setBulkMessageTrigger(document.activeElement as HTMLElement);
+    setBulkSendResult(null); // Reset on open
+    setIsBulkMessageModalOpen(true);
   };
   
   const handleCloseBulkMessageModal = () => {
     setIsBulkMessageModalOpen(false);
+    bulkMessageTrigger?.focus();
     // Delay resetting results so they don't vanish on close animation
     setTimeout(() => {
         setBulkSendResult(null);
@@ -261,8 +277,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
   return (
     <div>
         <div className="border-b border-soft-grey dark:border-gray-700 mb-6">
-            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+            <nav className="-mb-px flex space-x-8" role="tablist" aria-label={t('dashboard.tabs.label')}>
                  <button
+                    id="map-tab"
+                    role="tab"
+                    aria-selected={activeTab === 'map'}
+                    aria-controls="map-panel"
                     onClick={() => setActiveTab('map')}
                     className={`${
                         activeTab === 'map'
@@ -270,9 +290,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600'
                     } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                 >
-                    Map
+                    {t('dashboard.tabs.map')}
                 </button>
                  <button
+                    id="grid-tab"
+                    role="tab"
+                    aria-selected={activeTab === 'grid'}
+                    aria-controls="grid-panel"
                     onClick={() => setActiveTab('grid')}
                     className={`${
                         activeTab === 'grid'
@@ -280,9 +304,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600'
                     } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                 >
-                    Grid
+                    {t('dashboard.tabs.grid')}
                 </button>
                 <button
+                    id="geofences-tab"
+                    role="tab"
+                    aria-selected={activeTab === 'geofences'}
+                    aria-controls="geofences-panel"
                     onClick={() => setActiveTab('geofences')}
                     className={`${
                         activeTab === 'geofences'
@@ -290,76 +318,73 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600'
                     } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                 >
-                    Geofences
+                    {t('dashboard.tabs.geofences')}
                 </button>
             </nav>
         </div>
         
         {ravens.length === 0 && (activeTab === 'map' || activeTab === 'grid') ? (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-                <h2 className="text-xl font-semibold mb-2">No Vehicles Found</h2>
-                <p className="text-charcoal-grey dark:text-soft-grey">The API returned an empty list of vehicles.</p>
+                <h2 className="text-xl font-semibold mb-2">{t('dashboard.noVehiclesFound')}</h2>
+                <p className="text-charcoal-grey dark:text-soft-grey">{t('dashboard.noVehiclesDescription')}</p>
             </div>
         ) : (
             <>
                 {(activeTab === 'map' || activeTab === 'grid') && (
                     <div className="flex flex-col lg:flex-row justify-between items-center mb-6 gap-4">
                         <h2 className="text-3xl font-bold text-center lg:text-left text-gray-900 dark:text-white flex-shrink-0">
-                            {activeTab === 'map' ? 'Map View' : 'Grid View'}
+                            {activeTab === 'map' ? t('dashboard.mapView') : t('dashboard.gridView')}
                         </h2>
                         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
                             <div className="w-full sm:w-auto sm:flex-1 lg:w-56">
-                                <label htmlFor="search" className="sr-only">Search by vehicle name</label>
+                                <label htmlFor="search" className="sr-only">{t('dashboard.searchPlaceholder')}</label>
                                 <input
                                     id="search"
                                     type="text"
-                                    placeholder="Search by name..."
+                                    placeholder={t('dashboard.searchPlaceholder')}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
                                 />
                             </div>
                             <div className="w-full sm:w-auto">
-                                <label htmlFor="filter" className="sr-only">Filter by last report time</label>
+                                <label htmlFor="filter" className="sr-only">{t('dashboard.filter.label')}</label>
                                 <select id="filter" value={filter} onChange={(e) => setFilter(e.target.value as FilterOption)} className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
-                                    <option value="30d">Last 30 days</option>
-                                    <option value="7d">Last 7 days</option>
-                                    <option value="48h">Last 48 hours</option>
-                                    <option value="24h">Last 24 hours</option>
-                                    <option value="12h">Last 12 hours</option>
-                                    <option value="1h">Last 1 hour</option>
-                                    <option value="all">All Time</option>
+                                    <option value="30d">{t('dashboard.filter.30d')}</option>
+                                    <option value="7d">{t('dashboard.filter.7d')}</option>
+                                    <option value="48h">{t('dashboard.filter.48h')}</option>
+                                    <option value="24h">{t('dashboard.filter.24h')}</option>
+                                    <option value="12h">{t('dashboard.filter.12h')}</option>
+                                    <option value="1h">{t('dashboard.filter.1h')}</option>
+                                    <option value="all">{t('dashboard.filter.all')}</option>
                                 </select>
                             </div>
                             <div className="w-full sm:w-auto">
-                                <label htmlFor="sort" className="sr-only">Sort by</label>
+                                <label htmlFor="sort" className="sr-only">{t('dashboard.sort.label')}</label>
                                 <select id="sort" value={sortBy} onChange={(e) => setSortBy(e.target.value as 'persona' | 'time')} className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
-                                    <option value="persona">Sort by Name</option>
-                                    <option value="time">Sort by Last Report</option>
+                                    <option value="persona">{t('dashboard.sort.name')}</option>
+                                    <option value="time">{t('dashboard.sort.time')}</option>
                                 </select>
                             </div>
                             <div className="flex items-center gap-2">
                                 {activeTab === 'map' && (
                                   <>
                                     <button
-                                        onClick={() => {
-                                            setBulkSendResult(null); // Reset on open
-                                            setIsBulkMessageModalOpen(true);
-                                        }}
+                                        onClick={handleOpenBulkMessageModal}
                                         disabled={isRefreshing || filteredAndSortedRavens.length === 0}
                                         className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
-                                        title="Send message to all filtered vehicles"
+                                        aria-label={t('dashboard.bulkMessageTitle')}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15h14a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>
-                                        <span>Bulk Message</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15h14a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>
+                                        <span>{t('dashboard.bulkMessage')}</span>
                                     </button>
                                     <button
                                         onClick={handleExportToCSV}
                                         className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-charcoal-grey hover:bg-charcoal-grey/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-charcoal-grey disabled:bg-charcoal-grey/50 disabled:cursor-not-allowed"
-                                        title="Export to CSV"
+                                        aria-label={t('dashboard.exportCsvTitle')}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                        <span>CSV</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                        <span>{t('dashboard.exportCsv')}</span>
                                     </button>
                                   </>
                                 )}
@@ -367,12 +392,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                                     onClick={onRefreshData} 
                                     disabled={isRefreshing}
                                     className="flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
-                                    title="Refresh Data"
+                                    aria-label={isRefreshing ? t('common.refreshing') : t('common.refresh')}
                                 >
                                     {isRefreshing ? (
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                     ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" /></svg>
                                     )}
                                 </button>
                             </div>
@@ -380,48 +405,44 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                     </div>
                 )}
                 
-                {activeTab === 'map' && (
-                     <div>
-                        <div className="mb-6">
-                            <DashboardMap ravens={filteredAndSortedRavens} />
-                        </div>
-                        {filteredAndSortedRavens.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {filteredAndSortedRavens.map(raven => (
-                                    <RavenCard key={raven.uuid} raven={raven} onSelect={() => onSelectRaven(raven)} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-                                <h2 className="text-xl font-semibold mb-2">No Vehicles Found</h2>
-                                <p className="text-charcoal-grey dark:text-soft-grey">No vehicles match the current filter criteria.</p>
-                            </div>
-                        )}
+                <div id="map-panel" role="tabpanel" aria-labelledby="map-tab" hidden={activeTab !== 'map'}>
+                    <div className="mb-6">
+                        <DashboardMap ravens={filteredAndSortedRavens} />
                     </div>
-                )}
+                    {filteredAndSortedRavens.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {filteredAndSortedRavens.map(raven => (
+                                <RavenCard key={raven.uuid} raven={raven} onSelect={() => onSelectRaven(raven)} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
+                            <h2 className="text-xl font-semibold mb-2">{t('dashboard.noVehiclesFound')}</h2>
+                            <p className="text-charcoal-grey dark:text-soft-grey">{t('dashboard.noFilteredVehiclesDescription')}</p>
+                        </div>
+                    )}
+                </div>
                 
-                {activeTab === 'grid' && api && (
-                    <GridPreview ravens={filteredAndSortedRavens} api={api} />
-                )}
-            </>
-        )}
+                <div id="grid-panel" role="tabpanel" aria-labelledby="grid-tab" hidden={activeTab !== 'grid'}>
+                    {api && <GridPreview ravens={filteredAndSortedRavens} api={api} />}
+                </div>
 
-        {activeTab === 'geofences' && (
-            <div>
-                 <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Geofences</h2>
-                    <BulkGeofenceActions 
+                <div id="geofences-panel" role="tabpanel" aria-labelledby="geofences-tab" hidden={activeTab !== 'geofences'}>
+                    <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.tabs.geofences')}</h2>
+                        <BulkGeofenceActions 
+                            geofences={geofences} 
+                            api={api!} 
+                            onUploadComplete={onRefreshData}
+                            onCreateGeofence={() => handleOpenEditor('create')}
+                        />
+                    </div>
+                    <GeofenceMap 
                         geofences={geofences} 
-                        api={api!} 
-                        onUploadComplete={onRefreshData}
-                        onCreateGeofence={() => handleOpenEditor('create')}
+                        onSelectGeofence={(g) => handleOpenEditor('edit', g)}
                     />
                 </div>
-                <GeofenceMap 
-                    geofences={geofences} 
-                    onSelectGeofence={(g) => handleOpenEditor('edit', g)}
-                />
-            </div>
+            </>
         )}
         
         {editorConfig.isOpen && (
@@ -429,7 +450,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 isOpen={editorConfig.isOpen}
                 mode={editorConfig.mode}
                 geofence={editorConfig.geofence}
-                onClose={() => setEditorConfig({ isOpen: false })}
+                onClose={handleCloseEditor}
                 onSave={handleSaveGeofence}
                 onDelete={handleDeleteGeofence}
             />

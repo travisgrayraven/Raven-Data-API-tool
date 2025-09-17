@@ -1,10 +1,8 @@
 
-
-
-
 import React, { useState } from 'react';
 import type { RavenDetails, ApiContextType } from '../types';
 import { setDriverMessage, clearDriverMessage } from '../services/ravenApi';
+import { useTranslation } from '../i18n/i18n';
 
 interface DriverMessageManagerProps {
   raven: RavenDetails;
@@ -18,6 +16,7 @@ export const DriverMessageManager: React.FC<DriverMessageManagerProps> = ({ rave
   const [isClearing, setIsClearing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { t } = useTranslation();
   
   const isLoading = isSending || isClearing;
 
@@ -35,10 +34,10 @@ export const DriverMessageManager: React.FC<DriverMessageManagerProps> = ({ rave
     try {
       const durationInSeconds = duration * 60;
       await setDriverMessage(api, raven.uuid, message, durationInSeconds);
-      showSuccessMessage('Message sent successfully!');
+      showSuccessMessage(t('driverMessage.success.sent'));
       setMessage('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setIsSending(false);
     }
@@ -49,9 +48,9 @@ export const DriverMessageManager: React.FC<DriverMessageManagerProps> = ({ rave
     setError(null);
     try {
       await clearDriverMessage(api, raven.uuid);
-      showSuccessMessage('Message cleared successfully!');
+      showSuccessMessage(t('driverMessage.success.cleared'));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setIsClearing(false);
     }
@@ -59,12 +58,12 @@ export const DriverMessageManager: React.FC<DriverMessageManagerProps> = ({ rave
 
   return (
     <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
-      <h3 className="text-xl font-bold mb-4">Driver Display Message</h3>
+      <h3 className="text-xl font-bold mb-4">{t('driverMessage.title')}</h3>
       <form onSubmit={handleSendMessage} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="md:col-span-3">
             <div className="flex justify-between items-baseline mb-1">
-                <label htmlFor="driver-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
+                <label htmlFor="driver-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('driverMessage.messageLabel')}</label>
                 <span className="text-xs text-gray-500 dark:text-gray-400">{message.length} / 15</span>
             </div>
             <input
@@ -73,23 +72,23 @@ export const DriverMessageManager: React.FC<DriverMessageManagerProps> = ({ rave
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="block w-full bg-gray-100 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
-              placeholder="Enter a message to display..."
+              placeholder={t('driverMessage.placeholder')}
               maxLength={15}
             />
           </div>
           <div>
-            <label htmlFor="message-duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration</label>
+            <label htmlFor="message-duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('driverMessage.durationLabel')}</label>
             <select
                 id="message-duration"
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
                 className="block w-full bg-gray-100 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
             >
-                <option value={3}>3 minutes</option>
-                <option value={5}>5 minutes</option>
-                <option value={10}>10 minutes</option>
-                <option value={15}>15 minutes</option>
-                <option value={20}>20 minutes</option>
+                <option value={3}>{t('driverMessage.minutes', { count: 3 })}</option>
+                <option value={5}>{t('driverMessage.minutes', { count: 5 })}</option>
+                <option value={10}>{t('driverMessage.minutes', { count: 10 })}</option>
+                <option value={15}>{t('driverMessage.minutes', { count: 15 })}</option>
+                <option value={20}>{t('driverMessage.minutes', { count: 20 })}</option>
             </select>
           </div>
         </div>
@@ -105,14 +104,14 @@ export const DriverMessageManager: React.FC<DriverMessageManagerProps> = ({ rave
                 disabled={isLoading}
                 className="w-full sm:w-auto flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isClearing ? 'Clearing...' : 'Clear Message'}
+                {isClearing ? t('common.clearing') : t('driverMessage.clear')}
               </button>
               <button
                 type="submit"
                 disabled={isLoading || !message.trim()}
                 className="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
               >
-                {isSending ? 'Sending...' : 'Send Message'}
+                {isSending ? t('common.sending') : t('driverMessage.send')}
               </button>
           </div>
         </div>

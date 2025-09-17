@@ -1,10 +1,7 @@
 
-
-
-
-
 import React, { useEffect, useRef } from 'react';
 import type { Geofence } from '../types';
+import { useTranslation } from '../i18n/i18n';
 
 declare const L: any; // Declare Leaflet to TypeScript
 
@@ -13,30 +10,32 @@ interface GeofenceMapProps {
     onSelectGeofence: (geofence: Geofence) => void;
 }
 
-const getGeofenceStatus = (geofence: Geofence) => {
-    if (geofence.end === null) {
-        return { text: 'Active', color: 'green', description: 'This geofence is active and does not expire.' };
-    }
-    const endDate = new Date(geofence.end);
-    const now = new Date();
-    if (endDate < now) {
-        return { text: 'Expired', color: 'gray', description: `Expired on ${endDate.toLocaleDateString()}` };
-    }
-    return { text: 'Active', color: 'green', description: `Expires on ${endDate.toLocaleDateString()}` };
-};
-
-const formatNotificationLabel = (notification: string) => {
-    switch(notification) {
-        case 'ENTER': return 'On Enter';
-        case 'EXIT': return 'On Exit';
-        case 'ENTER,EXIT': return 'On Enter & Exit';
-        default: return 'None';
-    }
-};
-
 export const GeofenceMap: React.FC<GeofenceMapProps> = ({ geofences, onSelectGeofence }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
+    const { t } = useTranslation();
+
+    const getGeofenceStatus = (geofence: Geofence) => {
+        if (geofence.end === null) {
+            return { text: t('geofenceMap.statusActive'), color: 'green', description: t('geofenceMap.descActiveNoExpiry') };
+        }
+        const endDate = new Date(geofence.end);
+        const now = new Date();
+        if (endDate < now) {
+            return { text: t('geofenceMap.statusExpired'), color: 'gray', description: t('geofenceMap.descExpiredOn', { date: endDate.toLocaleDateString() }) };
+        }
+        return { text: t('geofenceMap.statusActive'), color: 'green', description: t('geofenceMap.descExpiresOn', { date: endDate.toLocaleDateString() }) };
+    };
+
+    const formatNotificationLabel = (notification: string) => {
+        switch(notification) {
+            case 'ENTER': return t('geofenceMap.notifyOnEnter');
+            case 'EXIT': return t('geofenceMap.notifyOnExit');
+            case 'ENTER,EXIT': return t('geofenceMap.notifyOnEnterExit');
+            default: return t('geofenceMap.notifyNone');
+        }
+    };
+
 
     useEffect(() => {
         if (!mapContainer.current) return;
@@ -58,9 +57,9 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({ geofences, onSelectGeo
             });
 
             const baseMaps = {
-                "Street": street,
-                "Dark": dark,
-                "Satellite": satellite
+                [t('dashboardMap.street')]: street,
+                [t('dashboardMap.dark')]: dark,
+                [t('dashboardMap.satellite')]: satellite
             };
             
             street.addTo(mapRef.current); // Add default layer
@@ -119,20 +118,20 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({ geofences, onSelectGeo
         }, 100);
         return () => clearTimeout(timer);
         
-    }, [geofences, onSelectGeofence]);
+    }, [geofences, onSelectGeofence, t]);
 
     if (geofences.length === 0) {
         return (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-                <h2 className="text-xl font-semibold mb-2">No Geofences Found</h2>
-                <p className="text-gray-600 dark:text-gray-400">There are no geofences associated with this account. Use the buttons above to create one or upload a CSV file.</p>
+                <h2 className="text-xl font-semibold mb-2">{t('geofenceMap.noGeofencesTitle')}</h2>
+                <p className="text-gray-600 dark:text-gray-400">{t('geofenceMap.noGeofencesDesc')}</p>
             </div>
         );
     }
 
     return (
         <div>
-            <div ref={mapContainer} className="h-[60vh] w-full rounded-lg shadow-md z-0" />
+            <div ref={mapContainer} className="h-[60vh] w-full rounded-lg shadow-md z-0" role="application" aria-label={t('geofenceMap.label')} />
 
             <div className="mt-8">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
@@ -151,11 +150,11 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({ geofences, onSelectGeo
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1 min-w-0">
                                             <p className="text-md font-semibold text-raven-blue truncate">{geofence.name}</p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{geofence.description || '(No description)'}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{geofence.description || t('geofenceMap.noDescription')}</p>
                                             <div className="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-4">
-                                                <span>Created: {new Date(geofence.start).toLocaleDateString()}</span>
+                                                <span>{t('geofenceMap.created')}: {new Date(geofence.start).toLocaleDateString()}</span>
                                                 <span className="flex items-center gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
                                                     {status.description}
                                                 </span>
                                             </div>

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ApiCredentials, RavenDetails, ApiLogEntry, RavenSummary, Geofence, ApiContextType } from './types';
 import { getToken, getRavens, getRavenDetails, getVehicleInfoFromVin, processWithConcurrency, getGeofences } from './services/ravenApi';
@@ -8,6 +9,8 @@ import { RavenDetailView } from './components/RavenDetailView';
 import { HeaderActions } from './components/HeaderActions';
 import { FullScreenImageViewer } from './components/FullScreenImageViewer';
 import { useTheme } from './hooks/useTheme';
+import { useTranslation } from './i18n/i18n';
+import { QRCodeModal } from './components/QRCodeModal';
 
 const CREDENTIALS_KEY = 'ravenApiCredentials';
 const API_CONCURRENCY_LIMIT = 5; // A safe limit to avoid hitting rate limits
@@ -29,8 +32,15 @@ const App: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [apiLogs, setApiLogs] = useState<ApiLogEntry[]>([]);
     const [fullScreenViewerState, setFullScreenViewerState] = useState<FullScreenViewerState | null>(null);
+    const [imageViewerTrigger, setImageViewerTrigger] = useState<HTMLElement | null>(null);
+
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [shareModalTrigger, setShareModalTrigger] = useState<HTMLElement | null>(null);
+    const APP_URL = 'https://ravenview-461394928777.us-west1.run.app/';
+
 
     const [theme, setTheme] = useTheme();
+    const { t } = useTranslation();
 
     // Register service worker for PWA functionality
     useEffect(() => {
@@ -122,14 +132,14 @@ const App: React.FC = () => {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('An unknown error occurred.');
+                setError(t('errors.unknown'));
             }
             clearState();
         } finally {
             setIsLoading(false);
             setIsRefreshing(false);
         }
-    }, [addApiLog]);
+    }, [addApiLog, t]);
 
     // Effect to load credentials from storage on initial load
     useEffect(() => {
@@ -151,7 +161,7 @@ const App: React.FC = () => {
         if (!creds) {
             console.error("Attempted to refresh token without credentials.");
             handleReset();
-            throw new Error("No credentials available for token refresh.");
+            throw new Error(t('errors.noCredentialsForRefresh'));
         }
         try {
             console.log("Refreshing auth token...");
@@ -164,7 +174,7 @@ const App: React.FC = () => {
             handleReset(); // Force re-login if refresh fails
             throw error;
         }
-    }, [credentials, addApiLog, handleReset]);
+    }, [credentials, addApiLog, handleReset, t]);
 
     const api = useMemo((): ApiContextType | null => {
         if (!credentials || !token) return null;
@@ -193,11 +203,13 @@ const App: React.FC = () => {
     };
 
     const handleOpenImageViewer = (images: string[], currentIndex: number) => {
+        setImageViewerTrigger(document.activeElement as HTMLElement);
         setFullScreenViewerState({ images, currentIndex });
     };
 
     const handleCloseImageViewer = () => {
         setFullScreenViewerState(null);
+        imageViewerTrigger?.focus();
     };
 
     const handleNavigateImageViewer = (direction: 'next' | 'prev') => {
@@ -213,12 +225,22 @@ const App: React.FC = () => {
             return { ...prevState, currentIndex: newIndex };
         });
     };
+    
+    const handleOpenShareModal = () => {
+        setShareModalTrigger(document.activeElement as HTMLElement);
+        setIsShareModalOpen(true);
+    };
+
+    const handleCloseShareModal = () => {
+        setIsShareModalOpen(false);
+        shareModalTrigger?.focus();
+    };
 
     const renderContent = () => {
         if (isLoading && !ravens) {
             return (
                 <div className="text-center">
-                    <p className="text-lg">Authenticating & Fetching data...</p>
+                    <p className="text-lg">{t('app.loading')}</p>
                 </div>
             );
         }
@@ -257,6 +279,7 @@ const App: React.FC = () => {
                                 theme={theme} 
                                 setTheme={setTheme} 
                                 onReset={handleReset}
+                                onShare={handleOpenShareModal}
                              />
                          </div>
                     </div>
@@ -265,7 +288,7 @@ const App: React.FC = () => {
                 <main>
                     {error && (
                         <div className="bg-alert-red/10 dark:bg-alert-red/20 border border-alert-red/50 dark:border-alert-red/70 text-alert-red dark:text-red-300 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                            <strong className="font-bold">Error: </strong>
+                            <strong className="font-bold">{t('common.error')}: </strong>
                             <span className="block sm:inline">{error}</span>
                         </div>
                     )}
@@ -283,6 +306,11 @@ const App: React.FC = () => {
                 currentIndex={fullScreenViewerState?.currentIndex || 0}
                 onClose={handleCloseImageViewer}
                 onNavigate={handleNavigateImageViewer}
+            />
+            <QRCodeModal
+                isOpen={isShareModalOpen}
+                url={APP_URL}
+                onClose={handleCloseShareModal}
             />
         </div>
     );

@@ -1,12 +1,8 @@
-
-
-
-
-
 import React, { useState, useRef } from 'react';
 import type { Geofence, ApiContextType, GeofenceFormData } from '../types';
 import { createGeofence, processWithConcurrency } from '../services/ravenApi';
 import { GeofenceUploadPreviewModal } from './GeofenceUploadPreviewModal';
+import { useTranslation } from '../i18n/i18n';
 
 declare const L: any;
 
@@ -81,6 +77,7 @@ const parseCsvLine = (line: string): string[] => {
 
 export const BulkGeofenceActions: React.FC<BulkGeofenceActionsProps> = ({ geofences, api, onUploadComplete, onCreateGeofence }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { t } = useTranslation();
     const [modalState, setModalState] = useState<{
         isOpen: boolean;
         validRows: ParsedRow[];
@@ -228,7 +225,7 @@ export const BulkGeofenceActions: React.FC<BulkGeofenceActionsProps> = ({ geofen
             onUploadComplete();
         } catch (error) {
             console.error("Bulk geofence creation failed:", error);
-            alert("An error occurred during the bulk upload. Some geofences may not have been created. Please check the list and try again.");
+            alert(t('bulkGeofence.uploadErrorAlert'));
         }
     };
 
@@ -238,19 +235,19 @@ export const BulkGeofenceActions: React.FC<BulkGeofenceActionsProps> = ({ geofen
              <button
                 onClick={handleDownloadTemplate}
                 className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-                title="Download a CSV template file"
+                title={t('bulkGeofence.templateTitle')}
             >
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                Template
+                {t('bulkGeofence.template')}
             </button>
              <button
                 onClick={handleDownloadAll}
                 disabled={geofences.length === 0}
                 className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Download all geofences as a CSV file"
+                title={t('bulkGeofence.downloadAllTitle')}
             >
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12.586l4.293-4.293a1 1 0 011.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 011.414-1.414L10 12.586zM3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" /></svg>
-                Download All
+                {t('bulkGeofence.downloadAll')}
             </button>
 
             <input
@@ -263,10 +260,10 @@ export const BulkGeofenceActions: React.FC<BulkGeofenceActionsProps> = ({ geofen
             <button
                 onClick={() => fileInputRef.current?.click()}
                 className="flex items-center gap-2 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-                title="Upload geofences from a CSV file"
+                title={t('bulkGeofence.uploadCsvTitle')}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
-                Upload CSV
+                {t('bulkGeofence.uploadCsv')}
             </button>
             
             <div className="border-l border-gray-300 dark:border-gray-600 h-6 mx-2"></div>
@@ -276,7 +273,7 @@ export const BulkGeofenceActions: React.FC<BulkGeofenceActionsProps> = ({ geofen
                 className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue"
             >
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110 2h5V4a1 1 0 011-1z" clipRule="evenodd" /></svg>
-                Create Geofence
+                {t('bulkGeofence.create')}
             </button>
             <GeofenceUploadPreviewModal 
                 isOpen={modalState.isOpen}

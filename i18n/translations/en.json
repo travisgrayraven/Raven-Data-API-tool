@@ -1,0 +1,374 @@
+
+{
+  "common": {
+    "error": "Error",
+    "save": "Save",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "close": "Close",
+    "edit": "Edit",
+    "login": "Login",
+    "loading": "Loading...",
+    "loadingSettings": "Loading settings",
+    "refresh": "Refresh Data",
+    "refreshing": "Refreshing...",
+    "backToDashboard": "Back to dashboard",
+    "details": "Details",
+    "empty": "empty",
+    "upload": "Upload",
+    "reset": "Reset",
+    "seconds": "seconds",
+    "selectAll": "Select All",
+    "selectNone": "Select None",
+    "copied": "Copied!",
+    "copy": "Copy",
+    "generating": "Generating...",
+    "sending": "Sending...",
+    "clearing": "Clearing..."
+  },
+  "app": {
+    "loading": "Authenticating & Fetching data..."
+  },
+  "header": {
+    "openSettings": "Open user settings",
+    "theme": "Theme",
+    "language": "Language",
+    "shareApp": "Share App",
+    "resetCredentials": "Reset Credentials"
+  },
+  "credentialsForm": {
+    "title": "API Credentials",
+    "apiUrl": "API URL",
+    "apiKey": "Integration Key",
+    "apiSecret": "Integration Secret"
+  },
+  "dashboard": {
+    "tabs": {
+      "map": "Map",
+      "grid": "Grid",
+      "geofences": "Geofences",
+      "label": "Main dashboard tabs"
+    },
+    "mapView": "Map View",
+    "gridView": "Grid View",
+    "searchPlaceholder": "Search by name...",
+    "filter": {
+      "label": "Filter by last report time",
+      "30d": "Last 30 days",
+      "7d": "Last 7 days",
+      "48h": "Last 48 hours",
+      "24h": "Last 24 hours",
+      "12h": "Last 12 hours",
+      "1h": "Last 1 hour",
+      "all": "All Time"
+    },
+    "sort": {
+      "label": "Sort by",
+      "name": "Sort by Name",
+      "time": "Sort by Last Report"
+    },
+    "bulkMessage": "Bulk Message",
+    "bulkMessageTitle": "Send message to all filtered vehicles",
+    "exportCsv": "CSV",
+    "exportCsvTitle": "Export to CSV",
+    "noVehiclesFound": "No Vehicles Found",
+    "noVehiclesDescription": "The API returned an empty list of vehicles.",
+    "noFilteredVehiclesDescription": "No vehicles match the current filter criteria."
+  },
+  "ravenCard": {
+    "unnamedVehicle": "Unnamed Vehicle",
+    "status": {
+      "unplugged": "Unplugged",
+      "offline": "Offline",
+      "driving": "Driving",
+      "parked": "Parked"
+    },
+    "statusTitle": {
+      "unplugged": "Device is unplugged from the vehicle.",
+      "offline": "Vehicle is offline.",
+      "driving": "Vehicle is driving. Last report: {{time}}.",
+      "parked": "Vehicle is parked. Last report: {{time}}."
+    },
+    "viewDetails": "View details for {{vehicleName}}",
+    "lastReportTitle": "Last report: {{time}}",
+    "lastReport": "Last report: {{time}}",
+    "odometerTitle": "Odometer: {{value}} km",
+    "fuelTitle": "Fuel Level: {{value}}%"
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago",
+    "monthsAgo": "{{count}}mo ago",
+    "yearsAgo": "{{count}}y ago"
+  },
+  "detailView": {
+    "tabs": {
+        "map": "Map",
+        "preview": "Preview",
+        "events": "Events",
+        "settings": "Settings",
+        "logs": "Logs",
+        "label": "Vehicle details tabs"
+    },
+    "map": {
+        "title": "Last Known Location",
+        "label": "Map showing last known location for {{vehicleName}}",
+        "noLocation": "Location data not available for this vehicle.",
+        "street": "Street",
+        "dark": "Dark",
+        "satellite": "Satellite"
+    },
+    "events": {
+        "title": "Recent Events",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "getEvents": "Get Events",
+        "filterEvents": "Filter Events",
+        "filterEventsCount": "Filter Events ({{selected}}/{{total}})",
+        "exportPdfTitle": "Export filtered events as PDF",
+        "prompt": "Select a date range and click \"Get Events\" to view event history.",
+        "noEvents": "No events found for the selected criteria.",
+        "location": "Location",
+        "speed": "Speed",
+        "roadCam": "Road Cam",
+        "cabinCam": "Cabin Cam",
+        "rawData": "Raw Event Data",
+        "reportTitle": "Event Report",
+        "timestamp": "Timestamp"
+    },
+    "settings": {
+        "title": "Device Settings",
+        "uploadTitle": "Upload settings from a JSON file",
+        "downloadTitle": "Download current settings as a JSON file",
+        "uploadSuccess": "Settings loaded successfully. Review the changes and click \"Save Changes\" to apply them to the device.",
+        "noSettings": "No settings data available."
+    },
+    "logs": {
+        "title": "API Call Logs",
+        "requestBody": "Request Body",
+        "responseBody": "Response Body",
+        "noLogs": "No API calls have been logged yet."
+    },
+    "livePreview": {
+        "title": "Live View",
+        "offlineTitle": "Raven is Offline",
+        "offlineDescription": "Live preview & stream are unavailable when the device is offline.",
+        "roadCamera": "Road Camera",
+        "cabinCamera": "Cabin Camera",
+        "stream": "Stream"
+    }
+  },
+  "settings": {
+      "audio": {
+          "title": "Audio",
+          "notifications": "Audio Notifications Enabled",
+          "streaming": "Streaming Audio Enabled"
+      },
+      "camera": {
+          "title": "Camera",
+          "roadCamera": "Road Camera",
+          "cabinCamera": "Cabin Camera",
+          "audioRecording": "Audio Recording",
+          "cameraEnabled": "Camera Enabled",
+          "recordingProfile": "Video Recording Profile",
+          "profiles": {
+              "standard": "Standard",
+              "hd": "HD",
+              "balanced": "Balanced",
+              "extended": "Extended"
+          }
+      },
+      "display": {
+          "title": "Display",
+          "brightness": "Brightness",
+          "distanceUnit": "Distance Unit",
+          "units": {
+              "metric": "Metric",
+              "imperial": "Imperial"
+          },
+          "locale": "Locale",
+          "timeStyle": "Time Style",
+          "timeStyles": {
+              "12": "12-Hour",
+              "24": "24-Hour"
+          }
+      },
+      "events": {
+          "title": "Events",
+          "gForce": {
+              "title": "G-Force",
+              "harshBraking": "Harsh Braking",
+              "aggressiveAccel": "Aggressive Acceleration",
+              "harshCornering": "Harsh Cornering"
+          },
+          "standard": {
+              "title": "Standard (Speeding/Idling)",
+              "idling": "Idling",
+              "speeding": "Speeding",
+              "speedingThreshold": "Speeding Threshold",
+              "speedingThresholdType": "Speeding Threshold Type",
+              "types": {
+                  "percent": "Percent",
+                  "constant": "Constant"
+              }
+          },
+          "dms": {
+              "title": "Driver Monitoring (DMS)",
+              "cellphone": "Cellphone",
+              "cameraObscured": "Camera Obscured",
+              "distraction": "Distraction",
+              "drinking": "Drinking",
+              "eating": "Eating",
+              "smoking": "Smoking",
+              "fatigue": "Fatigue/Tired"
+          },
+          "adas": {
+              "title": "Assistance (ADAS)",
+              "tailgating": "Tailgating",
+              "tailgatingThreshold": "Tailgating Speed Threshold"
+          }
+      },
+      "obd": {
+          "title": "OBD",
+          "canbus": "CANbus Enabled",
+          "lowBatteryCutoff": "Low Battery Cutoff"
+      },
+      "system": {
+          "title": "System",
+          "gesture": "Gesture Enabled",
+          "videoAfterParked": "Video Rec After Parked"
+      }
+  },
+  "driverMessage": {
+      "title": "Driver Display Message",
+      "messageLabel": "Message",
+      "placeholder": "Enter a message to display...",
+      "durationLabel": "Duration",
+      "minutes": "{{count}} minutes",
+      "clear": "Clear Message",
+      "send": "Send Message",
+      "success": {
+          "sent": "Message sent successfully!",
+          "cleared": "Message cleared successfully!"
+      }
+  },
+  "tripShare": {
+      "title": "Trip Share",
+      "description": "Generate a temporary link to share the Raven's next trip with anyone. The link will become active once the trip starts and will expire when it ends.",
+      "showQr": "Show QR Code",
+      "generateNew": "Generate New Link",
+      "generate": "Generate Trip Share Link"
+  },
+  "qrModal": {
+      "close": "Close QR code modal",
+      "title": "Share App"
+  },
+  "errors": {
+    "unknown": "An unknown error occurred.",
+    "noCredentialsForRefresh": "No credentials available for token refresh.",
+    "fetchEvents": "Failed to fetch events",
+    "loadMedia": "Failed to load media",
+    "imageLoadFailed": "Image failed to load",
+    "generatePdf": "Failed to generate PDF. See console for details.",
+    "loadSettings": "Failed to load settings",
+    "saveSettings": "Failed to save settings",
+    "parseSettings": "Failed to parse settings file. Please ensure it's a valid JSON file.",
+    "readSettings": "Failed to read the settings file.",
+    "settingsConfigError": "The device's settings could not be loaded due to a configuration error from the server.",
+    "settingsFixPrompt": "This error prevents other settings from being loaded. You can attempt to fix this by resetting the device's display layout to a safe default. This will not affect other settings.",
+    "settingsFixButton": "Reset Display Settings & Reload",
+    "settingsFixingButton": "Resetting...",
+    "settingsFixFailed": "Failed to apply the fix. Please contact support if the problem persists."
+  },
+  "fullScreenImageViewer": {
+    "close": "Close full screen image viewer",
+    "previous": "Previous image",
+    "next": "Next image",
+    "counter": "{{currentIndex}} / {{totalImages}}"
+  },
+  "dashboardMap": {
+    "street": "Street",
+    "dark": "Dark",
+    "satellite": "Satellite",
+    "label": "Map showing last known location of all vehicles."
+  },
+  "geofenceMap": {
+    "statusActive": "Active",
+    "statusExpired": "Expired",
+    "descActiveNoExpiry": "This geofence is active and does not expire.",
+    "descExpiresOn": "Expires on {{date}}",
+    "descExpiredOn": "Expired on {{date}}",
+    "notifyOnEnter": "On Enter",
+    "notifyOnExit": "On Exit",
+    "notifyOnEnterExit": "On Enter & Exit",
+    "notifyNone": "None",
+    "noGeofencesTitle": "No Geofences Found",
+    "noGeofencesDesc": "There are no geofences associated with this account. Use the buttons above to create one or upload a CSV file.",
+    "created": "Created",
+    "noDescription": "(No description)",
+    "label": "Map showing all geofences."
+  },
+  "geofenceEditor": {
+    "createTitle": "Create Geofence",
+    "editTitle": "Edit Geofence",
+    "closeAriaLabel": "Close editor",
+    "drawPrompt": "Use the tools on the map to draw a shape for your geofence.",
+    "nameLabel": "Name",
+    "descriptionLabel": "Description",
+    "radiusLabel": "Radius (meters)",
+    "notificationsLabel": "Notifications",
+    "notifyNone": "None",
+    "notifyOnEnter": "On Enter",
+    "notifyOnExit": "On Exit",
+    "notifyOnEnterExit": "On Enter & Exit",
+    "expirationLabel": "Expiration Date",
+    "expirationHelp": "Leave blank for no expiration.",
+    "clearDate": "Clear date",
+    "errorShapeRequired": "A shape must be drawn on the map.",
+    "errorNameRequired": "Geofence name is required.",
+    "deleteConfirm": "Are you sure you want to delete the geofence \"{{name}}\"? This action cannot be undone.",
+    "mapLabel": "Interactive map for drawing geofence shapes."
+  },
+  "geofenceUpload": {
+    "modalTitle": "Confirm Geofence Upload",
+    "summary": "Found <valid>{{validCount}} valid</valid> geofences and <invalid>{{invalidCount}} invalid</invalid> rows.",
+    "validTab": "Valid Rows ({{count}})",
+    "errorsTab": "Errors ({{count}})",
+    "headerRow": "Row",
+    "headerName": "Name",
+    "headerDescription": "Description",
+    "headerNotification": "Notification",
+    "headerError": "Error",
+    "headerOriginalData": "Original Data",
+    "uploading": "Uploading...",
+    "uploadButton": "Upload {{count}} Geofences"
+  },
+  "bulkGeofence": {
+    "templateTitle": "Download a CSV template file",
+    "template": "Template",
+    "downloadAllTitle": "Download all geofences as a CSV file",
+    "downloadAll": "Download All",
+    "uploadCsvTitle": "Upload geofences from a CSV file",
+    "uploadCsv": "Upload CSV",
+    "create": "Create Geofence",
+    "uploadErrorAlert": "An error occurred during the bulk upload. Some geofences may not have been created. Please check the list and try again."
+  },
+  "bulkMessage": {
+    "modalTitle": "Bulk Driver Message",
+    "summary": "This message will be sent to all <strong>{{count}}</strong> currently filtered vehicles.",
+    "sendingTitle": "Sending messages...",
+    "completeTitle": "Send Complete",
+    "successMessage": "Successfully sent to {{count}} vehicle(s).",
+    "errorMessage": "Failed to send to {{count}} vehicle(s).",
+    "messageLabel": "Message",
+    "placeholder": "Enter message...",
+    "durationLabel": "Duration",
+    "minutes": "{{count}} minutes",
+    "submit": "Send Message"
+  }
+}

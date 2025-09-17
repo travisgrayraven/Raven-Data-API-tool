@@ -1,20 +1,13 @@
 
 
-
-
-
-
-
-
-
-
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { RavenDetails, RavenEvent, RavenSettings, ApiContextType, ApiLogEntry } from '../types';
 import { getRavenEvents, getRavenSettings, updateRavenSettings, getMediaUrlViaProxy, processWithConcurrency } from '../services/ravenApi';
 import { SettingsForm } from './SettingsForm';
 import { DriverMessageManager } from './DriverMessageManager';
 import { TripShareManager } from './TripShareManager';
 import { LivePreview } from './LivePreview';
+import { useTranslation } from '../i18n/i18n';
 
 type Tab = 'map' | 'preview' | 'events' | 'settings' | 'logs';
 
@@ -25,8 +18,9 @@ declare const L: any; // Declare Leaflet to TypeScript
 declare const jspdf: any;
 
 const JsonViewer: React.FC<{ jsonString?: string, data?: object }> = ({ jsonString, data }) => {
+    const { t } = useTranslation();
     if (!jsonString && !data) {
-        return <pre className="text-xs bg-soft-grey/50 dark:bg-black p-2 rounded-md overflow-x-auto text-gray-500 dark:text-gray-400"><code>(empty)</code></pre>;
+        return <pre className="text-xs bg-soft-grey/50 dark:bg-black p-2 rounded-md overflow-x-auto text-gray-500 dark:text-gray-400"><code>({t('common.empty')})</code></pre>;
     }
     try {
         const content = data ? data : JSON.parse(jsonString || '{}');
@@ -40,6 +34,7 @@ const MapView: React.FC<{ raven: RavenDetails; api: ApiContextType }> = ({ raven
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
     const markerRef = useRef<any>(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const { latitude, longitude } = raven.last_known_location || {};
@@ -65,9 +60,9 @@ const MapView: React.FC<{ raven: RavenDetails; api: ApiContextType }> = ({ raven
             });
             
             const baseMaps = {
-                "Street": street,
-                "Dark": dark,
-                "Satellite": satellite
+                [t('detailView.map.street')]: street,
+                [t('detailView.map.dark')]: dark,
+                [t('detailView.map.satellite')]: satellite
             };
             
             street.addTo(mapRef.current);
@@ -97,18 +92,19 @@ const MapView: React.FC<{ raven: RavenDetails; api: ApiContextType }> = ({ raven
             clearTimeout(timer);
         };
 
-    }, [raven]); // Re-run effect if raven data changes
+    }, [raven, t]); // Re-run effect if raven data changes
 
     const { latitude, longitude } = raven.last_known_location || {};
+    const mapLabel = t('detailView.map.label', { vehicleName: raven.name });
 
     return (
         <div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
-                <h3 className="text-xl font-bold mb-4">Last Known Location</h3>
+                <h3 className="text-xl font-bold mb-4">{t('detailView.map.title')}</h3>
                 {latitude && longitude ? (
-                    <div ref={mapContainerRef} className="h-96 w-full rounded-md border border-gray-300 dark:border-gray-700 z-0" />
+                    <div ref={mapContainerRef} className="h-96 w-full rounded-md border border-gray-300 dark:border-gray-700 z-0" role="application" aria-label={mapLabel} />
                 ) : (
-                    <p>Location data not available for this vehicle.</p>
+                    <p>{t('detailView.map.noLocation')}</p>
                 )}
             </div>
             <DriverMessageManager raven={raven} api={api} />
@@ -140,15 +136,21 @@ const EventMediaItem: React.FC<{
 
 const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageClick: (images: string[], index: number) => void; }> = ({ raven, api, onImageClick }) => {
     const getInitialDates = (raven: RavenDetails) => {
+        // The default date range should be today.
+        // We will use the raven's last report time as "today" if available, otherwise the user's current date.
         const lastReportTimestamp = raven.last_known_location?.timestamp;
-        const initialEndDate = lastReportTimestamp ? new Date(lastReportTimestamp) : new Date();
+        const today = lastReportTimestamp ? new Date(lastReportTimestamp) : new Date();
         
-        const initialStartDate = new Date(initialEndDate);
-        initialStartDate.setDate(initialStartDate.getDate() - 1);
+        // Set the time to the beginning of the day to ensure the whole day is queried by default.
+        today.setHours(0, 0, 0, 0);
+
+        // Create new Date objects for state to avoid mutation issues.
+        const initialStartDate = new Date(today);
+        const initialEndDate = new Date(today);
 
         return { initialStartDate, initialEndDate };
     };
-
+    const { t } = useTranslation();
     const [events, setEvents] = useState<RavenEvent[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -217,7 +219,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                 setSelectedEventTypes(new Set(uniqueTypes));
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to fetch events');
+            setError(err instanceof Error ? err.message : t('errors.fetchEvents'));
         } finally {
             setIsLoading(false);
         }
@@ -254,7 +256,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                 const url = await getMediaUrlViaProxy(api, raven.uuid, mediaId);
                 return { id: mediaId, url };
             } catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'Failed to load media';
+                const errorMessage = err instanceof Error ? err.message : t('errors.loadMedia');
                 return { id: mediaId, error: errorMessage };
             }
         };
@@ -284,7 +286,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
             });
         })();
 
-    }, [filteredEvents, api, raven.uuid, mediaUrls, mediaErrors, loadingMedia]);
+    }, [filteredEvents, api, raven.uuid, mediaUrls, mediaErrors, loadingMedia, t]);
 
     const handleFilterChange = (eventType: string) => {
         setSelectedEventTypes(prev => {
@@ -323,7 +325,12 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
         .join(' ');
     };
     
-    const dateToInputFormat = (date: Date) => date.toISOString().slice(0, 10);
+    const dateToInputFormat = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is 0-indexed
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
     const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => setStartDate(new Date(e.target.value + 'T00:00:00'));
     const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => setEndDate(new Date(e.target.value + 'T00:00:00'));
 
@@ -377,7 +384,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
             const imageBoxHeight = 60;
     
             doc.setFontSize(18);
-            doc.text(`${raven.name} - Event Report`, leftMargin, y);
+            doc.text(`${raven.name} - ${t('detailView.events.reportTitle')}`, leftMargin, y);
             y += 8;
     
             for (const event of filteredEvents) {
@@ -402,11 +409,11 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
     
                 doc.setFont(undefined, 'normal');
                 doc.setFontSize(10);
-                doc.text(`Timestamp: ${new Date(event.event_timestamp).toLocaleString()}`, leftMargin, y);
+                doc.text(`${t('detailView.events.timestamp')}: ${new Date(event.event_timestamp).toLocaleString()}`, leftMargin, y);
                 y += 4;
     
                 if (event.latitude && event.longitude) {
-                    const prefixText = 'Location: ';
+                    const prefixText = `${t('detailView.events.location')}: `;
                     const linkText = `${event.latitude.toFixed(5)}, ${event.longitude.toFixed(5)}`;
                     const url = `https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`;
                     
@@ -426,7 +433,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                     y += 4;
                 }
                 if (typeof event.speed_kph === 'number') {
-                    doc.text(`Speed: ${Math.round(event.speed_kph)} km/h`, leftMargin, y);
+                    doc.text(`${t('detailView.events.speed')}: ${Math.round(event.speed_kph)} km/h`, leftMargin, y);
                     y += 4;
                 }
     
@@ -477,7 +484,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                                 doc.addImage(dataUrl, 'JPEG', imageX, imageY, pdfImageWidth, pdfImageHeight);
                             } catch (e) {
                                 console.error("Error adding image to PDF", e);
-                                doc.text('[Image failed to load]', imageX + 5, imageY + 20);
+                                doc.text(`[${t('errors.imageLoadFailed')}]`, imageX + 5, imageY + 20);
                             }
                         }
                     }
@@ -492,38 +499,38 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
             doc.save(getFormattedFilename('pdf'));
         } catch (err) {
             console.error("Failed to generate PDF:", err);
-            setError("Failed to generate PDF. See console for details.");
+            setError(t('errors.generatePdf'));
         } finally {
             setIsGeneratingPdf(false);
         }
     };
     
-    const filterButtonText = events ? `Filter Events (${selectedEventTypes.size}/${allEventTypes.length})` : 'Filter Events';
+    const filterButtonText = events ? t('detailView.events.filterEventsCount', { selected: selectedEventTypes.size, total: allEventTypes.length }) : t('detailView.events.filterEvents');
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
-             <h3 className="text-xl font-bold mb-4">Recent Events</h3>
+             <h3 className="text-xl font-bold mb-4">{t('detailView.events.title')}</h3>
              
              <div className="flex flex-wrap items-end justify-between gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-soft-grey dark:border-gray-700">
                  <div className="flex flex-wrap items-end gap-4">
                     <div>
-                        <label htmlFor="start-date" className="block text-sm font-medium mb-1">Start Date</label>
+                        <label htmlFor="start-date" className="block text-sm font-medium mb-1">{t('detailView.events.startDate')}</label>
                         <input 
                             type="date"
                             id="start-date"
                             value={dateToInputFormat(startDate)}
                             onChange={handleStartDateChange}
-                            className="block w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-1.5 px-2 text-gray-800 dark:text-gray-200 dark:[color-scheme:dark] focus:ring-raven-blue focus:border-raven-blue"
+                            className="block w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-gray-800 dark:text-gray-200 dark:[color-scheme:dark] focus:ring-raven-blue focus:border-raven-blue"
                         />
                     </div>
                     <div>
-                        <label htmlFor="end-date" className="block text-sm font-medium mb-1">End Date</label>
+                        <label htmlFor="end-date" className="block text-sm font-medium mb-1">{t('detailView.events.endDate')}</label>
                         <input 
                             type="date"
                             id="end-date"
                             value={dateToInputFormat(endDate)}
                             onChange={handleEndDateChange}
-                            className="block w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-1.5 px-2 text-gray-800 dark:text-gray-200 dark:[color-scheme:dark] focus:ring-raven-blue focus:border-raven-blue"
+                            className="block w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-gray-800 dark:text-gray-200 dark:[color-scheme:dark] focus:ring-raven-blue focus:border-raven-blue"
                         />
                     </div>
                     <button 
@@ -531,7 +538,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                         disabled={isLoading}
                         className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50"
                     >
-                        {isLoading ? 'Loading...' : 'Get Events'}
+                        {isLoading ? t('common.loading') : t('detailView.events.getEvents')}
                     </button>
                  </div>
 
@@ -540,12 +547,12 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                     {events && (
                         <>
                             <div className="relative" ref={filterDropdownRef}>
-                                <button onClick={() => setIsFilterOpen(!isFilterOpen)} className="py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800">{filterButtonText}</button>
+                                <button onClick={() => setIsFilterOpen(!isFilterOpen)} className="py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800" aria-haspopup="true" aria-expanded={isFilterOpen}>{filterButtonText}</button>
                                 {isFilterOpen && (
                                     <div className="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-10 max-h-80 overflow-y-auto">
                                         <div className="flex justify-between items-center p-2 border-b border-soft-grey dark:border-gray-700">
-                                            <button onClick={() => setSelectedEventTypes(new Set(allEventTypes))} className="text-sm text-raven-blue hover:underline">Select All</button>
-                                            <button onClick={() => setSelectedEventTypes(new Set())} className="text-sm text-raven-blue hover:underline">Select None</button>
+                                            <button onClick={() => setSelectedEventTypes(new Set(allEventTypes))} className="text-sm text-raven-blue hover:underline">{t('common.selectAll')}</button>
+                                            <button onClick={() => setSelectedEventTypes(new Set())} className="text-sm text-raven-blue hover:underline">{t('common.selectNone')}</button>
                                         </div>
                                         {allEventTypes.map(type => (
                                             <label key={type} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50">
@@ -561,18 +568,18 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                                 onClick={handleExportEventsCSV} 
                                 disabled={!filteredEvents || filteredEvents.length === 0}
                                 className="flex items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-400 disabled:cursor-not-allowed" 
-                                title="Export filtered events as CSV"
+                                aria-label={t('dashboard.exportCsvTitle')}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                <span>CSV</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                <span>{t('dashboard.exportCsv')}</span>
                             </button>
                             <button 
                                 onClick={handleExportEventsPDF} 
                                 disabled={isGeneratingPdf || !filteredEvents || filteredEvents.length === 0} 
                                 className="flex items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-alert-red hover:bg-alert-red/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-alert-red disabled:bg-alert-red/50 disabled:cursor-not-allowed" 
-                                title="Export filtered events as PDF"
+                                aria-label={t('detailView.events.exportPdfTitle')}
                             >
-                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>
+                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>
                                 <span>{isGeneratingPdf ? '...' : 'PDF'}</span>
                             </button>
                         </>
@@ -583,13 +590,13 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
 
             {!filteredEvents && !isLoading && !error && (
                 <div className="text-center py-8">
-                    <p>Select a date range and click "Get Events" to view event history.</p>
+                    <p>{t('detailView.events.prompt')}</p>
                 </div>
             )}
             
             {filteredEvents && filteredEvents.length === 0 && (
                  <div className="text-center py-8">
-                    <p>No events found for the selected criteria.</p>
+                    <p>{t('detailView.events.noEvents')}</p>
                 </div>
             )}
             
@@ -604,7 +611,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                             <div className="text-sm text-gray-600 dark:text-gray-300">
                                 {event.latitude && event.longitude && (
                                     <p>
-                                        Location:
+                                        {t('detailView.events.location')}:
                                         <a 
                                             href={`https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`} 
                                             target="_blank" 
@@ -616,7 +623,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                                     </p>
                                 )}
                                  {typeof event.speed_kph === 'number' && (
-                                    <p>Speed: {Math.round(event.speed_kph)} km/h</p>
+                                    <p>{t('detailView.events.speed')}: {Math.round(event.speed_kph)} km/h</p>
                                 )}
                             </div>
                         </div>
@@ -629,7 +636,7 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                                         mediaUrl={mediaUrls[id]}
                                         error={mediaErrors[id]}
                                         isLoading={loadingMedia.has(id)}
-                                        label="Road Cam"
+                                        label={t('detailView.events.roadCam')}
                                         onImageClick={(url) => handleLocalImageClick(event, url)}
                                     />
                                 ))}
@@ -639,14 +646,14 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                                         mediaUrl={mediaUrls[id]}
                                         error={mediaErrors[id]}
                                         isLoading={loadingMedia.has(id)}
-                                        label="Cabin Cam"
+                                        label={t('detailView.events.cabinCam')}
                                         onImageClick={(url) => handleLocalImageClick(event, url)}
                                     />
                                 ))}
                             </div>
                         )}
                          <details className="mt-3">
-                            <summary className="cursor-pointer text-xs text-gray-500 dark:text-gray-400">Raw Event Data</summary>
+                            <summary className="cursor-pointer text-xs text-gray-500 dark:text-gray-400">{t('detailView.events.rawData')}</summary>
                             <JsonViewer data={event} />
                         </details>
                     </div>
@@ -671,26 +678,81 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
     const [isFetchingSettings, setIsFetchingSettings] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [settingsError, setSettingsError] = useState<string | null>(null);
+    const [isConfigError, setIsConfigError] = useState(false);
+    const [isFixing, setIsFixing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { t } = useTranslation();
+
+    const fetchSettings = useCallback(async () => {
+        setIsFetchingSettings(true);
+        setSettingsError(null);
+        setIsConfigError(false);
+        try {
+            const fetchedSettings = await getRavenSettings(api, raven.uuid);
+            setSettings(fetchedSettings);
+            setInitialSettings(JSON.parse(JSON.stringify(fetchedSettings)));
+        } catch (err) {
+            let finalErrorString = t('errors.loadSettings'); // Default error
+            if (err instanceof Error) {
+                const errorMessage = err.message;
+                const jsonStartIndex = errorMessage.indexOf('{');
+                
+                if (jsonStartIndex !== -1) {
+                    const jsonString = errorMessage.substring(jsonStartIndex);
+                    try {
+                        const errorPayload = JSON.parse(jsonString);
+                        if (errorPayload.message) {
+                            const friendlyIntro = `${t('errors.settingsConfigError')}\n\n`;
+                            finalErrorString = friendlyIntro + errorPayload.message.replace(/\\n/g, '\n');
+                        } else {
+                            finalErrorString = errorMessage;
+                        }
+                    } catch (parseError) {
+                        finalErrorString = errorMessage;
+                    }
+                } else {
+                    finalErrorString = errorMessage;
+                }
+            }
+            if (finalErrorString.includes('validation errors for DisplaySettings')) {
+                setIsConfigError(true);
+            }
+            setSettingsError(finalErrorString);
+        } finally {
+            setIsFetchingSettings(false);
+        }
+    }, [api, raven.uuid, t]);
 
     useEffect(() => {
-        if ((activeTab === 'settings' || activeTab === 'preview') && !settings) {
-            const fetchSettings = async () => {
-                setIsFetchingSettings(true);
-                setSettingsError(null);
-                try {
-                    const fetchedSettings = await getRavenSettings(api, raven.uuid);
-                    setSettings(fetchedSettings);
-                    setInitialSettings(JSON.parse(JSON.stringify(fetchedSettings)));
-                } catch (err) {
-                    setSettingsError(err instanceof Error ? err.message : 'Failed to load settings');
-                } finally {
-                    setIsFetchingSettings(false);
-                }
-            };
+        // Fetch settings if the tab is opened, and we don't have them, and there's no standing error.
+        if ((activeTab === 'settings' || activeTab === 'preview') && !settings && !settingsError) {
             fetchSettings();
         }
-    }, [activeTab, settings, api, raven.uuid]);
+    }, [activeTab, settings, settingsError, fetchSettings]);
+
+
+    const handleFixDisplaySettings = async () => {
+        setIsFixing(true);
+        setSettingsError(null);
+        const defaultScreenGroups = [
+          { "name": "1", "left": "vehicle_speed", "right": "clock", "leftside": "statusbar", "rightside": "fuel_level" },
+          { "name": "2", "left": "fuel_level", "right": "vehicle_speed", "leftside": "statusbar", "rightside": "fuel_level" },
+          { "name": "3", "left": "rpm", "right": "coolant_temperature", "leftside": "statusbar", "rightside": "fuel_level" },
+          { "name": "4", "left": "gps_altitude", "right": "gps_heading", "leftside": "statusbar", "rightside": "fuel_level" }
+        ];
+
+        try {
+            await updateRavenSettings(api, raven.uuid, { display: { screen_groups: defaultScreenGroups } });
+            // It worked, refetch everything to populate the form.
+            await fetchSettings();
+        } catch (err) {
+            setSettingsError(err instanceof Error ? err.message : t('errors.settingsFixFailed'));
+            setIsConfigError(true); // Keep showing the fix UI if the fix itself fails
+        } finally {
+            setIsFixing(false);
+        }
+    };
+
 
     const handleSettingChange = (path: string, value: any) => {
         setSettings(prev => {
@@ -717,7 +779,7 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
             setInitialSettings(JSON.parse(JSON.stringify(updatedSettings)));
         // FIX: Corrected invalid `catch (err) => {` syntax to `catch (err) {`.
         } catch (err) {
-            setSettingsError(err instanceof Error ? err.message : 'Failed to save settings');
+            setSettingsError(err instanceof Error ? err.message : t('errors.saveSettings'));
         } finally {
             setIsSaving(false);
         }
@@ -764,15 +826,15 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
                 if (typeof text === 'string') {
                     const parsedSettings = JSON.parse(text);
                     setSettings(parsedSettings);
-                    alert('Settings loaded successfully. Review the changes and click "Save Changes" to apply them to the device.');
+                    alert(t('detailView.settings.uploadSuccess'));
                 }
             } catch (err) {
                 console.error("Failed to parse settings file:", err);
-                setSettingsError("Failed to parse settings file. Please ensure it's a valid JSON file.");
+                setSettingsError(t('errors.parseSettings'));
             }
         };
         reader.onerror = () => {
-             setSettingsError("Failed to read the settings file.");
+             setSettingsError(t('errors.readSettings'));
         }
         reader.readAsText(file);
 
@@ -786,11 +848,46 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
 
     const { make, model, year } = raven.vehicle_info || {};
     const subTitle = (make && model && year) ? `${year} ${make} ${model}` : raven.serial_number;
+    const tabs: Tab[] = ['map', 'preview', 'events', 'settings', 'logs'];
+    
+    const renderSettingsContent = () => {
+        if (isFetchingSettings) {
+            return <p>{t('common.loadingSettings')}...</p>;
+        }
+        if (isConfigError) {
+            return (
+                <div className="bg-alert-red/10 border border-alert-red text-alert-red px-4 py-3 rounded-lg relative mb-4" role="alert">
+                    <pre className="whitespace-pre-wrap break-words font-sans text-sm">{settingsError}</pre>
+                    <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">{t('errors.settingsFixPrompt')}</p>
+                    <div className="mt-4">
+                        <button
+                            onClick={handleFixDisplaySettings}
+                            disabled={isFixing}
+                            className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-alert-red/80 hover:bg-alert-red disabled:bg-alert-red/50"
+                        >
+                            {isFixing ? t('errors.settingsFixingButton') : t('errors.settingsFixButton')}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+        if (settingsError) {
+            return (
+                <div className="bg-alert-red/10 border border-alert-red text-alert-red px-4 py-3 rounded-lg relative mb-4" role="alert">
+                    <pre className="whitespace-pre-wrap break-words font-sans text-sm">{settingsError}</pre>
+                </div>
+            );
+        }
+        if (settings) {
+            return <SettingsForm settings={settings} onSettingChange={handleSettingChange} />;
+        }
+        return <p>{t('detailView.settings.noSettings')}</p>;
+    };
 
     return (
         <div>
             <div className="flex items-center mb-6">
-                <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 mr-4" aria-label="Back to dashboard">
+                <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 mr-4" aria-label={t('common.backToDashboard')}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                 </button>
                 <div>
@@ -800,10 +897,14 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
             </div>
             
             <div className="mt-6 border-b border-soft-grey dark:border-gray-700">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    {(['map', 'preview', 'events', 'settings', 'logs'] as Tab[]).map((tab) => (
+                <nav className="-mb-px flex space-x-8" role="tablist" aria-label={t('detailView.tabs.label')}>
+                    {tabs.map((tab) => (
                          <button
                             key={tab}
+                            id={`tab-${tab}`}
+                            role="tab"
+                            aria-selected={activeTab === tab}
+                            aria-controls={`panel-${tab}`}
                             onClick={() => setActiveTab(tab)}
                             className={`${
                                 activeTab === tab
@@ -811,20 +912,26 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600'
                             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize`}
                         >
-                            {tab}
+                            {t(`detailView.tabs.${tab}`)}
                         </button>
                     ))}
                 </nav>
             </div>
             
             <div className="mt-6">
-                {activeTab === 'map' && <MapView raven={raven} api={api} />}
-                {activeTab === 'preview' && <LivePreview raven={raven} api={api} settings={settings} />}
-                {activeTab === 'events' && <EventsView raven={raven} api={api} onImageClick={onImageClick} />}
-                {activeTab === 'settings' && (
+                <div id="panel-map" role="tabpanel" aria-labelledby="tab-map" hidden={activeTab !== 'map'}>
+                    <MapView raven={raven} api={api} />
+                </div>
+                <div id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden={activeTab !== 'preview'}>
+                    <LivePreview raven={raven} api={api} settings={settings} />
+                </div>
+                <div id="panel-events" role="tabpanel" aria-labelledby="tab-events" hidden={activeTab !== 'events'}>
+                    <EventsView raven={raven} api={api} onImageClick={onImageClick} />
+                </div>
+                <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden={activeTab !== 'settings'}>
                      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
                         <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-                             <h3 className="text-xl font-bold">Device Settings</h3>
+                             <h3 className="text-xl font-bold">{t('detailView.settings.title')}</h3>
                              <div className="flex items-center gap-2">
                                 <input
                                     type="file"
@@ -836,40 +943,38 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
                                 />
                                 <button
                                     onClick={handleUploadButtonClick}
-                                    disabled={isFetchingSettings}
+                                    disabled={isFetchingSettings || isConfigError}
                                     className="flex items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sky-blue hover:bg-sky-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-blue disabled:bg-sky-blue/50 disabled:cursor-not-allowed"
-                                    title="Upload settings from a JSON file"
+                                    aria-label={t('detailView.settings.uploadTitle')}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
-                                    <span>Upload</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
+                                    <span>{t('common.upload')}</span>
                                 </button>
                                 <button
                                     onClick={handleExportSettingsJSON}
                                     disabled={!settings}
                                     className="flex items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-charcoal-grey hover:bg-charcoal-grey/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-charcoal-grey disabled:bg-charcoal-grey/50 disabled:cursor-not-allowed"
-                                    title="Download current settings as a JSON file"
+                                    aria-label={t('detailView.settings.downloadTitle')}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                                     <span>JSON</span>
                                 </button>
                                 {hasChanges && (
                                     <>
-                                        <button onClick={handleResetChanges} disabled={isSaving} className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white disabled:opacity-50">Reset</button>
+                                        <button onClick={handleResetChanges} disabled={isSaving} className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white disabled:opacity-50">{t('common.reset')}</button>
                                         <button onClick={handleSaveChanges} disabled={isSaving} className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50">
-                                            {isSaving ? 'Saving...' : 'Save Changes'}
+                                            {isSaving ? t('common.saving') : t('common.saveChanges')}
                                         </button>
                                     </>
                                 )}
                              </div>
                         </div>
-                        {isFetchingSettings && <p>Loading settings...</p>}
-                        {settingsError && <div className="bg-alert-red/10 border border-alert-red text-alert-red px-4 py-3 rounded relative" role="alert"><span className="block sm:inline">{settingsError}</span></div>}
-                        {settings ? <SettingsForm settings={settings} onSettingChange={handleSettingChange} /> : !isFetchingSettings && !settingsError && <p>No settings data available.</p>}
+                        {renderSettingsContent()}
                      </div>
-                )}
-                {activeTab === 'logs' && (
+                </div>
+                <div id="panel-logs" role="tabpanel" aria-labelledby="tab-logs" hidden={activeTab !== 'logs'}>
                      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
-                        <h3 className="text-xl font-bold mb-4">API Call Logs</h3>
+                        <h3 className="text-xl font-bold mb-4">{t('detailView.logs.title')}</h3>
                          <div className="space-y-4 max-h-[600px] overflow-y-auto">
                             {logs.length > 0 ? logs.map(log => (
                                  <div key={log.id} className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-soft-grey dark:border-gray-700">
@@ -886,23 +991,23 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
                                          </div>
                                      </div>
                                      <details>
-                                        <summary className="cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">Details</summary>
+                                        <summary className="cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">{t('common.details')}</summary>
                                         <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <h4 className="font-semibold mb-1 text-sm">Request Body</h4>
+                                                <h4 className="font-semibold mb-1 text-sm">{t('detailView.logs.requestBody')}</h4>
                                                 <JsonViewer jsonString={log.request.body} />
                                             </div>
                                              <div>
-                                                <h4 className="font-semibold mb-1 text-sm">Response Body</h4>
+                                                <h4 className="font-semibold mb-1 text-sm">{t('detailView.logs.responseBody')}</h4>
                                                 <JsonViewer jsonString={log.response.body} />
                                             </div>
                                         </div>
                                      </details>
                                  </div>
-                            )) : <p>No API calls have been logged yet.</p>}
+                            )) : <p>{t('detailView.logs.noLogs')}</p>}
                         </div>
                      </div>
-                )}
+                </div>
             </div>
         </div>
     );

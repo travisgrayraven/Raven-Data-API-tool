@@ -1,10 +1,8 @@
 
-
-
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import type { Geofence, GeofenceFormData } from '../types';
+import { useTranslation } from '../i18n/i18n';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 declare const L: any;
 
@@ -18,6 +16,7 @@ interface GeofenceEditorProps {
 }
 
 export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, isOpen, onSave, onClose, onDelete }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<GeofenceFormData>({ name: '', description: '', end: '', notification: 'ENTER,EXIT' });
   const [radius, setRadius] = useState<string>('');
   const [editedLayer, setEditedLayer] = useState<any | null>(null);
@@ -29,6 +28,8 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
   const mapRef = useRef<any>(null);
   const drawnItemsRef = useRef<any>(null);
   const drawControlRef = useRef<any>(null);
+  const modalRef = useFocusTrap<HTMLDivElement>(isOpen);
+
 
   const geofenceToLayer = (g: Geofence): any | null => {
     if (g.shape_type === 'POLYGON' && g.shape_data.coordinates) {
@@ -223,11 +224,11 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
 
   const handleSave = async () => {
     if (!editedLayer && mode === 'create') {
-        setError('A shape must be drawn on the map.');
+        setError(t('geofenceEditor.errorShapeRequired'));
         return;
     }
     if (!formData.name.trim()) {
-        setError('Geofence name is required.');
+        setError(t('geofenceEditor.errorNameRequired'));
         return;
     }
 
@@ -241,7 +242,7 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
     try {
       await onSave(formData, layerToSave);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setIsSaving(false);
     }
@@ -250,9 +251,7 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
   const handleDelete = async () => {
     if (!geofence) return;
     
-    const isConfirmed = window.confirm(
-        `Are you sure you want to delete the geofence "${geofence.name}"? This action cannot be undone.`
-    );
+    const isConfirmed = window.confirm(t('geofenceEditor.deleteConfirm', { name: geofence.name }));
 
     if (isConfirmed) {
         setIsDeleting(true);
@@ -260,7 +259,7 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
         try {
             await onDelete(geofence.uuid);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to delete geofence.');
+            setError(err instanceof Error ? err.message : t('errors.unknown'));
             setIsDeleting(false);
         }
     }
@@ -272,39 +271,40 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4" onClick={triggerClose}>
       <div 
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col"
+        ref={modalRef}
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col focus:outline-none"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="geofence-editor-title"
       >
         <header className="flex justify-between items-center p-4 border-b border-soft-grey dark:border-gray-700 flex-shrink-0">
-            <h2 id="geofence-editor-title" className="text-xl font-bold">{mode === 'create' ? 'Create Geofence' : 'Edit Geofence'}</h2>
-            <button onClick={triggerClose} className="p-1 text-2xl" aria-label="Close editor">&times;</button>
+            <h2 id="geofence-editor-title" className="text-xl font-bold">{mode === 'create' ? t('geofenceEditor.createTitle') : t('geofenceEditor.editTitle')}</h2>
+            <button onClick={triggerClose} className="p-1 text-2xl" aria-label={t('geofenceEditor.closeAriaLabel')}>&times;</button>
         </header>
 
         <div className="flex flex-col md:flex-row flex-grow min-h-0">
             <main className="w-full md:w-2/3 h-64 md:h-auto order-2 md:order-1">
-                 <div ref={mapContainerRef} className="h-full w-full" />
+                 <div ref={mapContainerRef} className="h-full w-full" role="application" aria-label={t('geofenceEditor.mapLabel')} />
             </main>
 
             <aside className="w-full md:w-1/3 p-4 space-y-4 overflow-y-auto order-1 md:order-2 border-b md:border-b-0 md:border-l border-soft-grey dark:border-gray-700">
                 {!editedLayer && mode === 'create' && (
                     <div className="text-center p-4 bg-raven-blue/10 dark:bg-raven-blue/20 rounded-lg">
-                        <p className="text-sm text-raven-blue dark:text-sky-blue">Use the tools on the map to draw a shape for your geofence.</p>
+                        <p className="text-sm text-raven-blue dark:text-sky-blue">{t('geofenceEditor.drawPrompt')}</p>
                     </div>
                 )}
                 <div>
-                    <label htmlFor="name" className="block text-sm font-medium">Name</label>
+                    <label htmlFor="name" className="block text-sm font-medium">{t('geofenceEditor.nameLabel')}</label>
                     <input type="text" name="name" id="name" value={formData.name} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue"/>
                 </div>
                 <div>
-                    <label htmlFor="description" className="block text-sm font-medium">Description</label>
+                    <label htmlFor="description" className="block text-sm font-medium">{t('geofenceEditor.descriptionLabel')}</label>
                     <textarea name="description" id="description" value={formData.description} onChange={handleInputChange} rows={3} className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue" />
                 </div>
                  {editedLayer && (editedLayer instanceof L.Circle) && (
                     <div>
-                        <label htmlFor="radius" className="block text-sm font-medium">Radius (meters)</label>
+                        <label htmlFor="radius" className="block text-sm font-medium">{t('geofenceEditor.radiusLabel')}</label>
                         <input
                           type="number"
                           name="radius"
@@ -317,25 +317,25 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
                     </div>
                 )}
                 <div>
-                    <label htmlFor="notification" className="block text-sm font-medium">Notifications</label>
+                    <label htmlFor="notification" className="block text-sm font-medium">{t('geofenceEditor.notificationsLabel')}</label>
                     <select name="notification" id="notification" value={formData.notification} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
-                        <option value="">None</option>
-                        <option value="ENTER">On Enter</option>
-                        <option value="EXIT">On Exit</option>
-                        <option value="ENTER,EXIT">On Enter & Exit</option>
+                        <option value="">{t('geofenceEditor.notifyNone')}</option>
+                        <option value="ENTER">{t('geofenceEditor.notifyOnEnter')}</option>
+                        <option value="EXIT">{t('geofenceEditor.notifyOnExit')}</option>
+                        <option value="ENTER,EXIT">{t('geofenceEditor.notifyOnEnterExit')}</option>
                     </select>
                 </div>
                 <div>
-                    <label htmlFor="end" className="block text-sm font-medium">Expiration Date</label>
+                    <label htmlFor="end" className="block text-sm font-medium">{t('geofenceEditor.expirationLabel')}</label>
                     <div className="flex items-center">
                         <input type="date" name="end" id="end" value={formData.end} onChange={handleInputChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-raven-blue focus:border-raven-blue dark:[color-scheme:dark]" />
                         {formData.end && (
-                            <button onClick={() => setFormData(prev => ({...prev, end: ''}))} className="ml-2 p-1 text-gray-400 hover:text-gray-600" title="Clear date">
+                            <button onClick={() => setFormData(prev => ({...prev, end: ''}))} className="ml-2 p-1 text-gray-400 hover:text-gray-600" aria-label={t('geofenceEditor.clearDate')}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         )}
                     </div>
-                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Leave blank for no expiration.</p>
+                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('geofenceEditor.expirationHelp')}</p>
                 </div>
                 {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
             </aside>
@@ -349,14 +349,14 @@ export const GeofenceEditor: React.FC<GeofenceEditorProps> = ({ mode, geofence, 
                         disabled={isLoading} 
                         className="py-2 px-4 border border-alert-red rounded-md shadow-sm text-sm font-medium text-alert-red hover:bg-alert-red/10 disabled:opacity-50"
                     >
-                        {isDeleting ? 'Deleting...' : 'Delete'}
+                        {isDeleting ? t('common.deleting') : t('common.delete')}
                     </button>
                 )}
             </div>
             <div className="flex gap-3">
-                <button onClick={triggerClose} disabled={isLoading} className="py-2 px-4 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm text-sm font-medium">Cancel</button>
+                <button onClick={triggerClose} disabled={isLoading} className="py-2 px-4 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm text-sm font-medium">{t('common.cancel')}</button>
                 <button onClick={handleSave} disabled={isLoading} className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 disabled:bg-raven-blue/50">
-                    {isSaving ? 'Saving...' : 'Save Changes'}
+                    {isSaving ? t('common.saving') : t('common.saveChanges')}
                 </button>
             </div>
         </footer>

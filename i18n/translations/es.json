@@ -1,0 +1,374 @@
+
+{
+  "common": {
+    "error": "Error",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "saveChanges": "Guardar cambios",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "deleting": "Eliminando...",
+    "close": "Cerrar",
+    "edit": "Editar",
+    "login": "Iniciar sesión",
+    "loading": "Cargando...",
+    "loadingSettings": "Cargando configuración",
+    "refresh": "Actualizar datos",
+    "refreshing": "Actualizando...",
+    "backToDashboard": "Volver al panel",
+    "details": "Detalles",
+    "empty": "vacío",
+    "upload": "Subir",
+    "reset": "Reiniciar",
+    "seconds": "segundos",
+    "selectAll": "Seleccionar todo",
+    "selectNone": "No seleccionar nada",
+    "copied": "¡Copiado!",
+    "copy": "Copiar",
+    "generating": "Generando...",
+    "sending": "Enviando...",
+    "clearing": "Borrando..."
+  },
+  "app": {
+    "loading": "Autenticando y obteniendo datos..."
+  },
+  "header": {
+    "openSettings": "Abrir configuración de usuario",
+    "theme": "Tema",
+    "language": "Idioma",
+    "shareApp": "Compartir aplicación",
+    "resetCredentials": "Restablecer credenciales"
+  },
+  "credentialsForm": {
+    "title": "Credenciales de la API",
+    "apiUrl": "URL de la API",
+    "apiKey": "Clave de integración",
+    "apiSecret": "Secreto de integración"
+  },
+  "dashboard": {
+    "tabs": {
+      "map": "Mapa",
+      "grid": "Cuadrícula",
+      "geofences": "Geocercas",
+      "label": "Pestañas principales del panel"
+    },
+    "mapView": "Vista de Mapa",
+    "gridView": "Vista de Cuadrícula",
+    "searchPlaceholder": "Buscar por nombre...",
+    "filter": {
+      "label": "Filtrar por hora del último informe",
+      "30d": "Últimos 30 días",
+      "7d": "Últimos 7 días",
+      "48h": "Últimas 48 horas",
+      "24h": "Últimas 24 horas",
+      "12h": "Últimas 12 horas",
+      "1h": "Última hora",
+      "all": "Todo el tiempo"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "name": "Ordenar por Nombre",
+      "time": "Ordenar por Último Informe"
+    },
+    "bulkMessage": "Mensaje masivo",
+    "bulkMessageTitle": "Enviar mensaje a todos los vehículos filtrados",
+    "exportCsv": "CSV",
+    "exportCsvTitle": "Exportar a CSV",
+    "noVehiclesFound": "No se encontraron vehículos",
+    "noVehiclesDescription": "La API devolvió una lista de vehículos vacía.",
+    "noFilteredVehiclesDescription": "Ningún vehículo coincide con los criterios de filtro actuales."
+  },
+  "ravenCard": {
+    "unnamedVehicle": "Vehículo sin nombre",
+    "status": {
+      "unplugged": "Desconectado",
+      "offline": "Sin conexión",
+      "driving": "Conduciendo",
+      "parked": "Estacionado"
+    },
+    "statusTitle": {
+      "unplugged": "El dispositivo está desconectado del vehículo.",
+      "offline": "El vehículo está sin conexión.",
+      "driving": "El vehículo está conduciendo. Último informe: {{time}}.",
+      "parked": "El vehículo está estacionado. Último informe: {{time}}."
+    },
+    "viewDetails": "Ver detalles de {{vehicleName}}",
+    "lastReportTitle": "Último informe: {{time}}",
+    "lastReport": "Último informe: {{time}}",
+    "odometerTitle": "Odómetro: {{value}} km",
+    "fuelTitle": "Nivel de combustible: {{value}}%"
+  },
+  "time": {
+    "justNow": "justo ahora",
+    "minutesAgo": "hace {{count}} min",
+    "hoursAgo": "hace {{count}} h",
+    "daysAgo": "hace {{count}} d",
+    "monthsAgo": "hace {{count}} mes(es)",
+    "yearsAgo": "hace {{count}} año(s)"
+  },
+  "detailView": {
+    "tabs": {
+      "map": "Mapa",
+      "preview": "Vista previa",
+      "events": "Eventos",
+      "settings": "Configuración",
+      "logs": "Registros",
+      "label": "Pestañas de detalles del vehículo"
+    },
+    "map": {
+      "title": "Última ubicación conocida",
+      "label": "Mapa que muestra la última ubicación conocida de {{vehicleName}}",
+      "noLocation": "Datos de ubicación no disponibles para este vehículo.",
+      "street": "Calle",
+      "dark": "Oscuro",
+      "satellite": "Satélite"
+    },
+    "events": {
+      "title": "Eventos recientes",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin",
+      "getEvents": "Obtener eventos",
+      "filterEvents": "Filtrar eventos",
+      "filterEventsCount": "Filtrar ({{selected}}/{{total}})",
+      "exportPdfTitle": "Exportar eventos filtrados como PDF",
+      "prompt": "Seleccione un rango de fechas y haga clic en \"Obtener eventos\" para ver el historial.",
+      "noEvents": "No se encontraron eventos para los criterios seleccionados.",
+      "location": "Ubicación",
+      "speed": "Velocidad",
+      "roadCam": "Cámara de carretera",
+      "cabinCam": "Cámara de cabina",
+      "rawData": "Datos brutos del evento",
+      "reportTitle": "Informe de eventos",
+      "timestamp": "Marca de tiempo"
+    },
+    "settings": {
+      "title": "Configuración del dispositivo",
+      "uploadTitle": "Subir configuración desde un archivo JSON",
+      "downloadTitle": "Descargar configuración actual como archivo JSON",
+      "uploadSuccess": "Configuración cargada con éxito. Revise los cambios y haga clic en \"Guardar cambios\" para aplicarlos al dispositivo.",
+      "noSettings": "No hay datos de configuración disponibles."
+    },
+    "logs": {
+      "title": "Registros de llamadas a la API",
+      "requestBody": "Cuerpo de la solicitud",
+      "responseBody": "Cuerpo de la respuesta",
+      "noLogs": "Aún no se han registrado llamadas a la API."
+    },
+    "livePreview": {
+      "title": "Vista en vivo",
+      "offlineTitle": "Raven está sin conexión",
+      "offlineDescription": "La vista previa y la transmisión en vivo no están disponibles cuando el dispositivo está sin conexión.",
+      "roadCamera": "Cámara de carretera",
+      "cabinCamera": "Cámara de cabina",
+      "stream": "Transmitir"
+    }
+  },
+  "settings": {
+    "audio": {
+      "title": "Audio",
+      "notifications": "Notificaciones de audio habilitadas",
+      "streaming": "Audio en streaming habilitado"
+    },
+    "camera": {
+      "title": "Cámara",
+      "roadCamera": "Cámara de carretera",
+      "cabinCamera": "Cámara de cabina",
+      "audioRecording": "Grabación de audio",
+      "cameraEnabled": "Cámara habilitada",
+      "recordingProfile": "Perfil de grabación de video",
+      "profiles": {
+        "standard": "Estándar",
+        "hd": "HD",
+        "balanced": "Equilibrado",
+        "extended": "Extendido"
+      }
+    },
+    "display": {
+      "title": "Pantalla",
+      "brightness": "Brillo",
+      "distanceUnit": "Unidad de distancia",
+      "units": {
+        "metric": "Métrico",
+        "imperial": "Imperial"
+      },
+      "locale": "Idioma",
+      "timeStyle": "Formato de hora",
+      "timeStyles": {
+        "12": "12 horas",
+        "24": "24 horas"
+      }
+    },
+    "events": {
+      "title": "Eventos",
+      "gForce": {
+        "title": "Fuerza G",
+        "harshBraking": "Frenado brusco",
+        "aggressiveAccel": "Aceleración agresiva",
+        "harshCornering": "Giro brusco"
+      },
+      "standard": {
+        "title": "Estándar (Velocidad/Ralentí)",
+        "idling": "Ralentí",
+        "speeding": "Exceso de velocidad",
+        "speedingThreshold": "Umbral de exceso de velocidad",
+        "speedingThresholdType": "Tipo de umbral de exceso de velocidad",
+        "types": {
+          "percent": "Porcentaje",
+          "constant": "Constante"
+        }
+      },
+      "dms": {
+        "title": "Monitoreo del conductor (DMS)",
+        "cellphone": "Teléfono móvil",
+        "cameraObscured": "Cámara obstruida",
+        "distraction": "Distracción",
+        "drinking": "Bebiendo",
+        "eating": "Comiendo",
+        "smoking": "Fumando",
+        "fatigue": "Fatiga/Cansancio"
+      },
+      "adas": {
+        "title": "Asistencia (ADAS)",
+        "tailgating": "Seguir de cerca",
+        "tailgatingThreshold": "Umbral de velocidad para seguir de cerca"
+      }
+    },
+    "obd": {
+      "title": "OBD",
+      "canbus": "CANbus habilitado",
+      "lowBatteryCutoff": "Corte por batería baja"
+    },
+    "system": {
+      "title": "Sistema",
+      "gesture": "Gesto habilitado",
+      "videoAfterParked": "Grab. de video después de estacionar"
+    }
+  },
+  "driverMessage": {
+    "title": "Mensaje en pantalla del conductor",
+    "messageLabel": "Mensaje",
+    "placeholder": "Introduzca un mensaje para mostrar...",
+    "durationLabel": "Duración",
+    "minutes": "{{count}} minutos",
+    "clear": "Borrar mensaje",
+    "send": "Enviar mensaje",
+    "success": {
+      "sent": "¡Mensaje enviado con éxito!",
+      "cleared": "¡Mensaje borrado con éxito!"
+    }
+  },
+  "tripShare": {
+    "title": "Compartir viaje",
+    "description": "Genere un enlace temporal para compartir el próximo viaje del Raven. El enlace se activará cuando comience el viaje y caducará cuando termine.",
+    "showQr": "Mostrar código QR",
+    "generateNew": "Generar nuevo enlace",
+    "generate": "Generar enlace para compartir"
+  },
+  "qrModal": {
+    "close": "Cerrar modal de código QR",
+    "title": "Compartir aplicación"
+  },
+  "errors": {
+    "unknown": "Ocurrió un error desconocido.",
+    "noCredentialsForRefresh": "No hay credenciales disponibles para actualizar el token.",
+    "fetchEvents": "Error al obtener los eventos",
+    "loadMedia": "Error al cargar el medio",
+    "imageLoadFailed": "Error al cargar la imagen",
+    "generatePdf": "Error al generar el PDF. Consulte la consola para obtener más detalles.",
+    "loadSettings": "Error al cargar la configuración",
+    "saveSettings": "Error al guardar la configuración",
+    "parseSettings": "Error al analizar el archivo de configuración. Asegúrese de que sea un archivo JSON válido.",
+    "readSettings": "Error al leer el archivo de configuración.",
+    "settingsConfigError": "No se pudo cargar la configuración del dispositivo debido a un error de configuración del servidor.",
+    "settingsFixPrompt": "Este error impide que se carguen otras configuraciones. Puede intentar solucionarlo restableciendo el diseño de la pantalla del dispositivo a un valor predeterminado seguro. Esto no afectará a otras configuraciones.",
+    "settingsFixButton": "Restablecer configuración de pantalla y recargar",
+    "settingsFixingButton": "Restableciendo...",
+    "settingsFixFailed": "No se pudo aplicar la corrección. Póngase en contacto con el soporte si el problema persiste."
+  },
+  "fullScreenImageViewer": {
+    "close": "Cerrar visor de imágenes a pantalla completa",
+    "previous": "Imagen anterior",
+    "next": "Imagen siguiente",
+    "counter": "{{currentIndex}} / {{totalImages}}"
+  },
+  "dashboardMap": {
+    "street": "Calle",
+    "dark": "Oscuro",
+    "satellite": "Satélite",
+    "label": "Mapa que muestra la última ubicación conocida de todos los vehículos."
+  },
+  "geofenceMap": {
+    "statusActive": "Activo",
+    "statusExpired": "Expirado",
+    "descActiveNoExpiry": "Esta geocerca está activa y no caduca.",
+    "descExpiresOn": "Caduca el {{date}}",
+    "descExpiredOn": "Expiró el {{date}}",
+    "notifyOnEnter": "Al entrar",
+    "notifyOnExit": "Al salir",
+    "notifyOnEnterExit": "Al entrar y salir",
+    "notifyNone": "Ninguna",
+    "noGeofencesTitle": "No se encontraron geocercas",
+    "noGeofencesDesc": "No hay geocercas asociadas a esta cuenta. Utilice los botones de arriba para crear una o subir un archivo CSV.",
+    "created": "Creado",
+    "noDescription": "(Sin descripción)",
+    "label": "Mapa que muestra todas las geocercas."
+  },
+  "geofenceEditor": {
+    "createTitle": "Crear geocerca",
+    "editTitle": "Editar geocerca",
+    "closeAriaLabel": "Cerrar editor",
+    "drawPrompt": "Utilice las herramientas del mapa para dibujar una forma para su geocerca.",
+    "nameLabel": "Nombre",
+    "descriptionLabel": "Descripción",
+    "radiusLabel": "Radio (metros)",
+    "notificationsLabel": "Notificaciones",
+    "notifyNone": "Ninguna",
+    "notifyOnEnter": "Al entrar",
+    "notifyOnExit": "Al salir",
+    "notifyOnEnterExit": "Al entrar y salir",
+    "expirationLabel": "Fecha de caducidad",
+    "expirationHelp": "Dejar en blanco para que no caduque.",
+    "clearDate": "Borrar fecha",
+    "errorShapeRequired": "Se debe dibujar una forma en el mapa.",
+    "errorNameRequired": "El nombre de la geocerca es obligatorio.",
+    "deleteConfirm": "¿Está seguro de que desea eliminar la geocerca \"{{name}}\"? Esta acción no se puede deshacer.",
+    "mapLabel": "Mapa interactivo para dibujar formas de geocercas."
+  },
+  "geofenceUpload": {
+    "modalTitle": "Confirmar subida de geocercas",
+    "summary": "Se encontraron <valid>{{validCount}} geocercas válidas</valid> y <invalid>{{invalidCount}} filas no válidas</invalid>.",
+    "validTab": "Filas válidas ({{count}})",
+    "errorsTab": "Errores ({{count}})",
+    "headerRow": "Fila",
+    "headerName": "Nombre",
+    "headerDescription": "Descripción",
+    "headerNotification": "Notificación",
+    "headerError": "Error",
+    "headerOriginalData": "Datos originales",
+    "uploading": "Subiendo...",
+    "uploadButton": "Subir {{count}} geocercas"
+  },
+  "bulkGeofence": {
+    "templateTitle": "Descargar una plantilla de archivo CSV",
+    "template": "Plantilla",
+    "downloadAllTitle": "Descargar todas las geocercas como un archivo CSV",
+    "downloadAll": "Descargar todo",
+    "uploadCsvTitle": "Subir geocercas desde un archivo CSV",
+    "uploadCsv": "Subir CSV",
+    "create": "Crear geocerca",
+    "uploadErrorAlert": "Ocurrió un error durante la carga masiva. Es posible que algunas geocercas no se hayan creado. Por favor, revise la lista e inténtelo de nuevo."
+  },
+  "bulkMessage": {
+    "modalTitle": "Mensaje masivo para conductores",
+    "summary": "Este mensaje se enviará a todos los <strong>{{count}}</strong> vehículos filtrados actualmente.",
+    "sendingTitle": "Enviando mensajes...",
+    "completeTitle": "Envío completado",
+    "successMessage": "Enviado con éxito a {{count}} vehículo(s).",
+    "errorMessage": "Error al enviar a {{count}} vehículo(s).",
+    "messageLabel": "Mensaje",
+    "placeholder": "Introduzca el mensaje...",
+    "durationLabel": "Duración",
+    "minutes": "{{count}} minutos",
+    "submit": "Enviar mensaje"
+  }
+}

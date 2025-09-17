@@ -1,24 +1,33 @@
+
 import React, { useState } from 'react';
 import type { RavenSettings } from '../types';
+import { useTranslation } from '../i18n/i18n';
 
 // Reusable Accordion Component
 const Accordion: React.FC<{ title: string; children: React.ReactNode, startOpen?: boolean }> = ({ title, children, startOpen = false }) => {
     const [isOpen, setIsOpen] = useState(startOpen);
+    const contentId = `accordion-content-${title.replace(/\s+/g, '-').toLowerCase()}`;
+    
     return (
         <div className="border border-soft-grey dark:border-gray-700 rounded-md mb-2">
-            <button
-                className="w-full flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 text-left font-semibold"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                {title}
-                <svg
-                    className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+            <h3 className="m-0 text-base font-semibold">
+                <button
+                    className="w-full flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 text-left"
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-expanded={isOpen}
+                    aria-controls={contentId}
                 >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </button>
-            {isOpen && <div className="p-4 border-t border-soft-grey dark:border-gray-700">{children}</div>}
+                    {title}
+                    <svg
+                        className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+            </h3>
+            {isOpen && <div id={contentId} role="region" className="p-4 border-t border-soft-grey dark:border-gray-700">{children}</div>}
         </div>
     );
 };
@@ -97,6 +106,7 @@ interface SettingsFormProps {
 }
 
 export const SettingsForm: React.FC<SettingsFormProps> = ({ settings, onSettingChange }) => {
+    const { t } = useTranslation();
     // Helper to get nested values safely
     const getValue = (path: string, defaultValue: any = false) => {
         const keys = path.split('.');
@@ -113,76 +123,76 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ settings, onSettingC
 
     return (
         <div>
-            <Accordion title="Audio">
-                <SettingsCheckbox label="Audio Notifications Enabled" path="audio.audio_notifications_enabled" value={getValue('audio.audio_notifications_enabled')} onChange={onSettingChange} />
-                <SettingsCheckbox label="Streaming Audio Enabled" path="audio.streaming_audio_enabled" value={getValue('audio.streaming_audio_enabled')} onChange={onSettingChange} />
+            <Accordion title={t('settings.audio.title')}>
+                <SettingsCheckbox label={t('settings.audio.notifications')} path="audio.audio_notifications_enabled" value={getValue('audio.audio_notifications_enabled')} onChange={onSettingChange} />
+                <SettingsCheckbox label={t('settings.audio.streaming')} path="audio.streaming_audio_enabled" value={getValue('audio.streaming_audio_enabled')} onChange={onSettingChange} />
             </Accordion>
 
-            <Accordion title="Camera">
-                <h4 className="font-semibold text-md mb-2">Road Camera</h4>
-                <SettingsCheckbox label="Audio Recording" path="camera.road_camera.audio_recording" value={getValue('camera.road_camera.audio_recording')} onChange={onSettingChange} />
-                <SettingsCheckbox label="Camera Enabled" path="camera.road_camera.camera_enabled" value={getValue('camera.road_camera.camera_enabled')} onChange={onSettingChange} />
+            <Accordion title={t('settings.camera.title')}>
+                <h4 className="font-semibold text-md mb-2">{t('settings.camera.roadCamera')}</h4>
+                <SettingsCheckbox label={t('settings.camera.audioRecording')} path="camera.road_camera.audio_recording" value={getValue('camera.road_camera.audio_recording')} onChange={onSettingChange} />
+                <SettingsCheckbox label={t('settings.camera.cameraEnabled')} path="camera.road_camera.camera_enabled" value={getValue('camera.road_camera.camera_enabled')} onChange={onSettingChange} />
                 <hr className="my-4 dark:border-gray-700"/>
-                <h4 className="font-semibold text-md mb-2">Cabin Camera</h4>
-                <SettingsCheckbox label="Audio Recording" path="camera.cabin_camera.audio_recording" value={getValue('camera.cabin_camera.audio_recording')} onChange={onSettingChange} />
-                <SettingsCheckbox label="Camera Enabled" path="camera.cabin_camera.camera_enabled" value={getValue('camera.cabin_camera.camera_enabled')} onChange={onSettingChange} />
+                <h4 className="font-semibold text-md mb-2">{t('settings.camera.cabinCamera')}</h4>
+                <SettingsCheckbox label={t('settings.camera.audioRecording')} path="camera.cabin_camera.audio_recording" value={getValue('camera.cabin_camera.audio_recording')} onChange={onSettingChange} />
+                <SettingsCheckbox label={t('settings.camera.cameraEnabled')} path="camera.cabin_camera.camera_enabled" value={getValue('camera.cabin_camera.camera_enabled')} onChange={onSettingChange} />
                 <hr className="my-4 dark:border-gray-700"/>
                 <SettingsDropdown 
-                    label="Video Recording Profile" 
+                    label={t('settings.camera.recordingProfile')}
                     path="camera.video_recording_profile" 
                     value={getValue('camera.video_recording_profile', 'standard')} 
                     onChange={onSettingChange} 
                     options={[
-                        { value: 'standard', label: 'Standard' },
-                        { value: 'high', label: 'HD' },
-                        { value: 'balanced', label: 'Balanced' },
-                        { value: 'extended', label: 'Extended' },
+                        { value: 'standard', label: t('settings.camera.profiles.standard') },
+                        { value: 'high', label: t('settings.camera.profiles.hd') },
+                        { value: 'balanced', label: t('settings.camera.profiles.balanced') },
+                        { value: 'extended', label: t('settings.camera.profiles.extended') },
                     ]} 
                 />
             </Accordion>
             
-            <Accordion title="Display">
-                <SettingsSlider label="Brightness" path="display.brightness" value={getValue('display.brightness', 50)} min={0} max={100} onChange={onSettingChange} />
-                <SettingsDropdown label="Distance Unit" path="display.distance_unit" value={getValue('display.distance_unit', 'METRIC')} onChange={onSettingChange} options={[{value: 'METRIC', label: 'Metric'}, {value: 'IMPERIAL', label: 'Imperial'}]} />
-                <SettingsDropdown label="Locale" path="display.system_locale" value={getValue('display.system_locale', 'en-US')} onChange={onSettingChange} options={[{value: 'en-US', label: 'en-US'}, {value: 'en-CA', label: 'en-CA'}, {value: 'fr-CA', label: 'fr-CA'}, {value: 'es-MX', label: 'es-MX'}]} />
-                <SettingsDropdown label="Time Style" path="display.time_style" value={getValue('display.time_style', '12')} onChange={onSettingChange} options={[{value: '12', label: '12-Hour'}, {value: '24', label: '24-Hour'}]} />
+            <Accordion title={t('settings.display.title')}>
+                <SettingsSlider label={t('settings.display.brightness')} path="display.brightness" value={getValue('display.brightness', 50)} min={0} max={100} onChange={onSettingChange} />
+                <SettingsDropdown label={t('settings.display.distanceUnit')} path="display.distance_unit" value={getValue('display.distance_unit', 'METRIC')} onChange={onSettingChange} options={[{value: 'METRIC', label: t('settings.display.units.metric')}, {value: 'IMPERIAL', label: t('settings.display.units.imperial')}]} />
+                <SettingsDropdown label={t('settings.display.locale')} path="display.system_locale" value={getValue('display.system_locale', 'en-US')} onChange={onSettingChange} options={[{value: 'en-US', label: 'en-US'}, {value: 'en-CA', label: 'en-CA'}, {value: 'fr-CA', label: 'fr-CA'}, {value: 'es-MX', label: 'es-MX'}]} />
+                <SettingsDropdown label={t('settings.display.timeStyle')} path="display.time_style" value={getValue('display.time_style', '12')} onChange={onSettingChange} options={[{value: '12', label: t('settings.display.timeStyles.12')}, {value: '24', label: t('settings.display.timeStyles.24')}]} />
             </Accordion>
 
-            <Accordion title="Events" startOpen>
-                <Accordion title="G-Force">
-                    <SettingsCheckbox label="Harsh Braking" path="events.harsh_braking_event_enabled" value={getValue('events.harsh_braking_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Aggressive Acceleration" path="events.aggressive_accel_event_enabled" value={getValue('events.aggressive_accel_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Harsh Cornering" path="events.harsh_cornering_event_enabled" value={getValue('events.harsh_cornering_event_enabled')} onChange={onSettingChange} />
+            <Accordion title={t('settings.events.title')} startOpen>
+                <Accordion title={t('settings.events.gForce.title')}>
+                    <SettingsCheckbox label={t('settings.events.gForce.harshBraking')} path="events.harsh_braking_event_enabled" value={getValue('events.harsh_braking_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.gForce.aggressiveAccel')} path="events.aggressive_accel_event_enabled" value={getValue('events.aggressive_accel_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.gForce.harshCornering')} path="events.harsh_cornering_event_enabled" value={getValue('events.harsh_cornering_event_enabled')} onChange={onSettingChange} />
                 </Accordion>
-                <Accordion title="Standard (Speeding/Idling)">
-                    <SettingsCheckbox label="Idling" path="events.idling_event_enabled" value={getValue('events.idling_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Speeding" path="events.speeding_event_enabled" value={getValue('events.speeding_event_enabled')} onChange={onSettingChange} />
-                    <SettingsNumberInput label="Speeding Threshold" path="events.speeding_event_threshold" value={getValue('events.speeding_event_threshold', 0)} onChange={onSettingChange} />
-                    <SettingsDropdown label="Speeding Threshold Type" path="events.speeding_event_threshold_type" value={getValue('events.speeding_event_threshold_type', 'PERCENT')} onChange={onSettingChange} options={[{value: 'PERCENT', label: 'Percent'}, {value: 'CONSTANT', label: 'Constant'}]} />
+                <Accordion title={t('settings.events.standard.title')}>
+                    <SettingsCheckbox label={t('settings.events.standard.idling')} path="events.idling_event_enabled" value={getValue('events.idling_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.standard.speeding')} path="events.speeding_event_enabled" value={getValue('events.speeding_event_enabled')} onChange={onSettingChange} />
+                    <SettingsNumberInput label={t('settings.events.standard.speedingThreshold')} path="events.speeding_event_threshold" value={getValue('events.speeding_event_threshold', 0)} onChange={onSettingChange} />
+                    <SettingsDropdown label={t('settings.events.standard.speedingThresholdType')} path="events.speeding_event_threshold_type" value={getValue('events.speeding_event_threshold_type', 'PERCENT')} onChange={onSettingChange} options={[{value: 'PERCENT', label: t('settings.events.standard.types.percent')}, {value: 'CONSTANT', label: t('settings.events.standard.types.constant')}]} />
                 </Accordion>
-                 <Accordion title="Driver Monitoring (DMS)">
-                    <SettingsCheckbox label="Cellphone" path="events.cellphone_detection_event_enabled" value={getValue('events.cellphone_detection_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Camera Obscured" path="events.camera_obscured_event_enabled" value={getValue('events.camera_obscured_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Distraction" path="events.distracted_detection_event_enabled" value={getValue('events.distracted_detection_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Drinking" path="events.drinking_detection_event_enabled" value={getValue('events.drinking_detection_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Eating" path="events.eating_detection_event_enabled" value={getValue('events.eating_detection_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Smoking" path="events.smoking_detection_event_enabled" value={getValue('events.smoking_detection_event_enabled')} onChange={onSettingChange} />
-                    <SettingsCheckbox label="Fatigue/Tired" path="events.tired_detection_event_enabled" value={getValue('events.tired_detection_event_enabled')} onChange={onSettingChange} />
+                 <Accordion title={t('settings.events.dms.title')}>
+                    <SettingsCheckbox label={t('settings.events.dms.cellphone')} path="events.cellphone_detection_event_enabled" value={getValue('events.cellphone_detection_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.dms.cameraObscured')} path="events.camera_obscured_event_enabled" value={getValue('events.camera_obscured_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.dms.distraction')} path="events.distracted_detection_event_enabled" value={getValue('events.distracted_detection_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.dms.drinking')} path="events.drinking_detection_event_enabled" value={getValue('events.drinking_detection_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.dms.eating')} path="events.eating_detection_event_enabled" value={getValue('events.eating_detection_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.dms.smoking')} path="events.smoking_detection_event_enabled" value={getValue('events.smoking_detection_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.dms.fatigue')} path="events.tired_detection_event_enabled" value={getValue('events.tired_detection_event_enabled')} onChange={onSettingChange} />
                 </Accordion>
-                 <Accordion title="Assistance (ADAS)">
-                    <SettingsCheckbox label="Tailgating" path="events.tailgating_detection_event_enabled" value={getValue('events.tailgating_detection_event_enabled')} onChange={onSettingChange} />
-                    <SettingsNumberInput label="Tailgating Speed Threshold" helpText="km/h" path="events.tailgating_detection_speed_threshold" value={getValue('events.tailgating_detection_speed_threshold', 0)} onChange={onSettingChange} />
+                 <Accordion title={t('settings.events.adas.title')}>
+                    <SettingsCheckbox label={t('settings.events.adas.tailgating')} path="events.tailgating_detection_event_enabled" value={getValue('events.tailgating_detection_event_enabled')} onChange={onSettingChange} />
+                    <SettingsNumberInput label={t('settings.events.adas.tailgatingThreshold')} helpText="km/h" path="events.tailgating_detection_speed_threshold" value={getValue('events.tailgating_detection_speed_threshold', 0)} onChange={onSettingChange} />
                 </Accordion>
             </Accordion>
             
-            <Accordion title="OBD">
-                <SettingsCheckbox label="CANbus Enabled" path="obd.canbus_enabled" value={getValue('obd.canbus_enabled')} onChange={onSettingChange} />
-                <SettingsNumberInput label="Low Battery Cutoff" helpText="mV" path="obd.low_battery_cutoff_millivolts" value={getValue('obd.low_battery_cutoff_millivolts', 12000)} onChange={onSettingChange} />
+            <Accordion title={t('settings.obd.title')}>
+                <SettingsCheckbox label={t('settings.obd.canbus')} path="obd.canbus_enabled" value={getValue('obd.canbus_enabled')} onChange={onSettingChange} />
+                <SettingsNumberInput label={t('settings.obd.lowBatteryCutoff')} helpText="mV" path="obd.low_battery_cutoff_millivolts" value={getValue('obd.low_battery_cutoff_millivolts', 12000)} onChange={onSettingChange} />
             </Accordion>
 
-            <Accordion title="System">
-                <SettingsCheckbox label="Gesture Enabled" path="system.gesture_enabled" value={getValue('system.gesture_enabled')} onChange={onSettingChange} />
-                <SettingsNumberInput label="Video Rec After Parked" helpText="seconds" path="system.video_recording_after_parked_duration" value={getValue('system.video_recording_after_parked_duration', 30)} onChange={onSettingChange} />
+            <Accordion title={t('settings.system.title')}>
+                <SettingsCheckbox label={t('settings.system.gesture')} path="system.gesture_enabled" value={getValue('system.gesture_enabled')} onChange={onSettingChange} />
+                <SettingsNumberInput label={t('settings.system.videoAfterParked')} helpText={t('common.seconds')} path="system.video_recording_after_parked_duration" value={getValue('system.video_recording_after_parked_duration', 30)} onChange={onSettingChange} />
             </Accordion>
 
         </div>

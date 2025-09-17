@@ -1,5 +1,7 @@
+
 import React, { useEffect, useRef } from 'react';
 import type { RavenDetails } from '../types';
+import { useTranslation } from '../i18n/i18n';
 
 declare const L: any; // Declare Leaflet to TypeScript
 
@@ -10,6 +12,7 @@ interface DashboardMapProps {
 export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!mapContainer.current) return;
@@ -31,9 +34,9 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
             });
 
             const baseMaps = {
-                "Street": street,
-                "Dark": dark,
-                "Satellite": satellite
+                [t('dashboardMap.street')]: street,
+                [t('dashboardMap.dark')]: dark,
+                [t('dashboardMap.satellite')]: satellite
             };
             
             street.addTo(mapRef.current); // Add default layer
@@ -79,7 +82,7 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
         
         return () => clearTimeout(timer);
         
-    }, [ravens]);
+    }, [ravens, t]);
 
-    return <div ref={mapContainer} className="h-64 md:h-96 w-full rounded-lg shadow-md z-0" />;
+    return <div ref={mapContainer} className="h-64 md:h-96 w-full rounded-lg shadow-md z-0" role="application" aria-label={t('dashboardMap.label')} />;
 };

@@ -1,5 +1,7 @@
+
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import type { RavenDetails, ApiContextType } from '../types';
+import { useTranslation } from '../i18n/i18n';
 
 interface GridPreviewProps {
   ravens: RavenDetails[];
@@ -11,6 +13,14 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
     const [sessionToken, setSessionToken] = useState(api.token);
     const viewerRefs = useRef<Map<string, HTMLElement>>(new Map());
     const isRefreshingToken = useRef(false);
+    const { t } = useTranslation();
+
+    // FIX: Synchronize the internal session token state with the token from props.
+    // This ensures that if the token is refreshed elsewhere in the app, the viewers
+    // receive the updated token.
+    useEffect(() => {
+        setSessionToken(api.token);
+    }, [api.token]);
 
     const apiDomain = useMemo(() => {
         try {
@@ -76,7 +86,7 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                             activeCamera === 'road' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
                         }`}
                     >
-                        Road
+                        {t('detailView.livePreview.roadCamera')}
                     </button>
                     <button
                         type="button"
@@ -85,7 +95,7 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                             activeCamera === 'cabin' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
                         }`}
                     >
-                        Cabin
+                        {t('detailView.livePreview.cabinCamera')}
                     </button>
                 </div>
             </div>
@@ -115,7 +125,7 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M11.106 12.212a3 3 0 0 1 4.242 0M13.924 9.388a1.5 1.5 0 0 1 2.122 0M3 3l18 18" />
                                         </svg>
-                                        <p className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300">Device Offline</p>
+                                        <p className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300">{t('ravenCard.status.offline')}</p>
                                     </div>
                                 )}
                             </div>
@@ -124,8 +134,8 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                 </div>
             ) : (
                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-                    <h2 className="text-xl font-semibold mb-2">No Vehicles Found</h2>
-                    <p className="text-gray-600 dark:text-gray-400">No vehicles match the current filter criteria.</p>
+                    <h2 className="text-xl font-semibold mb-2">{t('dashboard.noVehiclesFound')}</h2>
+                    <p className="text-gray-600 dark:text-gray-400">{t('dashboard.noFilteredVehiclesDescription')}</p>
                 </div>
             )}
         </div>

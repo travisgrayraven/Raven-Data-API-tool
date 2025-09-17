@@ -1,0 +1,374 @@
+
+{
+  "common": {
+    "error": "Erreur",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "saveChanges": "Enregistrer les modifications",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "deleting": "Suppression...",
+    "close": "Fermer",
+    "edit": "Modifier",
+    "login": "Connexion",
+    "loading": "Chargement...",
+    "loadingSettings": "Chargement des paramètres",
+    "refresh": "Actualiser les données",
+    "refreshing": "Actualisation...",
+    "backToDashboard": "Retour au tableau de bord",
+    "details": "Détails",
+    "empty": "vide",
+    "upload": "Télécharger",
+    "reset": "Réinitialiser",
+    "seconds": "secondes",
+    "selectAll": "Tout sélectionner",
+    "selectNone": "Ne rien sélectionner",
+    "copied": "Copié !",
+    "copy": "Copier",
+    "generating": "Génération...",
+    "sending": "Envoi...",
+    "clearing": "Effacement..."
+  },
+  "app": {
+    "loading": "Authentification et récupération des données..."
+  },
+  "header": {
+    "openSettings": "Ouvrir les paramètres utilisateur",
+    "theme": "Thème",
+    "language": "Langue",
+    "shareApp": "Partager l'application",
+    "resetCredentials": "Réinitialiser les identifiants"
+  },
+  "credentialsForm": {
+    "title": "Identifiants API",
+    "apiUrl": "URL de l'API",
+    "apiKey": "Clé d'intégration",
+    "apiSecret": "Secret d'intégration"
+  },
+  "dashboard": {
+    "tabs": {
+      "map": "Carte",
+      "grid": "Grille",
+      "geofences": "Géorepérages",
+      "label": "Onglets principaux du tableau de bord"
+    },
+    "mapView": "Vue Carte",
+    "gridView": "Vue Grille",
+    "searchPlaceholder": "Rechercher par nom...",
+    "filter": {
+      "label": "Filtrer par heure du dernier rapport",
+      "30d": "30 derniers jours",
+      "7d": "7 derniers jours",
+      "48h": "48 dernières heures",
+      "24h": "24 dernières heures",
+      "12h": "12 dernières heures",
+      "1h": "Dernière heure",
+      "all": "Toute la période"
+    },
+    "sort": {
+      "label": "Trier par",
+      "name": "Trier par Nom",
+      "time": "Trier par Dernier Rapport"
+    },
+    "bulkMessage": "Message groupé",
+    "bulkMessageTitle": "Envoyer un message à tous les véhicules filtrés",
+    "exportCsv": "CSV",
+    "exportCsvTitle": "Exporter en CSV",
+    "noVehiclesFound": "Aucun véhicule trouvé",
+    "noVehiclesDescription": "L'API a retourné une liste de véhicules vide.",
+    "noFilteredVehiclesDescription": "Aucun véhicule ne correspond aux critères de filtre actuels."
+  },
+  "ravenCard": {
+    "unnamedVehicle": "Véhicule sans nom",
+    "status": {
+      "unplugged": "Débranché",
+      "offline": "Hors ligne",
+      "driving": "En conduite",
+      "parked": "Garé"
+    },
+    "statusTitle": {
+      "unplugged": "L'appareil est débranché du véhicule.",
+      "offline": "Le véhicule est hors ligne.",
+      "driving": "Le véhicule est en conduite. Dernier rapport : {{time}}.",
+      "parked": "Le véhicule est garé. Dernier rapport : {{time}}."
+    },
+    "viewDetails": "Voir les détails pour {{vehicleName}}",
+    "lastReportTitle": "Dernier rapport : {{time}}",
+    "lastReport": "Dernier rapport : {{time}}",
+    "odometerTitle": "Odomètre : {{value}} km",
+    "fuelTitle": "Niveau de carburant : {{value}}%"
+  },
+  "time": {
+    "justNow": "à l'instant",
+    "minutesAgo": "il y a {{count}} min",
+    "hoursAgo": "il y a {{count}} h",
+    "daysAgo": "il y a {{count}} j",
+    "monthsAgo": "il y a {{count}} mois",
+    "yearsAgo": "il y a {{count}} an(s)"
+  },
+  "detailView": {
+    "tabs": {
+      "map": "Carte",
+      "preview": "Aperçu",
+      "events": "Événements",
+      "settings": "Paramètres",
+      "logs": "Journaux",
+      "label": "Onglets des détails du véhicule"
+    },
+    "map": {
+      "title": "Dernière position connue",
+      "label": "Carte montrant la dernière position connue pour {{vehicleName}}",
+      "noLocation": "Données de localisation non disponibles pour ce véhicule.",
+      "street": "Rue",
+      "dark": "Sombre",
+      "satellite": "Satellite"
+    },
+    "events": {
+      "title": "Événements récents",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "getEvents": "Obtenir les événements",
+      "filterEvents": "Filtrer les événements",
+      "filterEventsCount": "Filtrer ({{selected}}/{{total}})",
+      "exportPdfTitle": "Exporter les événements filtrés en PDF",
+      "prompt": "Sélectionnez une plage de dates et cliquez sur \"Obtenir les événements\" pour voir l'historique.",
+      "noEvents": "Aucun événement trouvé pour les critères sélectionnés.",
+      "location": "Position",
+      "speed": "Vitesse",
+      "roadCam": "Caméra route",
+      "cabinCam": "Caméra cabine",
+      "rawData": "Données brutes de l'événement",
+      "reportTitle": "Rapport d'événements",
+      "timestamp": "Horodatage"
+    },
+    "settings": {
+      "title": "Paramètres de l'appareil",
+      "uploadTitle": "Télécharger les paramètres depuis un fichier JSON",
+      "downloadTitle": "Télécharger les paramètres actuels en fichier JSON",
+      "uploadSuccess": "Paramètres chargés avec succès. Vérifiez les modifications et cliquez sur \"Enregistrer les modifications\" pour les appliquer à l'appareil.",
+      "noSettings": "Aucune donnée de paramètre disponible."
+    },
+    "logs": {
+      "title": "Journaux d'appels API",
+      "requestBody": "Corps de la requête",
+      "responseBody": "Corps de la réponse",
+      "noLogs": "Aucun appel API n'a encore été enregistré."
+    },
+    "livePreview": {
+      "title": "Vue en direct",
+      "offlineTitle": "Raven est hors ligne",
+      "offlineDescription": "L'aperçu et le flux en direct sont indisponibles lorsque l'appareil est hors ligne.",
+      "roadCamera": "Caméra route",
+      "cabinCamera": "Caméra cabine",
+      "stream": "Flux"
+    }
+  },
+  "settings": {
+    "audio": {
+      "title": "Audio",
+      "notifications": "Notifications audio activées",
+      "streaming": "Audio en streaming activé"
+    },
+    "camera": {
+      "title": "Caméra",
+      "roadCamera": "Caméra route",
+      "cabinCamera": "Caméra cabine",
+      "audioRecording": "Enregistrement audio",
+      "cameraEnabled": "Caméra activée",
+      "recordingProfile": "Profil d'enregistrement vidéo",
+      "profiles": {
+        "standard": "Standard",
+        "hd": "HD",
+        "balanced": "Équilibré",
+        "extended": "Étendu"
+      }
+    },
+    "display": {
+      "title": "Affichage",
+      "brightness": "Luminosité",
+      "distanceUnit": "Unité de distance",
+      "units": {
+        "metric": "Métrique",
+        "imperial": "Impérial"
+      },
+      "locale": "Langue",
+      "timeStyle": "Format de l'heure",
+      "timeStyles": {
+        "12": "12 heures",
+        "24": "24 heures"
+      }
+    },
+    "events": {
+      "title": "Événements",
+      "gForce": {
+        "title": "Force G",
+        "harshBraking": "Freinage brusque",
+        "aggressiveAccel": "Accélération agressive",
+        "harshCornering": "Virage serré"
+      },
+      "standard": {
+        "title": "Standard (Vitesse/Ralenti)",
+        "idling": "Ralenti",
+        "speeding": "Excès de vitesse",
+        "speedingThreshold": "Seuil d'excès de vitesse",
+        "speedingThresholdType": "Type de seuil d'excès de vitesse",
+        "types": {
+          "percent": "Pourcentage",
+          "constant": "Constante"
+        }
+      },
+      "dms": {
+        "title": "Surveillance du conducteur (DMS)",
+        "cellphone": "Téléphone portable",
+        "cameraObscured": "Caméra obstruée",
+        "distraction": "Distraction",
+        "drinking": "Boisson",
+        "eating": "Alimentation",
+        "smoking": "Tabagisme",
+        "fatigue": "Fatigue/Somnolence"
+      },
+      "adas": {
+        "title": "Assistance (ADAS)",
+        "tailgating": "Collé au véhicule précédent",
+        "tailgatingThreshold": "Seuil de vitesse pour talonnage"
+      }
+    },
+    "obd": {
+      "title": "OBD",
+      "canbus": "CANbus activé",
+      "lowBatteryCutoff": "Coupure batterie faible"
+    },
+    "system": {
+      "title": "Système",
+      "gesture": "Geste activé",
+      "videoAfterParked": "Enr. vidéo après stationnement"
+    }
+  },
+  "driverMessage": {
+    "title": "Message à l'écran du conducteur",
+    "messageLabel": "Message",
+    "placeholder": "Saisir un message à afficher...",
+    "durationLabel": "Durée",
+    "minutes": "{{count}} minutes",
+    "clear": "Effacer le message",
+    "send": "Envoyer le message",
+    "success": {
+      "sent": "Message envoyé avec succès !",
+      "cleared": "Message effacé avec succès !"
+    }
+  },
+  "tripShare": {
+    "title": "Partage de trajet",
+    "description": "Générez un lien temporaire pour partager le prochain trajet du Raven. Le lien deviendra actif au début du trajet et expirera à la fin.",
+    "showQr": "Afficher le code QR",
+    "generateNew": "Générer un nouveau lien",
+    "generate": "Générer le lien de partage"
+  },
+  "qrModal": {
+    "close": "Fermer la modale du code QR",
+    "title": "Partager l'application"
+  },
+  "errors": {
+    "unknown": "Une erreur inconnue est survenue.",
+    "noCredentialsForRefresh": "Aucun identifiant disponible pour le rafraîchissement du jeton.",
+    "fetchEvents": "Échec de la récupération des événements",
+    "loadMedia": "Échec du chargement du média",
+    "imageLoadFailed": "Le chargement de l'image a échoué",
+    "generatePdf": "Échec de la génération du PDF. Voir la console pour plus de détails.",
+    "loadSettings": "Échec du chargement des paramètres",
+    "saveSettings": "Échec de l'enregistrement des paramètres",
+    "parseSettings": "Échec de l'analyse du fichier de paramètres. Veuillez vous assurer qu'il s'agit d'un fichier JSON valide.",
+    "readSettings": "Échec de la lecture du fichier de paramètres.",
+    "settingsConfigError": "Les paramètres de l'appareil n'ont pas pu être chargés en raison d'une erreur de configuration du serveur.",
+    "settingsFixPrompt": "Cette erreur empêche le chargement des autres paramètres. Vous pouvez tenter de résoudre ce problème en réinitialisant la disposition de l'affichage de l'appareil à une valeur par défaut sûre. Cela n'affectera pas les autres paramètres.",
+    "settingsFixButton": "Réinitialiser les paramètres d'affichage et recharger",
+    "settingsFixingButton": "Réinitialisation...",
+    "settingsFixFailed": "Échec de l'application du correctif. Veuillez contacter le support si le problème persiste."
+  },
+  "fullScreenImageViewer": {
+    "close": "Fermer la visionneuse d'images en plein écran",
+    "previous": "Image précédente",
+    "next": "Image suivante",
+    "counter": "{{currentIndex}} / {{totalImages}}"
+  },
+  "dashboardMap": {
+    "street": "Rue",
+    "dark": "Sombre",
+    "satellite": "Satellite",
+    "label": "Carte montrant la dernière position connue de tous les véhicules."
+  },
+  "geofenceMap": {
+    "statusActive": "Actif",
+    "statusExpired": "Expiré",
+    "descActiveNoExpiry": "Ce géorepérage est actif et n'expire pas.",
+    "descExpiresOn": "Expire le {{date}}",
+    "descExpiredOn": "A expiré le {{date}}",
+    "notifyOnEnter": "À l'entrée",
+    "notifyOnExit": "À la sortie",
+    "notifyOnEnterExit": "À l'entrée et à la sortie",
+    "notifyNone": "Aucune",
+    "noGeofencesTitle": "Aucun géorepérage trouvé",
+    "noGeofencesDesc": "Aucun géorepérage n'est associé à ce compte. Utilisez les boutons ci-dessus pour en créer un ou télécharger un fichier CSV.",
+    "created": "Créé",
+    "noDescription": "(Aucune description)",
+    "label": "Carte montrant toutes les géorepérages."
+  },
+  "geofenceEditor": {
+    "createTitle": "Créer un géorepérage",
+    "editTitle": "Modifier le géorepérage",
+    "closeAriaLabel": "Fermer l'éditeur",
+    "drawPrompt": "Utilisez les outils sur la carte pour dessiner une forme pour votre géorepérage.",
+    "nameLabel": "Nom",
+    "descriptionLabel": "Description",
+    "radiusLabel": "Rayon (mètres)",
+    "notificationsLabel": "Notifications",
+    "notifyNone": "Aucune",
+    "notifyOnEnter": "À l'entrée",
+    "notifyOnExit": "À la sortie",
+    "notifyOnEnterExit": "À l'entrée et à la sortie",
+    "expirationLabel": "Date d'expiration",
+    "expirationHelp": "Laisser vide pour aucune expiration.",
+    "clearDate": "Effacer la date",
+    "errorShapeRequired": "Une forme doit être dessinée sur la carte.",
+    "errorNameRequired": "Le nom du géorepérage est requis.",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer le géorepérage \"{{name}}\" ? Cette action est irréversible.",
+    "mapLabel": "Carte interactive pour dessiner des formes de géorepérage."
+  },
+  "geofenceUpload": {
+    "modalTitle": "Confirmer le téléchargement des géorepérages",
+    "summary": "Trouvé <valid>{{validCount}} géorepérages valides</valid> et <invalid>{{invalidCount}} lignes non valides</invalid>.",
+    "validTab": "Lignes valides ({{count}})",
+    "errorsTab": "Erreurs ({{count}})",
+    "headerRow": "Ligne",
+    "headerName": "Nom",
+    "headerDescription": "Description",
+    "headerNotification": "Notification",
+    "headerError": "Erreur",
+    "headerOriginalData": "Données originales",
+    "uploading": "Téléchargement...",
+    "uploadButton": "Télécharger {{count}} géorepérages"
+  },
+  "bulkGeofence": {
+    "templateTitle": "Télécharger un fichier modèle CSV",
+    "template": "Modèle",
+    "downloadAllTitle": "Télécharger tous les géorepérages en tant que fichier CSV",
+    "downloadAll": "Tout télécharger",
+    "uploadCsvTitle": "Télécharger des géorepérages à partir d'un fichier CSV",
+    "uploadCsv": "Télécharger CSV",
+    "create": "Créer un géorepérage",
+    "uploadErrorAlert": "Une erreur s'est produite lors du téléchargement groupé. Certains géorepérages n'ont peut-être pas été créés. Veuillez vérifier la liste et réessayer."
+  },
+  "bulkMessage": {
+    "modalTitle": "Message groupé pour les conducteurs",
+    "summary": "Ce message sera envoyé à tous les <strong>{{count}}</strong> véhicules actuellement filtrés.",
+    "sendingTitle": "Envoi des messages...",
+    "completeTitle": "Envoi terminé",
+    "successMessage": "Envoyé avec succès à {{count}} véhicule(s).",
+    "errorMessage": "Échec de l'envoi à {{count}} véhicule(s).",
+    "messageLabel": "Message",
+    "placeholder": "Entrez le message...",
+    "durationLabel": "Durée",
+    "minutes": "{{count}} minutes",
+    "submit": "Envoyer le message"
+  }
+}

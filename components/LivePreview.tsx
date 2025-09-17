@@ -1,5 +1,7 @@
+
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import type { RavenDetails, ApiContextType, RavenSettings } from '../types';
+import { useTranslation } from '../i18n/i18n';
 
 interface LivePreviewProps {
   raven: RavenDetails;
@@ -9,11 +11,19 @@ interface LivePreviewProps {
 
 export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }) => {
     const [mode, setMode] = useState<'preview' | 'stream'>('preview');
+    const { t } = useTranslation();
 
     const roadViewerRef = useRef<HTMLElement>(null);
     const cabinViewerRef = useRef<HTMLElement>(null);
     const streamViewerRef = useRef<HTMLElement>(null);
     const [sessionToken, setSessionToken] = useState(api.token);
+    
+    // FIX: Synchronize the internal session token state with the token from props.
+    // This ensures that if the token is refreshed elsewhere in the app, the viewers
+    // receive the updated token.
+    useEffect(() => {
+        setSessionToken(api.token);
+    }, [api.token]);
     
     const apiDomain = useMemo(() => {
         try {
@@ -66,13 +76,13 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
     if (!raven.online) {
         return (
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
-                <h3 className="text-xl font-bold mb-4">Live View</h3>
+                <h3 className="text-xl font-bold mb-4">{t('detailView.livePreview.title')}</h3>
                 <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-soft-grey dark:border-gray-700">
                     <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M11.106 12.212a3 3 0 0 1 4.242 0M13.924 9.388a1.5 1.5 0 0 1 2.122 0M3 3l18 18" />
                     </svg>
-                    <h4 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">Raven is Offline</h4>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Live preview & stream are unavailable when the device is offline.</p>
+                    <h4 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">{t('detailView.livePreview.offlineTitle')}</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('detailView.livePreview.offlineDescription')}</p>
                 </div>
             </div>
         );
@@ -93,7 +103,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
             `}</style>
 
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-                <h3 className="text-xl font-bold">Live View</h3>
+                <h3 className="text-xl font-bold">{t('detailView.livePreview.title')}</h3>
                 <div className="inline-flex rounded-md shadow-sm bg-gray-100 dark:bg-gray-700/50 p-1" role="group">
                     <button
                         type="button"
@@ -102,7 +112,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
                             mode === 'preview' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
                         }`}
                     >
-                        Preview
+                        {t('detailView.tabs.preview')}
                     </button>
                     <button
                         type="button"
@@ -111,7 +121,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
                             mode === 'stream' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
                         }`}
                     >
-                        Stream
+                        {t('detailView.livePreview.stream')}
                     </button>
                 </div>
             </div>
@@ -119,7 +129,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
             {mode === 'preview' ? (
                 <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1 min-w-0">
-                        <h4 className="text-lg font-semibold mb-2 text-center">Road Camera</h4>
+                        <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.roadCamera')}</h4>
                         <div className="w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
                             <rc-live-preview-viewer
                                 ref={roadViewerRef}
@@ -132,7 +142,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
                         </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h4 className="text-lg font-semibold mb-2 text-center">Cabin Camera</h4>
+                        <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.cabinCamera')}</h4>
                         <div className="w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
                             <rc-live-preview-viewer
                                 ref={cabinViewerRef}
@@ -147,7 +157,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
                 </div>
             ) : (
                 <div>
-                    <h4 className="text-lg font-semibold mb-2 text-center">Live Stream</h4>
+                    <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.stream')}</h4>
                     <div className="w-full max-w-2xl mx-auto bg-black rounded-md overflow-hidden aspect-video">
                         <rc-streaming-video-player
                             ref={streamViewerRef}
