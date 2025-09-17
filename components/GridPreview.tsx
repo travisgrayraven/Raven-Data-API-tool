@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import type { RavenDetails, ApiContextType } from '../types';
 import { useTranslation } from '../i18n/i18n';
@@ -75,6 +76,7 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
                 rc-live-preview-viewer {
                     --media-control-background-color: transparent;
                     --media-control-active-background-color: transparent;
+                    border-radius: 0.375rem; /* Corresponds to Tailwind's rounded-md */
                 }
             `}</style>
             <div className="flex justify-center mb-6">

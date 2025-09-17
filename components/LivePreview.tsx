@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import type { RavenDetails, ApiContextType, RavenSettings } from '../types';
 import { useTranslation } from '../i18n/i18n';
@@ -91,14 +92,15 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings }
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
             {/* 
-                Inject a style tag to visually hide the camera toggle button within the web component.
-                This is done via CSS custom properties as the component uses a shadow DOM,
-                which prevents direct styling of its internal elements.
+                Inject a style tag to visually hide the camera toggle button within the web component
+                and to fix the corner radius to match its container.
             */}
             <style>{`
-                rc-live-preview-viewer {
+                rc-live-preview-viewer,
+                rc-streaming-video-player {
                     --media-control-background-color: transparent;
                     --media-control-active-background-color: transparent;
+                    border-radius: 0.375rem; /* Corresponds to Tailwind's rounded-md */
                 }
             `}</style>
 

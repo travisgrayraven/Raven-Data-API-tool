@@ -12,12 +12,13 @@ interface DashboardMapProps {
 export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
+    const markerClusterGroupRef = useRef<any>(null); // Ref for the cluster group
     const { t } = useTranslation();
 
     useEffect(() => {
         if (!mapContainer.current) return;
         
-        // Initialize map only once
+        // Initialize map and cluster group only once
         if (!mapRef.current) {
             mapRef.current = L.map(mapContainer.current).setView([45.4215, -75.6972], 5); // Default to Ottawa, ON
 
@@ -41,35 +42,35 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
             
             street.addTo(mapRef.current); // Add default layer
             L.control.layers(baseMaps).addTo(mapRef.current);
+            
+            // Initialize the marker cluster group and add it to the map
+            markerClusterGroupRef.current = L.markerClusterGroup({
+                disableClusteringAtZoom: 19, // OpenStreetMap tiles max zoom is 19
+                spiderfyOnMaxZoom: true,
+            });
+            mapRef.current.addLayer(markerClusterGroupRef.current);
         }
         
         const map = mapRef.current;
+        const markerClusterGroup = markerClusterGroupRef.current;
         
-        // Clear existing markers
-        map.eachLayer((layer: any) => {
-            if (layer instanceof L.Marker) {
-                map.removeLayer(layer);
-            }
-        });
+        // Clear existing markers from the cluster group
+        markerClusterGroup.clearLayers();
 
         const validRavens = ravens.filter(r => r.last_known_location?.latitude && r.last_known_location?.longitude);
 
         if (validRavens.length > 0) {
-            const markers = L.featureGroup();
-            
-            validRavens.forEach(raven => {
+            const markers = validRavens.map(raven => {
                 const { latitude, longitude } = raven.last_known_location!;
                 const marker = L.marker([latitude, longitude]);
                 marker.bindPopup(`<b>${raven.name}</b>`);
-                markers.addLayer(marker);
+                return marker;
             });
 
-            markers.addTo(map);
+            markerClusterGroup.addLayers(markers);
             
-            // Fit map to markers
-            if (markers.getLayers().length > 0) {
-                map.fitBounds(markers.getBounds().pad(0.1));
-            }
+            // Fit map to markers - use the cluster group's bounds
+            map.fitBounds(markerClusterGroup.getBounds().pad(0.1));
         }
 
         // This addresses the sizing issue by ensuring Leaflet re-checks the container's
