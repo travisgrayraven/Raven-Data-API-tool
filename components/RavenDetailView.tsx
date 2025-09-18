@@ -511,8 +511,8 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
              <h3 className="text-xl font-bold mb-4">{t('detailView.events.title')}</h3>
              
-             <div className="flex flex-wrap items-end justify-between gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-soft-grey dark:border-gray-700">
-                 <div className="flex flex-wrap items-end gap-4">
+             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-soft-grey dark:border-gray-700">
+                 <div className="flex flex-col sm:flex-row sm:items-end gap-4">
                     <div>
                         <label htmlFor="start-date" className="block text-sm font-medium mb-1">{t('detailView.events.startDate')}</label>
                         <input 
@@ -542,49 +542,46 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                     </button>
                  </div>
 
-                 <div className="flex items-center gap-2">
-                    {/* This entire block of controls should only appear after events have been fetched */}
-                    {events && (
-                        <>
-                            <div className="relative" ref={filterDropdownRef}>
-                                <button onClick={() => setIsFilterOpen(!isFilterOpen)} className="py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800" aria-haspopup="true" aria-expanded={isFilterOpen}>{filterButtonText}</button>
-                                {isFilterOpen && (
-                                    <div className="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-10 max-h-80 overflow-y-auto">
-                                        <div className="flex justify-between items-center p-2 border-b border-soft-grey dark:border-gray-700">
-                                            <button onClick={() => setSelectedEventTypes(new Set(allEventTypes))} className="text-sm text-raven-blue hover:underline">{t('common.selectAll')}</button>
-                                            <button onClick={() => setSelectedEventTypes(new Set())} className="text-sm text-raven-blue hover:underline">{t('common.selectNone')}</button>
-                                        </div>
-                                        {allEventTypes.map(type => (
-                                            <label key={type} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50">
-                                                <input type="checkbox" checked={selectedEventTypes.has(type)} onChange={() => handleFilterChange(type)} className="h-4 w-4 rounded border-gray-300 text-raven-blue focus:ring-raven-blue mr-3" />
-                                                {formatEventTypeLabel(type)}
-                                            </label>
-                                        ))}
+                 {events && (
+                     <div className="flex items-center gap-2">
+                        <div className="relative" ref={filterDropdownRef}>
+                            <button onClick={() => setIsFilterOpen(!isFilterOpen)} className="py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium bg-white dark:bg-gray-800" aria-haspopup="true" aria-expanded={isFilterOpen}>{filterButtonText}</button>
+                            {isFilterOpen && (
+                                <div className="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-10 max-h-80 overflow-y-auto">
+                                    <div className="flex justify-between items-center p-2 border-b border-soft-grey dark:border-gray-700">
+                                        <button onClick={() => setSelectedEventTypes(new Set(allEventTypes))} className="text-sm text-raven-blue hover:underline">{t('common.selectAll')}</button>
+                                        <button onClick={() => setSelectedEventTypes(new Set())} className="text-sm text-raven-blue hover:underline">{t('common.selectNone')}</button>
                                     </div>
-                                )}
-                            </div>
-                            
-                            <button 
-                                onClick={handleExportEventsCSV} 
-                                disabled={!filteredEvents || filteredEvents.length === 0}
-                                className="flex items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-400 disabled:cursor-not-allowed" 
-                                aria-label={t('dashboard.exportCsvTitle')}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                <span>{t('dashboard.exportCsv')}</span>
-                            </button>
-                            <button 
-                                onClick={handleExportEventsPDF} 
-                                disabled={isGeneratingPdf || !filteredEvents || filteredEvents.length === 0} 
-                                className="flex items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-alert-red hover:bg-alert-red/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-alert-red disabled:bg-alert-red/50 disabled:cursor-not-allowed" 
-                                aria-label={t('detailView.events.exportPdfTitle')}
-                            >
-                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>
-                                <span>{isGeneratingPdf ? '...' : 'PDF'}</span>
-                            </button>
-                        </>
-                    )}
-                 </div>
+                                    {allEventTypes.map(type => (
+                                        <label key={type} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                                            <input type="checkbox" checked={selectedEventTypes.has(type)} onChange={() => handleFilterChange(type)} className="h-4 w-4 rounded border-gray-300 text-raven-blue focus:ring-raven-blue mr-3" />
+                                            {formatEventTypeLabel(type)}
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        
+                        <button 
+                            onClick={handleExportEventsCSV} 
+                            disabled={!filteredEvents || filteredEvents.length === 0}
+                            className="flex items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-400 disabled:cursor-not-allowed" 
+                            aria-label={t('dashboard.exportCsvTitle')}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                            <span>{t('dashboard.exportCsv')}</span>
+                        </button>
+                        <button 
+                            onClick={handleExportEventsPDF} 
+                            disabled={isGeneratingPdf || !filteredEvents || filteredEvents.length === 0} 
+                            className="flex items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-alert-red hover:bg-alert-red/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-alert-red disabled:bg-alert-red/50 disabled:cursor-not-allowed" 
+                            aria-label={t('detailView.events.exportPdfTitle')}
+                        >
+                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>
+                            <span>{isGeneratingPdf ? '...' : 'PDF'}</span>
+                        </button>
+                    </div>
+                 )}
             </div>
             {error && <p className="text-red-500 mb-4">{error}</p>}
 

@@ -204,7 +204,18 @@
               "title": "G-Force",
               "harshBraking": "Harsh Braking",
               "aggressiveAccel": "Aggressive Acceleration",
-              "harshCornering": "Harsh Cornering"
+              "harshCornering": "Harsh Cornering",
+              "possibleImpact": "Possible Impact",
+              "thresholdsTitle": "G-Force Thresholds",
+              "vehicleTypePreset": "Vehicle Type Preset",
+              "lightDuty": "Light Duty (e.g., Sedans)",
+              "mediumDuty": "Medium Duty (e.g., Vans)",
+              "heavyDuty": "Heavy Duty (e.g., Trucks)",
+              "brakingThreshold": "Harsh Braking Threshold",
+              "accelThreshold": "Aggressive Acceleration Threshold",
+              "corneringThreshold": "Harsh Cornering Threshold",
+              "impactThreshold": "Impact Threshold",
+              "gUnit": "(G)"
           },
           "standard": {
               "title": "Standard (Speeding/Idling)",

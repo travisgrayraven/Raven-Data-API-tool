@@ -204,7 +204,18 @@
         "title": "Fuerza G",
         "harshBraking": "Frenado brusco",
         "aggressiveAccel": "Aceleración agresiva",
-        "harshCornering": "Giro brusco"
+        "harshCornering": "Giro brusco",
+        "possibleImpact": "Posible impacto",
+        "thresholdsTitle": "Umbrales de fuerza G",
+        "vehicleTypePreset": "Preajuste de tipo de vehículo",
+        "lightDuty": "Ligero (ej: Sedanes)",
+        "mediumDuty": "Mediano (ej: Furgonetas)",
+        "heavyDuty": "Pesado (ej: Camiones)",
+        "brakingThreshold": "Umbral de frenado brusco",
+        "accelThreshold": "Umbral de aceleración agresiva",
+        "corneringThreshold": "Umbral de giro brusco",
+        "impactThreshold": "Umbral de impacto",
+        "gUnit": "(G)"
       },
       "standard": {
         "title": "Estándar (Velocidad/Ralentí)",

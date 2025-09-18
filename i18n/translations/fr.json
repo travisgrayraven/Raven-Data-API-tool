@@ -204,7 +204,18 @@
         "title": "Force G",
         "harshBraking": "Freinage brusque",
         "aggressiveAccel": "Accélération agressive",
-        "harshCornering": "Virage serré"
+        "harshCornering": "Virage serré",
+        "possibleImpact": "Impact possible",
+        "thresholdsTitle": "Seuils de force G",
+        "vehicleTypePreset": "Préréglage type de véhicule",
+        "lightDuty": "Léger (ex: Berlines)",
+        "mediumDuty": "Moyen (ex: Fourgonnettes)",
+        "heavyDuty": "Lourd (ex: Camions)",
+        "brakingThreshold": "Seuil de freinage brusque",
+        "accelThreshold": "Seuil d'accélération agressive",
+        "corneringThreshold": "Seuil de virage serré",
+        "impactThreshold": "Seuil d'impact",
+        "gUnit": "(G)"
       },
       "standard": {
         "title": "Standard (Vitesse/Ralenti)",

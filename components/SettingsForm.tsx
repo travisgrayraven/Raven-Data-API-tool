@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { RavenSettings } from '../types';
 import { useTranslation } from '../i18n/i18n';
 
@@ -68,14 +68,18 @@ const SettingsDropdown: React.FC<ControlProps & { options: { value: string, labe
     </div>
 );
 
-const SettingsNumberInput: React.FC<ControlProps> = ({ label, path, value, onChange, helpText }) => (
+const SettingsNumberInput: React.FC<ControlProps & { step?: number }> = ({ label, path, value, onChange, helpText, step = 1 }) => (
      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2 gap-2">
         <label htmlFor={path} className="text-sm font-medium">{label} {helpText && <span className="text-xs text-gray-500">({helpText})</span>}</label>
         <input
             id={path}
             type="number"
+            step={step}
             value={value || 0}
-            onChange={(e) => onChange(path, parseInt(e.target.value, 10))}
+            onChange={(e) => {
+                const numValue = step < 1 ? parseFloat(e.target.value) : parseInt(e.target.value, 10);
+                onChange(path, isNaN(numValue) ? 0 : numValue);
+            }}
             className="mt-1 sm:mt-0 block w-full sm:w-1/2 py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-raven-blue focus:border-raven-blue sm:text-sm"
         />
     </div>
@@ -105,8 +109,16 @@ interface SettingsFormProps {
     onSettingChange: (path: string, value: any) => void;
 }
 
+const vehicleCategoryPresets = [
+  { name: 'light', values: { harsh_braking_threshold: 0.45, aggressive_accel_threshold: 0.35, harsh_cornering_threshold: 0.40, impact_threshold: 1.5 } },
+  { name: 'medium', values: { harsh_braking_threshold: 0.50, aggressive_accel_threshold: 0.40, harsh_cornering_threshold: 0.45, impact_threshold: 2.0 } },
+  { name: 'heavy', values: { harsh_braking_threshold: 0.55, aggressive_accel_threshold: 0.45, harsh_cornering_threshold: 0.50, impact_threshold: 2.5 } }
+];
+
 export const SettingsForm: React.FC<SettingsFormProps> = ({ settings, onSettingChange }) => {
     const { t } = useTranslation();
+    const [vehicleCategory, setVehicleCategory] = useState(0);
+
     // Helper to get nested values safely
     const getValue = (path: string, defaultValue: any = false) => {
         const keys = path.split('.');
@@ -120,6 +132,42 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ settings, onSettingC
         }
         return result;
     };
+
+    // Effect to set the initial vehicle category slider based on current settings
+    useEffect(() => {
+        const currentBraking = getValue('events.harsh_braking_threshold', 0);
+        if (currentBraking === 0) return; // Don't set if no value exists
+
+        let closestCategoryIndex = 0;
+        let smallestDiff = Infinity;
+
+        vehicleCategoryPresets.forEach((preset, index) => {
+            const diff = Math.abs(currentBraking - preset.values.harsh_braking_threshold);
+            if (diff < smallestDiff) {
+                smallestDiff = diff;
+                closestCategoryIndex = index;
+            }
+        });
+        setVehicleCategory(closestCategoryIndex);
+    }, []); // Run only once on mount
+
+
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const index = parseInt(e.target.value, 10);
+        setVehicleCategory(index);
+        const presetValues = vehicleCategoryPresets[index].values;
+        
+        onSettingChange('events.harsh_braking_threshold', presetValues.harsh_braking_threshold);
+        onSettingChange('events.aggressive_accel_threshold', presetValues.aggressive_accel_threshold);
+        onSettingChange('events.harsh_cornering_threshold', presetValues.harsh_cornering_threshold);
+        onSettingChange('events.impact_threshold', presetValues.impact_threshold);
+    };
+
+    const vehicleCategoryLabels = [
+        t('settings.events.gForce.lightDuty'),
+        t('settings.events.gForce.mediumDuty'),
+        t('settings.events.gForce.heavyDuty'),
+    ];
 
     return (
         <div>
@@ -163,6 +211,32 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ settings, onSettingC
                     <SettingsCheckbox label={t('settings.events.gForce.harshBraking')} path="events.harsh_braking_event_enabled" value={getValue('events.harsh_braking_event_enabled')} onChange={onSettingChange} />
                     <SettingsCheckbox label={t('settings.events.gForce.aggressiveAccel')} path="events.aggressive_accel_event_enabled" value={getValue('events.aggressive_accel_event_enabled')} onChange={onSettingChange} />
                     <SettingsCheckbox label={t('settings.events.gForce.harshCornering')} path="events.harsh_cornering_event_enabled" value={getValue('events.harsh_cornering_event_enabled')} onChange={onSettingChange} />
+                    <SettingsCheckbox label={t('settings.events.gForce.possibleImpact')} path="events.impact_event_enabled" value={getValue('events.impact_event_enabled')} onChange={onSettingChange} />
+                    <Accordion title={t('settings.events.gForce.thresholdsTitle')}>
+                        <div className="py-2">
+                            <label htmlFor="vehicle-type-slider" className="text-sm font-medium">{t('settings.events.gForce.vehicleTypePreset')}</label>
+                            <input
+                                id="vehicle-type-slider"
+                                type="range"
+                                min="0"
+                                max="2"
+                                step="1"
+                                value={vehicleCategory}
+                                onChange={handleCategoryChange}
+                                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer mt-1"
+                            />
+                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {vehicleCategoryLabels.map((label, index) => (
+                                    <span key={index} className={`w-1/3 text-center ${index === vehicleCategory ? 'font-bold text-gray-800 dark:text-gray-200' : ''}`}>{label}</span>
+                                ))}
+                            </div>
+                        </div>
+                        <hr className="my-4 border-soft-grey dark:border-gray-600"/>
+                        <SettingsNumberInput label={t('settings.events.gForce.brakingThreshold')} path="events.harsh_braking_threshold" value={getValue('events.harsh_braking_threshold', 0.45)} onChange={onSettingChange} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
+                        <SettingsNumberInput label={t('settings.events.gForce.accelThreshold')} path="events.aggressive_accel_threshold" value={getValue('events.aggressive_accel_threshold', 0.35)} onChange={onSettingChange} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
+                        <SettingsNumberInput label={t('settings.events.gForce.corneringThreshold')} path="events.harsh_cornering_threshold" value={getValue('events.harsh_cornering_threshold', 0.40)} onChange={onSettingChange} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
+                        <SettingsNumberInput label={t('settings.events.gForce.impactThreshold')} path="events.impact_threshold" value={getValue('events.impact_threshold', 1.5)} onChange={onSettingChange} helpText={t('settings.events.gForce.gUnit')} step={0.1} />
+                    </Accordion>
                 </Accordion>
                 <Accordion title={t('settings.events.standard.title')}>
                     <SettingsCheckbox label={t('settings.events.standard.idling')} path="events.idling_event_enabled" value={getValue('events.idling_event_enabled')} onChange={onSettingChange} />
