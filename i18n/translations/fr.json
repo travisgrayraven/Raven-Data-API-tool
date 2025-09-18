@@ -55,6 +55,7 @@
     "mapView": "Vue Carte",
     "gridView": "Vue Grille",
     "searchPlaceholder": "Rechercher par nom...",
+    "searchGeofencePlaceholder": "Rechercher par nom ou description...",
     "filter": {
       "label": "Filtrer par heure du dernier rapport",
       "30d": "30 derniers jours",
@@ -69,6 +70,13 @@
       "label": "Trier par",
       "name": "Trier par Nom",
       "time": "Trier par Dernier Rapport"
+    },
+    "status": {
+      "driving": "En conduite",
+      "parked": "Garé",
+      "offline": "Hors ligne",
+      "filterLabel": "Filtrer par statut du véhicule",
+      "filterTitle": "Activer/désactiver le filtre de statut {{status}}"
     },
     "bulkMessage": "Message groupé",
     "bulkMessageTitle": "Envoyer un message à tous les véhicules filtrés",

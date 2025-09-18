@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface RavenSummary {
@@ -103,10 +104,9 @@ export interface GeofenceFormData {
 
 // --- Web Component Type Definitions ---
 
-// FIX: Correctly type the custom web component to resolve the JSX.IntrinsicElements error.
-// The props for the web component are defined, and then `React.DetailedHTMLProps` is used
-// within the JSX namespace declaration to correctly include all standard HTML attributes
-// and the special `ref` prop needed for web components in React.
+// FIX: To resolve issues with JSX not recognizing the custom web components,
+// the prop interfaces are defined to extend React's HTMLAttributes.
+// This ensures all standard HTML attributes are available.
 interface RcLivePreviewViewerProps extends React.HTMLAttributes<HTMLElement> {
     apidomain?: string;
     sessiontoken?: string;
@@ -115,7 +115,7 @@ interface RcLivePreviewViewerProps extends React.HTMLAttributes<HTMLElement> {
     inactivitytimeoutseconds?: string;
 }
 
-// Add props for the streaming video player component
+// FIX: Similarly, define props for the streaming video player component.
 interface RcStreamingVideoPlayerProps extends React.HTMLAttributes<HTMLElement> {
     apidomain?: string;
     sessiontoken?: string;
@@ -133,7 +133,10 @@ interface RcStreamingVideoPlayerProps extends React.HTMLAttributes<HTMLElement> 
 // Extend JSX to include the custom web component
 declare global {
     namespace JSX {
-        // FIX: Corrected a typo in the JSX namespace from `IntrinisicElements` to `IntrinsicElements` to allow TypeScript to recognize the custom web components.
+        // FIX: The IntrinsicElements interface is updated to use the prop types
+        // defined above. React.DetailedHTMLProps correctly includes special React
+        // props like `ref` and `key`. This approach resolves the TypeScript errors
+        // where the custom elements were not found.
         interface IntrinsicElements {
             'rc-live-preview-viewer': React.DetailedHTMLProps<RcLivePreviewViewerProps, HTMLElement>;
             'rc-streaming-video-player': React.DetailedHTMLProps<RcStreamingVideoPlayerProps, HTMLElement>;

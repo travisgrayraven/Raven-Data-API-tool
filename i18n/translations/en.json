@@ -55,6 +55,7 @@
     "mapView": "Map View",
     "gridView": "Grid View",
     "searchPlaceholder": "Search by name...",
+    "searchGeofencePlaceholder": "Search by name or description...",
     "filter": {
       "label": "Filter by last report time",
       "30d": "Last 30 days",
@@ -69,6 +70,13 @@
       "label": "Sort by",
       "name": "Sort by Name",
       "time": "Sort by Last Report"
+    },
+    "status": {
+      "driving": "Driving",
+      "parked": "Parked",
+      "offline": "Offline",
+      "filterLabel": "Filter by vehicle status",
+      "filterTitle": "Toggle {{status}} status filter"
     },
     "bulkMessage": "Bulk Message",
     "bulkMessageTitle": "Send message to all filtered vehicles",

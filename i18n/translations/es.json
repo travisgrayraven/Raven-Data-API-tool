@@ -55,6 +55,7 @@
     "mapView": "Vista de Mapa",
     "gridView": "Vista de Cuadrícula",
     "searchPlaceholder": "Buscar por nombre...",
+    "searchGeofencePlaceholder": "Buscar por nombre o descripción...",
     "filter": {
       "label": "Filtrar por hora del último informe",
       "30d": "Últimos 30 días",
@@ -69,6 +70,13 @@
       "label": "Ordenar por",
       "name": "Ordenar por Nombre",
       "time": "Ordenar por Último Informe"
+    },
+    "status": {
+      "driving": "Conduciendo",
+      "parked": "Estacionado",
+      "offline": "Sin conexión",
+      "filterLabel": "Filtrar por estado del vehículo",
+      "filterTitle": "Activar/desactivar filtro de estado {{status}}"
     },
     "bulkMessage": "Mensaje masivo",
     "bulkMessageTitle": "Enviar mensaje a todos los vehículos filtrados",

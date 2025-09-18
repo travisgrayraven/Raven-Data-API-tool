@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import type { RavenDetails, Geofence, ApiContextType, GeofenceFormData } from '../types';
 import { RavenCard } from './RavenCard';
@@ -22,12 +23,15 @@ interface DashboardProps {
 }
 
 type FilterOption = '30d' | '7d' | '48h' | '24h' | '12h' | '1h' | 'all';
+type VehicleStatus = 'driving' | 'parked' | 'offline';
 
 export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGeofences, onSelectRaven, onRefreshData, isRefreshing, api }) => {
   const [activeTab, setActiveTab] = useState<'map' | 'grid' | 'geofences'>('map');
   const [filter, setFilter] = useState<FilterOption>('7d');
   const [sortBy, setSortBy] = useState<'persona' | 'time'>('persona');
   const [searchQuery, setSearchQuery] = useState('');
+  const [geofenceSearchQuery, setGeofenceSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<Set<VehicleStatus>>(new Set(['driving', 'parked', 'offline']));
   
   const [editorConfig, setEditorConfig] = useState<{
     isOpen: boolean;
@@ -68,6 +72,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     };
   }, [onRefreshData, isRefreshing]);
 
+  const getRavenStatus = (raven: RavenDetails): VehicleStatus => {
+    if (raven.unplugged || !raven.online) {
+        return 'offline';
+    }
+    return raven.engineOn ? 'driving' : 'parked';
+  };
+
   const filteredAndSortedRavens = useMemo(() => {
     let processedRavens = [...ravens];
 
@@ -77,6 +88,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
             raven.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
         );
     }
+    
+    // Filter by status
+    processedRavens = processedRavens.filter(raven => {
+        const status = getRavenStatus(raven);
+        return statusFilter.has(status);
+    });
 
     // Filter by time
     if (filter !== 'all') {
@@ -126,7 +143,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     });
 
     return processedRavens;
-  }, [ravens, filter, sortBy, searchQuery]);
+  }, [ravens, filter, sortBy, searchQuery, statusFilter]);
+
+  const filteredGeofences = useMemo(() => {
+      const query = geofenceSearchQuery.trim().toLowerCase();
+      if (!query) {
+          return geofences;
+      }
+      return geofences.filter(g => 
+          g.name.toLowerCase().includes(query) ||
+          g.description.toLowerCase().includes(query)
+      );
+  }, [geofences, geofenceSearchQuery]);
+
 
   const handleExportToCSV = () => {
     const now = new Date();
@@ -273,6 +302,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     setIsSendingBulkMessage(false); // This will transition the modal to the result screen
   };
 
+  const handleStatusFilterChange = (status: VehicleStatus) => {
+    setStatusFilter(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(status)) {
+            newSet.delete(status);
+        } else {
+            newSet.add(status);
+        }
+        return newSet;
+    });
+  };
+
+  const statusInfo: { [key in VehicleStatus]: { label: string; color: string } } = {
+    driving: { label: t('dashboard.status.driving'), color: 'bg-green-500' },
+    parked: { label: t('dashboard.status.parked'), color: 'bg-raven-blue' },
+    offline: { label: t('dashboard.status.offline'), color: 'bg-charcoal-grey' },
+  };
 
   return (
     <div>
@@ -331,12 +377,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
         ) : (
             <>
                 {(activeTab === 'map' || activeTab === 'grid') && (
-                    <div className="flex flex-col lg:flex-row justify-between items-center mb-6 gap-4">
-                        <h2 className="text-3xl font-bold text-center lg:text-left text-gray-900 dark:text-white flex-shrink-0">
-                            {activeTab === 'map' ? t('dashboard.mapView') : t('dashboard.gridView')}
-                        </h2>
-                        <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-                            <div className="w-full sm:w-auto sm:flex-1 lg:w-56">
+                    <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        {/* Left-aligned filters */}
+                        <div className="flex items-center gap-4 flex-wrap">
+                            <div className="w-full sm:w-auto lg:w-64">
                                 <label htmlFor="search" className="sr-only">{t('dashboard.searchPlaceholder')}</label>
                                 <input
                                     id="search"
@@ -346,6 +390,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
                                 />
+                            </div>
+                            <div className="flex items-center p-1 space-x-1 bg-gray-100 dark:bg-gray-900/50 rounded-lg" role="group" aria-label={t('dashboard.status.filterLabel')}>
+                                {(['driving', 'parked', 'offline'] as VehicleStatus[]).map((status) => (
+                                    <button
+                                        key={status}
+                                        onClick={() => handleStatusFilterChange(status)}
+                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors duration-200 flex items-center gap-2 ${
+                                            statusFilter.has(status)
+                                                ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow'
+                                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200/70 dark:hover:bg-gray-800/50'
+                                        }`}
+                                        aria-pressed={statusFilter.has(status)}
+                                        title={t('dashboard.status.filterTitle', { status: statusInfo[status].label })}
+                                    >
+                                        <span className={`h-2 w-2 rounded-full ${statusInfo[status].color}`} aria-hidden="true"></span>
+                                        <span>{statusInfo[status].label}</span>
+                                    </button>
+                                ))}
                             </div>
                             <div className="w-full sm:w-auto">
                                 <label htmlFor="filter" className="sr-only">{t('dashboard.filter.label')}</label>
@@ -366,41 +428,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                                     <option value="time">{t('dashboard.sort.time')}</option>
                                 </select>
                             </div>
-                            <div className="flex items-center gap-2">
-                                {activeTab === 'map' && (
-                                  <>
-                                    <button
-                                        onClick={handleOpenBulkMessageModal}
-                                        disabled={isRefreshing || filteredAndSortedRavens.length === 0}
-                                        className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
-                                        aria-label={t('dashboard.bulkMessageTitle')}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15h14a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>
-                                        <span>{t('dashboard.bulkMessage')}</span>
-                                    </button>
-                                    <button
-                                        onClick={handleExportToCSV}
-                                        className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-charcoal-grey hover:bg-charcoal-grey/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-charcoal-grey disabled:bg-charcoal-grey/50 disabled:cursor-not-allowed"
-                                        aria-label={t('dashboard.exportCsvTitle')}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                        <span>{t('dashboard.exportCsv')}</span>
-                                    </button>
-                                  </>
-                                )}
-                                <button 
-                                    onClick={onRefreshData} 
-                                    disabled={isRefreshing}
-                                    className="flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
-                                    aria-label={isRefreshing ? t('common.refreshing') : t('common.refresh')}
+                        </div>
+
+                        {/* Right-aligned actions */}
+                        <div className="flex items-center gap-2">
+                            {activeTab === 'map' && (
+                              <>
+                                <button
+                                    onClick={handleOpenBulkMessageModal}
+                                    disabled={isRefreshing || filteredAndSortedRavens.length === 0}
+                                    className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
+                                    aria-label={t('dashboard.bulkMessageTitle')}
                                 >
-                                    {isRefreshing ? (
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                    ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" /></svg>
-                                    )}
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15h14a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>
+                                    <span>{t('dashboard.bulkMessage')}</span>
                                 </button>
-                            </div>
+                                <button
+                                    onClick={handleExportToCSV}
+                                    className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-charcoal-grey hover:bg-charcoal-grey/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-charcoal-grey disabled:bg-charcoal-grey/50 disabled:cursor-not-allowed"
+                                    aria-label={t('dashboard.exportCsvTitle')}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                    <span>{t('dashboard.exportCsv')}</span>
+                                </button>
+                              </>
+                            )}
+                            <button 
+                                onClick={onRefreshData} 
+                                disabled={isRefreshing}
+                                className="flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
+                                aria-label={isRefreshing ? t('common.refreshing') : t('common.refresh')}
+                            >
+                                {isRefreshing ? (
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" /></svg>
+                                )}
+                            </button>
                         </div>
                     </div>
                 )}
@@ -428,8 +492,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 </div>
 
                 <div id="geofences-panel" role="tabpanel" aria-labelledby="geofences-tab" hidden={activeTab !== 'geofences'}>
-                    <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.tabs.geofences')}</h2>
+                    <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
+                        <div className="w-full sm:w-auto lg:w-64">
+                            <label htmlFor="geofence-search" className="sr-only">{t('dashboard.searchGeofencePlaceholder')}</label>
+                            <input
+                                id="geofence-search"
+                                type="text"
+                                placeholder={t('dashboard.searchGeofencePlaceholder')}
+                                value={geofenceSearchQuery}
+                                onChange={(e) => setGeofenceSearchQuery(e.target.value)}
+                                className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
+                            />
+                        </div>
                         <BulkGeofenceActions 
                             geofences={geofences} 
                             api={api!} 
@@ -438,7 +512,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                         />
                     </div>
                     <GeofenceMap 
-                        geofences={geofences} 
+                        geofences={filteredGeofences} 
                         onSelectGeofence={(g) => handleOpenEditor('edit', g)}
                     />
                 </div>
