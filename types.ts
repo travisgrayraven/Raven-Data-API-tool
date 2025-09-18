@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export interface RavenSummary {
@@ -101,12 +100,18 @@ export interface GeofenceFormData {
   notification: string;
 }
 
+export type Tab = 'map' | 'preview' | 'events' | 'settings' | 'logs';
+
 
 // --- Web Component Type Definitions ---
 
-// FIX: To resolve issues with JSX not recognizing the custom web components,
-// the prop interfaces are defined to extend React's HTMLAttributes.
-// This ensures all standard HTML attributes are available.
+// FIX: Added TypeScript definitions for the custom web components ('rc-live-preview-viewer' and 'rc-streaming-video-player')
+// to be recognized by JSX. This is done by augmenting the global JSX.IntrinsicElements interface, which resolves
+// errors like "Property 'rc-live-preview-viewer' does not exist on type 'JSX.IntrinsicElements'".
+
+/**
+ * Props for the rc-live-preview-viewer web component.
+ */
 interface RcLivePreviewViewerProps extends React.HTMLAttributes<HTMLElement> {
     apidomain?: string;
     sessiontoken?: string;
@@ -115,7 +120,9 @@ interface RcLivePreviewViewerProps extends React.HTMLAttributes<HTMLElement> {
     inactivitytimeoutseconds?: string;
 }
 
-// FIX: Similarly, define props for the streaming video player component.
+/**
+ * Props for the rc-streaming-video-player web component.
+ */
 interface RcStreamingVideoPlayerProps extends React.HTMLAttributes<HTMLElement> {
     apidomain?: string;
     sessiontoken?: string;
@@ -129,14 +136,9 @@ interface RcStreamingVideoPlayerProps extends React.HTMLAttributes<HTMLElement> 
     forcereporting?: boolean;
 }
 
-
-// Extend JSX to include the custom web component
+// Extend the global JSX namespace to include our custom elements.
 declare global {
     namespace JSX {
-        // FIX: The IntrinsicElements interface is updated to use the prop types
-        // defined above. React.DetailedHTMLProps correctly includes special React
-        // props like `ref` and `key`. This approach resolves the TypeScript errors
-        // where the custom elements were not found.
         interface IntrinsicElements {
             'rc-live-preview-viewer': React.DetailedHTMLProps<RcLivePreviewViewerProps, HTMLElement>;
             'rc-streaming-video-player': React.DetailedHTMLProps<RcStreamingVideoPlayerProps, HTMLElement>;

@@ -106,6 +106,9 @@
     "odometerTitle": "Odómetro: {{value}} km",
     "fuelTitle": "Nivel de combustible: {{value}}%"
   },
+  "gridPreview": {
+    "viewDetails": "Ver vista previa en vivo para {{vehicleName}}"
+  },
   "time": {
     "justNow": "justo ahora",
     "minutesAgo": "hace {{count}} min",

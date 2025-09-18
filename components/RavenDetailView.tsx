@@ -1,15 +1,13 @@
 
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import type { RavenDetails, RavenEvent, RavenSettings, ApiContextType, ApiLogEntry } from '../types';
+import type { RavenDetails, RavenEvent, RavenSettings, ApiContextType, ApiLogEntry, Tab } from '../types';
 import { getRavenEvents, getRavenSettings, updateRavenSettings, getMediaUrlViaProxy, processWithConcurrency } from '../services/ravenApi';
 import { SettingsForm } from './SettingsForm';
 import { DriverMessageManager } from './DriverMessageManager';
 import { TripShareManager } from './TripShareManager';
 import { LivePreview } from './LivePreview';
 import { useTranslation } from '../i18n/i18n';
-
-type Tab = 'map' | 'preview' | 'events' | 'settings' | 'logs';
 
 const MEDIA_CONCURRENCY_LIMIT = 5;
 
@@ -666,10 +664,11 @@ interface RavenDetailViewProps {
   onBack: () => void;
   logs: ApiLogEntry[];
   onImageClick: (images: string[], index: number) => void;
+  initialTab?: Tab;
 }
 
-export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, onBack, logs, onImageClick }) => {
-    const [activeTab, setActiveTab] = useState<Tab>('map');
+export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, onBack, logs, onImageClick, initialTab }) => {
+    const [activeTab, setActiveTab] = useState<Tab>(initialTab || 'map');
     const [settings, setSettings] = useState<RavenSettings | null>(null);
     const [initialSettings, setInitialSettings] = useState<RavenSettings | null>(null);
     const [isFetchingSettings, setIsFetchingSettings] = useState(false);

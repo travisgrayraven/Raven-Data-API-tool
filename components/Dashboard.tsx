@@ -1,7 +1,7 @@
 
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { RavenDetails, Geofence, ApiContextType, GeofenceFormData } from '../types';
+import type { RavenDetails, Geofence, ApiContextType, GeofenceFormData, Tab } from '../types';
 import { RavenCard } from './RavenCard';
 import { DashboardMap } from './DashboardMap';
 import { GeofenceMap } from './GeofenceMap';
@@ -16,7 +16,7 @@ interface DashboardProps {
   ravens: RavenDetails[];
   geofences: Geofence[];
   onSetGeofences: (geofences: Geofence[]) => void;
-  onSelectRaven: (raven: RavenDetails) => void;
+  onSelectRaven: (raven: RavenDetails, initialTab?: Tab) => void;
   onRefreshData: () => void;
   isRefreshing: boolean;
   api: ApiContextType | null;
@@ -488,7 +488,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 </div>
                 
                 <div id="grid-panel" role="tabpanel" aria-labelledby="grid-tab" hidden={activeTab !== 'grid'}>
-                    {api && <GridPreview ravens={filteredAndSortedRavens} api={api} />}
+                    {api && <GridPreview ravens={filteredAndSortedRavens} api={api} onSelectRaven={onSelectRaven} />}
                 </div>
 
                 <div id="geofences-panel" role="tabpanel" aria-labelledby="geofences-tab" hidden={activeTab !== 'geofences'}>

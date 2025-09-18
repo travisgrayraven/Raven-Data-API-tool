@@ -1,7 +1,7 @@
 
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import type { ApiCredentials, RavenDetails, ApiLogEntry, RavenSummary, Geofence, ApiContextType } from './types';
+import type { ApiCredentials, RavenDetails, ApiLogEntry, RavenSummary, Geofence, ApiContextType, Tab } from './types';
 import { getToken, getRavens, getRavenDetails, getVehicleInfoFromVin, processWithConcurrency, getGeofences } from './services/ravenApi';
 import { CredentialsForm } from './components/CredentialsForm';
 import { Dashboard } from './components/Dashboard';
@@ -26,6 +26,7 @@ const App: React.FC = () => {
     const [ravens, setRavens] = useState<RavenDetails[] | null>(null);
     const [geofences, setGeofences] = useState<Geofence[] | null>(null);
     const [selectedRaven, setSelectedRaven] = useState<RavenDetails | null>(null);
+    const [initialDetailTab, setInitialDetailTab] = useState<Tab | undefined>(undefined);
     
     const [isLoading, setIsLoading] = useState<boolean>(true); // Start true to check for stored creds
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -192,14 +193,16 @@ const App: React.FC = () => {
         }
     }
 
-    const handleSelectRaven = (raven: RavenDetails) => {
+    const handleSelectRaven = (raven: RavenDetails, initialTab: Tab = 'map') => {
         window.scrollTo(0, 0);
         setSelectedRaven(raven);
+        setInitialDetailTab(initialTab);
     };
     
     const handleBackToDashboard = () => {
         window.scrollTo(0, 0);
         setSelectedRaven(null);
+        setInitialDetailTab(undefined);
     };
 
     const handleOpenImageViewer = (images: string[], currentIndex: number) => {
@@ -247,7 +250,14 @@ const App: React.FC = () => {
 
         if (ravens && api && geofences) {
             if (selectedRaven) {
-                return <RavenDetailView raven={selectedRaven} api={api} onBack={handleBackToDashboard} logs={apiLogs} onImageClick={handleOpenImageViewer} />;
+                return <RavenDetailView 
+                    raven={selectedRaven} 
+                    api={api} 
+                    onBack={handleBackToDashboard} 
+                    logs={apiLogs} 
+                    onImageClick={handleOpenImageViewer}
+                    initialTab={initialDetailTab}
+                />;
             }
             return <Dashboard 
                 ravens={ravens} 
@@ -265,7 +275,7 @@ const App: React.FC = () => {
 
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
+            <div>
                 <header className="mb-8 pb-4 border-b border-soft-grey dark:border-gray-700">
                     <div className="flex justify-between items-center">
                          <div className="flex items-center gap-4">

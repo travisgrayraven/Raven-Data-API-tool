@@ -1,12 +1,13 @@
 
 
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import type { RavenDetails, ApiContextType } from '../types';
+import type { RavenDetails, ApiContextType, Tab } from '../types';
 import { useTranslation } from '../i18n/i18n';
 
 interface GridPreviewProps {
   ravens: RavenDetails[];
   api: ApiContextType;
+  onSelectRaven: (raven: RavenDetails, initialTab: Tab) => void;
 }
 
 const getRavenStatus = (raven: RavenDetails, t: (key: string) => string) => {
@@ -42,7 +43,7 @@ const getRavenStatus = (raven: RavenDetails, t: (key: string) => string) => {
     };
 };
 
-export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
+export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectRaven }) => {
     const [activeCamera, setActiveCamera] = useState<'road' | 'cabin'>('road');
     const [sessionToken, setSessionToken] = useState(api.token);
     const viewerRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -135,15 +136,21 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api }) => {
             </div>
 
             {ravens.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div 
+                    className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                >
                     {ravens.map(raven => {
                         const status = getRavenStatus(raven, t);
                         return (
                             <div key={raven.uuid} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
                                 <div className="flex justify-between items-center mb-2 gap-2">
-                                    <h3 className="text-md font-bold truncate text-gray-900 dark:text-white" title={raven.name}>
+                                     <button 
+                                        onClick={() => onSelectRaven(raven, 'preview')}
+                                        className="text-md font-bold truncate text-gray-900 dark:text-white hover:text-raven-blue dark:hover:text-sky-blue focus:outline-none focus:underline"
+                                        title={t('gridPreview.viewDetails', { vehicleName: raven.name })}
+                                    >
                                         {raven.name}
-                                    </h3>
+                                    </button>
                                     <div title={status.title} className={`flex-shrink-0 flex items-center gap-1.5 ${status.color}`}>
                                         {status.icon}
                                         <span className="text-xs font-semibold">{status.text}</span>
