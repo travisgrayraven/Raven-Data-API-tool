@@ -9,9 +9,9 @@ interface CredentialsFormProps {
 }
 
 export const CredentialsForm: React.FC<CredentialsFormProps> = ({ onSubmit, isLoading }) => {
-  const [apiUrl, setApiUrl] = useState('https://api.beta3.klashwerks.com/user-v1');
-  const [apiKey, setApiKey] = useState('5c4def4c-cc8f-4fe9-9a1d-39176ff40285');
-  const [apiSecret, setApiSecret] = useState('RavenConnected2024!');
+  const [apiUrl, setApiUrl] = useState('https://api.klashwerks.com/user-v1');
+  const [apiKey, setApiKey] = useState('7735ae89-94a4-11f0-9566-120765f5df43');
+  const [apiSecret, setApiSecret] = useState('BWTSecret01');
   const { t } = useTranslation();
 
   const handleSubmit = (e: React.FormEvent) => {

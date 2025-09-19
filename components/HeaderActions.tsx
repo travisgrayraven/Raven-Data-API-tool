@@ -7,11 +7,13 @@ import { useTranslation, supportedLanguages } from '../i18n/i18n';
 interface HeaderActionsProps {
   theme: 'light' | 'dark';
   setTheme: React.Dispatch<React.SetStateAction<'light' | 'dark'>>;
+  isCabinCameraEnabled: boolean;
+  setIsCabinCameraEnabled: (enabled: boolean) => void;
   onReset: () => void;
   onShare: () => void;
 }
 
-export const HeaderActions: React.FC<HeaderActionsProps> = ({ theme, setTheme, onReset, onShare }) => {
+export const HeaderActions: React.FC<HeaderActionsProps> = ({ theme, setTheme, isCabinCameraEnabled, setIsCabinCameraEnabled, onReset, onShare }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { language, setLanguage, t } = useTranslation();
@@ -53,6 +55,16 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({ theme, setTheme, o
             <div className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
                 <span className="font-medium">{t('header.theme')}</span>
                 <ThemeToggle theme={theme} setTheme={setTheme} />
+            </div>
+            <div className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
+                <label htmlFor="cabin-camera-toggle" className="font-medium">{t('header.cabinCamera')}</label>
+                 <input
+                    id="cabin-camera-toggle"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-raven-blue focus:ring-raven-blue"
+                    checked={isCabinCameraEnabled}
+                    onChange={(e) => setIsCabinCameraEnabled(e.target.checked)}
+                />
             </div>
             <div className="border-t border-soft-grey dark:border-gray-700 my-1"></div>
             <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200">

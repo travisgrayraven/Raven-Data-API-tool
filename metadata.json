@@ -1,5 +1,5 @@
 {
-  "name": "RavenView",
+  "name": "RavenView-C",
   "description": "A simple application to view vehicle data from Raven video telematics devices. Enter your API credentials to fetch and display vehicle information and locations on a map.",
   "requestFramePermissions": []
 }

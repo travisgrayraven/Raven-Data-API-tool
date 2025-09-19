@@ -35,6 +35,7 @@
   "header": {
     "openSettings": "Open user settings",
     "theme": "Theme",
+    "cabinCamera": "Show Cabin Camera",
     "language": "Language",
     "shareApp": "Share App",
     "resetCredentials": "Reset Credentials"
@@ -141,11 +142,13 @@
         "satellite": "Satellite"
     },
     "media": {
-      "title": "Enhanced Video Access",
-      "startDate": "Start Date & Time",
-      "endDate": "End Date & Time",
-      "loadTimeline": "Load Media Timeline",
-      "prompt": "Select a date and time range to load the media timeline."
+        "title": "Enhanced Video Access",
+        "startDate": "Start Date",
+        "startTime": "Start Time",
+        "endDate": "End Date",
+        "endTime": "End Time",
+        "loadMedia": "Load Media",
+        "prompt": "Select a date and time range and click \"Load Media\" to view the timeline."
     },
     "events": {
         "title": "Recent Events",
@@ -163,9 +166,7 @@
         "cabinCam": "Cabin Cam",
         "rawData": "Raw Event Data",
         "reportTitle": "Event Report",
-        "timestamp": "Timestamp",
-        "watchStream": "Watch historical stream for this event",
-        "historicalStreamTitle": "Historical Stream: {{eventType}}"
+        "timestamp": "Timestamp"
     },
     "settings": {
         "title": "Device Settings",
@@ -300,6 +301,10 @@
       "showQr": "Show QR Code",
       "generateNew": "Generate New Link",
       "generate": "Generate Trip Share Link"
+  },
+  "historicalStream": {
+    "title": "Historical Stream",
+    "playAriaLabel": "Play historical stream for this event"
   },
   "qrModal": {
       "close": "Close QR code modal",

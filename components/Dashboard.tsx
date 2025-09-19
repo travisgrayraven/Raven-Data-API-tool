@@ -20,12 +20,13 @@ interface DashboardProps {
   onRefreshData: () => void;
   isRefreshing: boolean;
   api: ApiContextType | null;
+  isCabinCameraEnabled: boolean;
 }
 
 type FilterOption = '30d' | '7d' | '48h' | '24h' | '12h' | '1h' | 'all';
 type VehicleStatus = 'driving' | 'parked' | 'offline';
 
-export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGeofences, onSelectRaven, onRefreshData, isRefreshing, api }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGeofences, onSelectRaven, onRefreshData, isRefreshing, api, isCabinCameraEnabled }) => {
   const [activeTab, setActiveTab] = useState<'map' | 'grid' | 'geofences'>('map');
   const [filter, setFilter] = useState<FilterOption>('7d');
   const [sortBy, setSortBy] = useState<'persona' | 'time'>('persona');
@@ -488,7 +489,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 </div>
                 
                 <div id="grid-panel" role="tabpanel" aria-labelledby="grid-tab" hidden={activeTab !== 'grid'}>
-                    {api && <GridPreview ravens={filteredAndSortedRavens} api={api} onSelectRaven={onSelectRaven} />}
+                    {api && <GridPreview ravens={filteredAndSortedRavens} api={api} onSelectRaven={onSelectRaven} isCabinCameraEnabled={isCabinCameraEnabled} />}
                 </div>
 
                 <div id="geofences-panel" role="tabpanel" aria-labelledby="geofences-tab" hidden={activeTab !== 'geofences'}>

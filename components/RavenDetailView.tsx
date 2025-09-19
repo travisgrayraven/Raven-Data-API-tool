@@ -128,7 +128,7 @@ const EventMediaItem: React.FC<{
                 {error && <p className="text-xs text-red-500 text-center p-2">{error}</p>}
                 {mediaUrl && <img src={mediaUrl} alt={`Media for ${label}`} className="max-w-full max-h-full object-contain rounded-lg cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onImageClick(mediaUrl)} />}
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">{label}</span>
+            {label && <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">{label}</span>}
         </div>
     );
 };
@@ -137,8 +137,9 @@ const EventsView: React.FC<{
     raven: RavenDetails; 
     api: ApiContextType; 
     onImageClick: (images: string[], index: number) => void;
-    settings: RavenSettings | null;
-}> = ({ raven, api, onImageClick, settings }) => {
+    isCabinCameraEnabled: boolean;
+    onOpenStreamModal: (event: RavenEvent) => void;
+}> = ({ raven, api, onImageClick, isCabinCameraEnabled, onOpenStreamModal }) => {
     const getInitialDates = (raven: RavenDetails) => {
         // The default date range should be today.
         // We will use the raven's last report time as "today" if available, otherwise the user's current date.
@@ -175,14 +176,6 @@ const EventsView: React.FC<{
 
     // State for PDF generation
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
-    // State for historical stream modal
-    const [streamModalState, setStreamModalState] = useState<{ 
-        isOpen: boolean; 
-        startTimestamp?: string; 
-        eventType?: string;
-    }>({ isOpen: false });
-
 
     const mediaUrlsRef = useRef(mediaUrls);
     mediaUrlsRef.current = mediaUrls;
@@ -246,10 +239,13 @@ const EventsView: React.FC<{
     useEffect(() => {
         if (!filteredEvents) return;
 
-        const allMediaIds = filteredEvents.flatMap(event => [
-            ...(event.road_media_ids || []),
-            ...(event.cabin_media_ids || [])
-        ]);
+        const allMediaIds = filteredEvents.flatMap(event => {
+            const media = [...(event.road_media_ids || [])];
+            if (isCabinCameraEnabled) {
+                media.push(...(event.cabin_media_ids || []));
+            }
+            return media;
+        });
 
         const idsToFetch = allMediaIds.filter(id => 
             !mediaUrls[id] && !mediaErrors[id] && !loadingMedia.has(id)
@@ -298,7 +294,7 @@ const EventsView: React.FC<{
             });
         })();
 
-    }, [filteredEvents, api, raven.uuid, mediaUrls, mediaErrors, loadingMedia, t]);
+    }, [filteredEvents, api, raven.uuid, mediaUrls, mediaErrors, loadingMedia, t, isCabinCameraEnabled]);
 
     const handleFilterChange = (eventType: string) => {
         setSelectedEventTypes(prev => {
@@ -315,7 +311,7 @@ const EventsView: React.FC<{
     const handleLocalImageClick = (clickedEvent: RavenEvent, clickedMediaUrl: string) => {
         const eventMediaIds = [
             ...(clickedEvent.road_media_ids || []),
-            ...(clickedEvent.cabin_media_ids || [])
+            ...(isCabinCameraEnabled ? (clickedEvent.cabin_media_ids || []) : [])
         ];
         
         const eventMediaUrls = eventMediaIds
@@ -400,7 +396,10 @@ const EventsView: React.FC<{
             y += 8;
     
             for (const event of filteredEvents) {
-                const mediaIds = [...(event.road_media_ids || []), ...(event.cabin_media_ids || [])];
+                const mediaIds = [...(event.road_media_ids || [])];
+                if (isCabinCameraEnabled) {
+                    mediaIds.push(...(event.cabin_media_ids || []));
+                }
                 
                 const imagesPerRow = 2;
                 const rowGap = 5;
@@ -517,27 +516,6 @@ const EventsView: React.FC<{
         }
     };
     
-    const handleOpenStream = (event: RavenEvent) => {
-        const eventTime = new Date(event.event_timestamp).getTime();
-        let startTime;
-
-        // Per user request, CAR_BUMPED and ENGINE_ON start 2s after. Others start 5s before.
-        if (event.event_type === 'CAR_BUMPED' || event.event_type === 'ENGINE_ON') {
-            startTime = eventTime + 2000;
-        } else {
-            startTime = eventTime - 5000;
-        }
-
-        const startTimestampForApi = Math.floor(startTime / 1000).toString();
-        
-        setStreamModalState({ 
-            isOpen: true, 
-            startTimestamp: startTimestampForApi, 
-            eventType: formatEventTypeLabel(event.event_type) 
-        });
-    };
-
-
     const filterButtonText = events ? t('detailView.events.filterEventsCount', { selected: selectedEventTypes.size, total: allEventTypes.length }) : t('detailView.events.filterEvents');
 
     return (
@@ -636,10 +614,10 @@ const EventsView: React.FC<{
                         <div className="flex justify-between items-start flex-wrap gap-2 mb-3">
                             <div className="flex items-center gap-3">
                                 <button
-                                    onClick={() => handleOpenStream(event)}
-                                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-raven-blue dark:hover:text-sky-blue transition-colors duration-200"
-                                    aria-label={t('detailView.events.watchStream')}
-                                    title={t('detailView.events.watchStream')}
+                                    onClick={() => onOpenStreamModal(event)}
+                                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue dark:focus:ring-offset-gray-800"
+                                    aria-label={t('historicalStream.playAriaLabel')}
+                                    title={t('historicalStream.playAriaLabel')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
@@ -670,7 +648,7 @@ const EventsView: React.FC<{
                             </div>
                         </div>
 
-                        {(event.road_media_ids || event.cabin_media_ids) && (
+                        {(event.road_media_ids || (isCabinCameraEnabled && event.cabin_media_ids)) && (
                             <div className="flex flex-wrap gap-4 pt-3 border-t border-soft-grey dark:border-gray-700">
                                 {event.road_media_ids?.map(id => (
                                     <EventMediaItem
@@ -678,11 +656,11 @@ const EventsView: React.FC<{
                                         mediaUrl={mediaUrls[id]}
                                         error={mediaErrors[id]}
                                         isLoading={loadingMedia.has(id)}
-                                        label={t('detailView.events.roadCam')}
+                                        label={isCabinCameraEnabled ? t('detailView.events.roadCam') : ''}
                                         onImageClick={(url) => handleLocalImageClick(event, url)}
                                     />
                                 ))}
-                                {event.cabin_media_ids?.map(id => (
+                                {isCabinCameraEnabled && event.cabin_media_ids?.map(id => (
                                     <EventMediaItem
                                         key={id}
                                         mediaUrl={mediaUrls[id]}
@@ -701,16 +679,6 @@ const EventsView: React.FC<{
                     </div>
                 ))}
             </div>
-            
-            <HistoricalStreamModal
-                isOpen={streamModalState.isOpen}
-                onClose={() => setStreamModalState({ isOpen: false })}
-                startTimestamp={streamModalState.startTimestamp}
-                eventType={streamModalState.eventType}
-                raven={raven}
-                api={api}
-                settings={settings}
-            />
         </div>
     );
 };
@@ -722,9 +690,10 @@ interface RavenDetailViewProps {
   logs: ApiLogEntry[];
   onImageClick: (images: string[], index: number) => void;
   initialTab?: Tab;
+  isCabinCameraEnabled: boolean;
 }
 
-export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, onBack, logs, onImageClick, initialTab }) => {
+export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, onBack, logs, onImageClick, initialTab, isCabinCameraEnabled }) => {
     const [activeTab, setActiveTab] = useState<Tab>(initialTab || 'map');
     const [settings, setSettings] = useState<RavenSettings | null>(null);
     const [initialSettings, setInitialSettings] = useState<RavenSettings | null>(null);
@@ -735,6 +704,9 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
     const [isFixing, setIsFixing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
+
+    const [streamModalState, setStreamModalState] = useState<{ isOpen: boolean; startTimestamp: string | null }>({ isOpen: false, startTimestamp: null });
+    const [streamModalTrigger, setStreamModalTrigger] = useState<HTMLElement | null>(null);
 
     const fetchSettings = useCallback(async () => {
         setIsFetchingSettings(true);
@@ -778,7 +750,7 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
 
     useEffect(() => {
         // Fetch settings if the tab is opened, and we don't have them, and there's no standing error.
-        if ((activeTab === 'settings' || activeTab === 'preview' || activeTab === 'events') && !settings && !settingsError) {
+        if ((activeTab === 'settings' || activeTab === 'preview') && !settings && !settingsError) {
             fetchSettings();
         }
     }, [activeTab, settings, settingsError, fetchSettings]);
@@ -899,6 +871,29 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
         return JSON.stringify(settings) !== JSON.stringify(initialSettings);
     }, [settings, initialSettings]);
 
+    const isAudioSupported = useMemo(() => settings?.audio?.streaming_audio_enabled === true, [settings]);
+
+    const handleOpenStreamModal = useCallback((event: RavenEvent) => {
+        const eventTime = new Date(event.event_timestamp).getTime();
+        let startTime;
+
+        if (event.event_type === 'CAR_BUMPED' || event.event_type === 'ENGINE_ON') {
+            startTime = eventTime + 2000; // 2 seconds after
+        } else {
+            startTime = eventTime - 5000; // 5 seconds before
+        }
+        
+        const startTimestamp = Math.floor(startTime / 1000).toString();
+
+        setStreamModalTrigger(document.activeElement as HTMLElement);
+        setStreamModalState({ isOpen: true, startTimestamp });
+    }, []);
+
+    const handleCloseStreamModal = () => {
+        setStreamModalState({ isOpen: false, startTimestamp: null });
+        streamModalTrigger?.focus();
+    };
+
     const { make, model, year } = raven.vehicle_info || {};
     const subTitle = (make && model && year) ? `${year} ${make} ${model}` : raven.serial_number;
     const tabs: Tab[] = ['map', 'preview', 'media', 'events', 'settings', 'logs'];
@@ -950,7 +945,7 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
             </div>
             
             <div className="mt-6 border-b border-soft-grey dark:border-gray-700">
-                <nav className="-mb-px flex space-x-6 overflow-x-auto pb-1" role="tablist" aria-label={t('detailView.tabs.label')}>
+                <nav className="-mb-px flex space-x-8" role="tablist" aria-label={t('detailView.tabs.label')}>
                     {tabs.map((tab) => (
                          <button
                             key={tab}
@@ -976,13 +971,19 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
                     <MapView raven={raven} api={api} />
                 </div>
                 <div id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden={activeTab !== 'preview'}>
-                    <LivePreview raven={raven} api={api} settings={settings} />
+                    <LivePreview raven={raven} api={api} settings={settings} isCabinCameraEnabled={isCabinCameraEnabled} />
                 </div>
                 <div id="panel-media" role="tabpanel" aria-labelledby="tab-media" hidden={activeTab !== 'media'}>
                     <MediaView raven={raven} api={api} />
                 </div>
                 <div id="panel-events" role="tabpanel" aria-labelledby="tab-events" hidden={activeTab !== 'events'}>
-                    <EventsView raven={raven} api={api} onImageClick={onImageClick} settings={settings} />
+                    <EventsView 
+                        raven={raven} 
+                        api={api} 
+                        onImageClick={onImageClick} 
+                        isCabinCameraEnabled={isCabinCameraEnabled} 
+                        onOpenStreamModal={handleOpenStreamModal}
+                    />
                 </div>
                 <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden={activeTab !== 'settings'}>
                      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
@@ -1065,6 +1066,15 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
                      </div>
                 </div>
             </div>
+            <HistoricalStreamModal
+                isOpen={streamModalState.isOpen}
+                onClose={handleCloseStreamModal}
+                raven={raven}
+                api={api}
+                startTimestamp={streamModalState.startTimestamp}
+                isAudioSupported={isAudioSupported}
+                isCabinCameraEnabled={isCabinCameraEnabled}
+            />
         </div>
     );
 };

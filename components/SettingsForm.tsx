@@ -260,10 +260,10 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ settings, onSettingC
                         </div>
                         <hr className="my-4 border-soft-grey dark:border-gray-600"/>
                         {/* FIX: Use correct API keys and value conversion helpers for all G-Force inputs */}
-                        <SettingsNumberInput label={t('settings.events.gForce.brakingThreshold')} path="events.harsh_braking_accel_threshold" value={getGForceValue('events.harsh_braking_accel_threshold', -450)} onChange={handleGForceChange} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
-                        <SettingsNumberInput label={t('settings.events.gForce.accelThreshold')} path="events.aggressive_accel_threshold" value={getGForceValue('events.aggressive_accel_threshold', 350)} onChange={handleGForceChange} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
-                        <SettingsNumberInput label={t('settings.events.gForce.corneringThreshold')} path="events.harsh_cornering_accel_threshold" value={getGForceValue('events.harsh_cornering_accel_threshold', 400)} onChange={handleGForceChange} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
-                        <SettingsNumberInput label={t('settings.events.gForce.impactThreshold')} path="events.possible_impact_accel_threshold" value={getGForceValue('events.possible_impact_accel_threshold', 1500)} onChange={handleGForceChange} helpText={t('settings.events.gForce.gUnit')} step={0.1} />
+                        <SettingsNumberInput label={t('settings.events.gForce.brakingThreshold')} path="events.harsh_braking_accel_threshold" value={getGForceValue('events.harsh_braking_accel_threshold', -450)} onChange={(path, val) => handleGForceChange(path, val)} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
+                        <SettingsNumberInput label={t('settings.events.gForce.accelThreshold')} path="events.aggressive_accel_threshold" value={getGForceValue('events.aggressive_accel_threshold', 350)} onChange={(path, val) => handleGForceChange(path, val)} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
+                        <SettingsNumberInput label={t('settings.events.gForce.corneringThreshold')} path="events.harsh_cornering_accel_threshold" value={getGForceValue('events.harsh_cornering_accel_threshold', 400)} onChange={(path, val) => handleGForceChange(path, val)} helpText={t('settings.events.gForce.gUnit')} step={0.01} />
+                        <SettingsNumberInput label={t('settings.events.gForce.impactThreshold')} path="events.possible_impact_accel_threshold" value={getGForceValue('events.possible_impact_accel_threshold', 1500)} onChange={(path, val) => handleGForceChange(path, val)} helpText={t('settings.events.gForce.gUnit')} step={0.1} />
                     </Accordion>
                 </Accordion>
                 <Accordion title={t('settings.events.standard.title')}>
