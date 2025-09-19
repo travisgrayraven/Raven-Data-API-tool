@@ -1,8 +1,11 @@
-
-
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import type { RavenDetails, ApiContextType, RavenSettings } from '../types';
+// FIX: Changed from 'import type' to ensure the module is evaluated, applying global JSX augmentations.
+// FIX: Changed `import type` to a regular `import` to ensure the module containing global JSX augmentations is evaluated.
+import { RavenDetails, ApiContextType, RavenSettings } from '../types';
 import { useTranslation } from '../i18n/i18n';
+
+// FIX: Removed the local `declare global` block. The types for custom web components
+// are now correctly sourced from the central `types.ts` file, resolving conflicts and errors.
 
 interface LivePreviewProps {
   raven: RavenDetails;

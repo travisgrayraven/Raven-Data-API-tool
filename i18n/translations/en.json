@@ -107,7 +107,12 @@
     "fuelTitle": "Fuel Level: {{value}}%"
   },
   "gridPreview": {
-    "viewDetails": "View live preview for {{vehicleName}}"
+    "viewDetails": "View live preview for {{vehicleName}}",
+    "pageIndicator": "Page {{currentPage}} of {{totalPages}}",
+    "firstPage": "Go to first page",
+    "previousPage": "Go to previous page",
+    "nextPage": "Go to next page",
+    "lastPage": "Go to last page"
   },
   "time": {
     "justNow": "just now",
@@ -121,6 +126,7 @@
     "tabs": {
         "map": "Map",
         "preview": "Preview",
+        "media": "Media",
         "events": "Events",
         "settings": "Settings",
         "logs": "Logs",
@@ -133,6 +139,13 @@
         "street": "Street",
         "dark": "Dark",
         "satellite": "Satellite"
+    },
+    "media": {
+      "title": "Enhanced Video Access",
+      "startDate": "Start Date & Time",
+      "endDate": "End Date & Time",
+      "loadTimeline": "Load Media Timeline",
+      "prompt": "Select a date and time range to load the media timeline."
     },
     "events": {
         "title": "Recent Events",
@@ -150,7 +163,9 @@
         "cabinCam": "Cabin Cam",
         "rawData": "Raw Event Data",
         "reportTitle": "Event Report",
-        "timestamp": "Timestamp"
+        "timestamp": "Timestamp",
+        "watchStream": "Watch historical stream for this event",
+        "historicalStreamTitle": "Historical Stream: {{eventType}}"
     },
     "settings": {
         "title": "Device Settings",
@@ -317,7 +332,8 @@
     "street": "Street",
     "dark": "Dark",
     "satellite": "Satellite",
-    "label": "Map showing last known location of all vehicles."
+    "label": "Map showing last known location of all vehicles.",
+    "adjusting": "Adjusting map view..."
   },
   "geofenceMap": {
     "statusActive": "Active",

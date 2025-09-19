@@ -107,7 +107,12 @@
     "fuelTitle": "Niveau de carburant : {{value}}%"
   },
   "gridPreview": {
-    "viewDetails": "Voir l'aperçu en direct pour {{vehicleName}}"
+    "viewDetails": "Voir l'aperçu en direct pour {{vehicleName}}",
+    "pageIndicator": "Page {{currentPage}} sur {{totalPages}}",
+    "firstPage": "Aller à la première page",
+    "previousPage": "Aller à la page précédente",
+    "nextPage": "Aller à la page suivante",
+    "lastPage": "Aller à la dernière page"
   },
   "time": {
     "justNow": "à l'instant",
@@ -121,6 +126,7 @@
     "tabs": {
       "map": "Carte",
       "preview": "Aperçu",
+      "media": "Média",
       "events": "Événements",
       "settings": "Paramètres",
       "logs": "Journaux",
@@ -133,6 +139,13 @@
       "street": "Rue",
       "dark": "Sombre",
       "satellite": "Satellite"
+    },
+    "media": {
+      "title": "Accès Vidéo Amélioré",
+      "startDate": "Date et heure de début",
+      "endDate": "Date et heure de fin",
+      "loadTimeline": "Charger la chronologie",
+      "prompt": "Sélectionnez une plage de dates et d'heures pour charger la chronologie média."
     },
     "events": {
       "title": "Événements récents",
@@ -150,7 +163,9 @@
       "cabinCam": "Caméra cabine",
       "rawData": "Données brutes de l'événement",
       "reportTitle": "Rapport d'événements",
-      "timestamp": "Horodatage"
+      "timestamp": "Horodatage",
+      "watchStream": "Regarder le flux historique pour cet événement",
+      "historicalStreamTitle": "Flux historique : {{eventType}}"
     },
     "settings": {
       "title": "Paramètres de l'appareil",
@@ -317,7 +332,8 @@
     "street": "Rue",
     "dark": "Sombre",
     "satellite": "Satellite",
-    "label": "Carte montrant la dernière position connue de tous les véhicules."
+    "label": "Carte montrant la dernière position connue de tous les véhicules.",
+    "adjusting": "Ajustement de la vue de la carte..."
   },
   "geofenceMap": {
     "statusActive": "Actif",

@@ -1,7 +1,7 @@
-
-
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import type { RavenDetails, ApiContextType, Tab } from '../types';
+// FIX: Changed from 'import type' to ensure the module is evaluated, applying global JSX augmentations.
+// FIX: Changed `import type` to a regular `import` to ensure the module containing global JSX augmentations is evaluated.
+import { RavenDetails, ApiContextType, Tab } from '../types';
 import { useTranslation } from '../i18n/i18n';
 
 interface GridPreviewProps {
@@ -49,10 +49,23 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectR
     const viewerRefs = useRef<Map<string, HTMLElement>>(new Map());
     const isRefreshingToken = useRef(false);
     const { t } = useTranslation();
+    const [currentPage, setCurrentPage] = useState(1);
 
-    // FIX: Synchronize the internal session token state with the token from props.
-    // This ensures that if the token is refreshed elsewhere in the app, the viewers
-    // receive the updated token.
+    const ITEMS_PER_PAGE = 20;
+    const totalPages = Math.ceil(ravens.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const paginatedRavens = useMemo(() => ravens.slice(startIndex, endIndex), [ravens, startIndex, endIndex]);
+
+    // Effect to adjust page number if filters change and current page becomes invalid
+    useEffect(() => {
+        const newTotalPages = Math.ceil(ravens.length / ITEMS_PER_PAGE);
+        if (currentPage > newTotalPages) {
+            setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
+        }
+    }, [ravens, currentPage, ITEMS_PER_PAGE]);
+
+
     useEffect(() => {
         setSessionToken(api.token);
     }, [api.token]);
@@ -103,6 +116,55 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectR
             });
         };
     }, [ravens, handleSessionExpired]);
+    
+    const PaginationControls = () => {
+        if (totalPages <= 1) return null;
+
+        const goToPage = (page: number) => {
+            setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+        };
+
+        return (
+            <div className="flex justify-center items-center gap-2 sm:gap-4 my-6">
+                <button
+                    onClick={() => goToPage(1)}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t('gridPreview.firstPage')}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.707 4.293a1 1 0 010 1.414L5.414 10l4.293 4.293a1 1 0 01-1.414 1.414l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 0z" clipRule="evenodd" /><path fillRule="evenodd" d="M15.707 4.293a1 1 0 010 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                </button>
+                <button
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t('gridPreview.previousPage')}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                </button>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 tabular-nums">
+                    {t('gridPreview.pageIndicator', { currentPage, totalPages })}
+                </span>
+                <button
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t('gridPreview.nextPage')}
+                >
+                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
+                </button>
+                 <button
+                    onClick={() => goToPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t('gridPreview.lastPage')}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clipRule="evenodd" /><path fillRule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
+                </button>
+            </div>
+        );
+    };
+
 
     return (
         <div className="mt-4">
@@ -135,14 +197,16 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectR
                 </div>
             </div>
 
+            <PaginationControls />
+
             {ravens.length > 0 ? (
                 <div 
-                    className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                    className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
                 >
-                    {ravens.map(raven => {
+                    {paginatedRavens.map(raven => {
                         const status = getRavenStatus(raven, t);
                         return (
-                            <div key={raven.uuid} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+                            <div key={raven.uuid} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3">
                                 <div className="flex justify-between items-center mb-2 gap-2">
                                      <button 
                                         onClick={() => onSelectRaven(raven, 'preview')}
@@ -187,6 +251,7 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectR
                     <p className="text-gray-600 dark:text-gray-400">{t('dashboard.noFilteredVehiclesDescription')}</p>
                 </div>
             )}
+            <PaginationControls />
         </div>
     );
 };

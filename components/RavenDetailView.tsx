@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { RavenDetails, RavenEvent, RavenSettings, ApiContextType, ApiLogEntry, Tab } from '../types';
 import { getRavenEvents, getRavenSettings, updateRavenSettings, getMediaUrlViaProxy, processWithConcurrency } from '../services/ravenApi';
@@ -7,6 +6,8 @@ import { SettingsForm } from './SettingsForm';
 import { DriverMessageManager } from './DriverMessageManager';
 import { TripShareManager } from './TripShareManager';
 import { LivePreview } from './LivePreview';
+import { MediaView } from './MediaView';
+import { HistoricalStreamModal } from './HistoricalStreamModal';
 import { useTranslation } from '../i18n/i18n';
 
 const MEDIA_CONCURRENCY_LIMIT = 5;
@@ -132,7 +133,12 @@ const EventMediaItem: React.FC<{
     );
 };
 
-const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageClick: (images: string[], index: number) => void; }> = ({ raven, api, onImageClick }) => {
+const EventsView: React.FC<{ 
+    raven: RavenDetails; 
+    api: ApiContextType; 
+    onImageClick: (images: string[], index: number) => void;
+    settings: RavenSettings | null;
+}> = ({ raven, api, onImageClick, settings }) => {
     const getInitialDates = (raven: RavenDetails) => {
         // The default date range should be today.
         // We will use the raven's last report time as "today" if available, otherwise the user's current date.
@@ -169,6 +175,14 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
 
     // State for PDF generation
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+    // State for historical stream modal
+    const [streamModalState, setStreamModalState] = useState<{ 
+        isOpen: boolean; 
+        startTimestamp?: string; 
+        eventType?: string;
+    }>({ isOpen: false });
+
 
     const mediaUrlsRef = useRef(mediaUrls);
     mediaUrlsRef.current = mediaUrls;
@@ -503,6 +517,27 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
         }
     };
     
+    const handleOpenStream = (event: RavenEvent) => {
+        const eventTime = new Date(event.event_timestamp).getTime();
+        let startTime;
+
+        // Per user request, CAR_BUMPED and ENGINE_ON start 2s after. Others start 5s before.
+        if (event.event_type === 'CAR_BUMPED' || event.event_type === 'ENGINE_ON') {
+            startTime = eventTime + 2000;
+        } else {
+            startTime = eventTime - 5000;
+        }
+
+        const startTimestampForApi = Math.floor(startTime / 1000).toString();
+        
+        setStreamModalState({ 
+            isOpen: true, 
+            startTimestamp: startTimestampForApi, 
+            eventType: formatEventTypeLabel(event.event_type) 
+        });
+    };
+
+
     const filterButtonText = events ? t('detailView.events.filterEventsCount', { selected: selectedEventTypes.size, total: allEventTypes.length }) : t('detailView.events.filterEvents');
 
     return (
@@ -599,9 +634,21 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                 {filteredEvents?.map((event, index) => (
                     <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-soft-grey dark:border-gray-700">
                         <div className="flex justify-between items-start flex-wrap gap-2 mb-3">
-                            <div>
-                                <h4 className="font-bold">{formatEventTypeLabel(event.event_type)}</h4>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(event.event_timestamp).toLocaleString()}</p>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => handleOpenStream(event)}
+                                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-raven-blue dark:hover:text-sky-blue transition-colors duration-200"
+                                    aria-label={t('detailView.events.watchStream')}
+                                    title={t('detailView.events.watchStream')}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div>
+                                    <h4 className="font-bold">{formatEventTypeLabel(event.event_type)}</h4>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(event.event_timestamp).toLocaleString()}</p>
+                                </div>
                             </div>
                             <div className="text-sm text-gray-600 dark:text-gray-300">
                                 {event.latitude && event.longitude && (
@@ -654,6 +701,16 @@ const EventsView: React.FC<{ raven: RavenDetails; api: ApiContextType; onImageCl
                     </div>
                 ))}
             </div>
+            
+            <HistoricalStreamModal
+                isOpen={streamModalState.isOpen}
+                onClose={() => setStreamModalState({ isOpen: false })}
+                startTimestamp={streamModalState.startTimestamp}
+                eventType={streamModalState.eventType}
+                raven={raven}
+                api={api}
+                settings={settings}
+            />
         </div>
     );
 };
@@ -721,7 +778,7 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
 
     useEffect(() => {
         // Fetch settings if the tab is opened, and we don't have them, and there's no standing error.
-        if ((activeTab === 'settings' || activeTab === 'preview') && !settings && !settingsError) {
+        if ((activeTab === 'settings' || activeTab === 'preview' || activeTab === 'events') && !settings && !settingsError) {
             fetchSettings();
         }
     }, [activeTab, settings, settingsError, fetchSettings]);
@@ -844,7 +901,7 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
 
     const { make, model, year } = raven.vehicle_info || {};
     const subTitle = (make && model && year) ? `${year} ${make} ${model}` : raven.serial_number;
-    const tabs: Tab[] = ['map', 'preview', 'events', 'settings', 'logs'];
+    const tabs: Tab[] = ['map', 'preview', 'media', 'events', 'settings', 'logs'];
     
     const renderSettingsContent = () => {
         if (isFetchingSettings) {
@@ -893,7 +950,7 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
             </div>
             
             <div className="mt-6 border-b border-soft-grey dark:border-gray-700">
-                <nav className="-mb-px flex space-x-8" role="tablist" aria-label={t('detailView.tabs.label')}>
+                <nav className="-mb-px flex space-x-6 overflow-x-auto pb-1" role="tablist" aria-label={t('detailView.tabs.label')}>
                     {tabs.map((tab) => (
                          <button
                             key={tab}
@@ -921,8 +978,11 @@ export const RavenDetailView: React.FC<RavenDetailViewProps> = ({ raven, api, on
                 <div id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden={activeTab !== 'preview'}>
                     <LivePreview raven={raven} api={api} settings={settings} />
                 </div>
+                <div id="panel-media" role="tabpanel" aria-labelledby="tab-media" hidden={activeTab !== 'media'}>
+                    <MediaView raven={raven} api={api} />
+                </div>
                 <div id="panel-events" role="tabpanel" aria-labelledby="tab-events" hidden={activeTab !== 'events'}>
-                    <EventsView raven={raven} api={api} onImageClick={onImageClick} />
+                    <EventsView raven={raven} api={api} onImageClick={onImageClick} settings={settings} />
                 </div>
                 <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden={activeTab !== 'settings'}>
                      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">

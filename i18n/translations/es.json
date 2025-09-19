@@ -107,7 +107,12 @@
     "fuelTitle": "Nivel de combustible: {{value}}%"
   },
   "gridPreview": {
-    "viewDetails": "Ver vista previa en vivo para {{vehicleName}}"
+    "viewDetails": "Ver vista previa en vivo para {{vehicleName}}",
+    "pageIndicator": "Página {{currentPage}} de {{totalPages}}",
+    "firstPage": "Ir a la primera página",
+    "previousPage": "Ir a la página anterior",
+    "nextPage": "Ir a la página siguiente",
+    "lastPage": "Ir a la última página"
   },
   "time": {
     "justNow": "justo ahora",
@@ -120,9 +125,10 @@
   "detailView": {
     "tabs": {
       "map": "Mapa",
-      "preview": "Vista previa",
+      "preview": "Avance",
+      "media": "Medios",
       "events": "Eventos",
-      "settings": "Configuración",
+      "settings": "Ajustes",
       "logs": "Registros",
       "label": "Pestañas de detalles del vehículo"
     },
@@ -134,10 +140,17 @@
       "dark": "Oscuro",
       "satellite": "Satélite"
     },
+    "media": {
+      "title": "Acceso a Video Mejorado",
+      "startDate": "Fecha y hora de inicio",
+      "endDate": "Fecha y hora de finalización",
+      "loadTimeline": "Cargar línea de tiempo",
+      "prompt": "Seleccione un rango de fecha y hora para cargar la línea de tiempo de medios."
+    },
     "events": {
       "title": "Eventos recientes",
       "startDate": "Fecha de inicio",
-      "endDate": "Fecha de fin",
+      "endDate": "Fecha de finalización",
       "getEvents": "Obtener eventos",
       "filterEvents": "Filtrar eventos",
       "filterEventsCount": "Filtrar ({{selected}}/{{total}})",
@@ -150,7 +163,9 @@
       "cabinCam": "Cámara de cabina",
       "rawData": "Datos brutos del evento",
       "reportTitle": "Informe de eventos",
-      "timestamp": "Marca de tiempo"
+      "timestamp": "Marca de tiempo",
+      "watchStream": "Ver transmisión histórica de este evento",
+      "historicalStreamTitle": "Transmisión histórica: {{eventType}}"
     },
     "settings": {
       "title": "Configuración del dispositivo",
@@ -178,7 +193,7 @@
     "audio": {
       "title": "Audio",
       "notifications": "Notificaciones de audio habilitadas",
-      "streaming": "Audio en streaming habilitado"
+      "streaming": "Transmisión de audio habilitada"
     },
     "camera": {
       "title": "Cámara",
@@ -216,12 +231,12 @@
         "harshBraking": "Frenado brusco",
         "aggressiveAccel": "Aceleración agresiva",
         "harshCornering": "Giro brusco",
-        "possibleImpact": "Posible impacto",
-        "thresholdsTitle": "Umbrales de fuerza G",
+        "possibleImpact": "Impacto posible",
+        "thresholdsTitle": "Umbrales de Fuerza G",
         "vehicleTypePreset": "Preajuste de tipo de vehículo",
-        "lightDuty": "Ligero (ej: Sedanes)",
-        "mediumDuty": "Mediano (ej: Furgonetas)",
-        "heavyDuty": "Pesado (ej: Camiones)",
+        "lightDuty": "Ligero (ej. Sedanes)",
+        "mediumDuty": "Mediano (ej. Furgonetas)",
+        "heavyDuty": "Pesado (ej. Camiones)",
         "brakingThreshold": "Umbral de frenado brusco",
         "accelThreshold": "Umbral de aceleración agresiva",
         "corneringThreshold": "Umbral de giro brusco",
@@ -241,7 +256,7 @@
       },
       "dms": {
         "title": "Monitoreo del conductor (DMS)",
-        "cellphone": "Teléfono móvil",
+        "cellphone": "Teléfono celular",
         "cameraObscured": "Cámara obstruida",
         "distraction": "Distracción",
         "drinking": "Bebiendo",
@@ -251,8 +266,8 @@
       },
       "adas": {
         "title": "Asistencia (ADAS)",
-        "tailgating": "Seguir de cerca",
-        "tailgatingThreshold": "Umbral de velocidad para seguir de cerca"
+        "tailgating": "Seguimiento cercano",
+        "tailgatingThreshold": "Umbral de velocidad de seguimiento"
       }
     },
     "obd": {
@@ -263,13 +278,13 @@
     "system": {
       "title": "Sistema",
       "gesture": "Gesto habilitado",
-      "videoAfterParked": "Grab. de video después de estacionar"
+      "videoAfterParked": "Grab. video tras estacionar"
     }
   },
   "driverMessage": {
     "title": "Mensaje en pantalla del conductor",
     "messageLabel": "Mensaje",
-    "placeholder": "Introduzca un mensaje para mostrar...",
+    "placeholder": "Escriba un mensaje para mostrar...",
     "durationLabel": "Duración",
     "minutes": "{{count}} minutos",
     "clear": "Borrar mensaje",
@@ -281,10 +296,10 @@
   },
   "tripShare": {
     "title": "Compartir viaje",
-    "description": "Genere un enlace temporal para compartir el próximo viaje del Raven. El enlace se activará cuando comience el viaje y caducará cuando termine.",
+    "description": "Genere un enlace temporal para compartir el próximo viaje del Raven. El enlace se activará al comenzar el viaje y expirará al finalizar.",
     "showQr": "Mostrar código QR",
     "generateNew": "Generar nuevo enlace",
-    "generate": "Generar enlace para compartir"
+    "generate": "Generar enlace de viaje"
   },
   "qrModal": {
     "close": "Cerrar modal de código QR",
@@ -296,16 +311,16 @@
     "fetchEvents": "Error al obtener los eventos",
     "loadMedia": "Error al cargar el medio",
     "imageLoadFailed": "Error al cargar la imagen",
-    "generatePdf": "Error al generar el PDF. Consulte la consola para obtener más detalles.",
+    "generatePdf": "Error al generar el PDF. Consulte la consola para más detalles.",
     "loadSettings": "Error al cargar la configuración",
     "saveSettings": "Error al guardar la configuración",
     "parseSettings": "Error al analizar el archivo de configuración. Asegúrese de que sea un archivo JSON válido.",
     "readSettings": "Error al leer el archivo de configuración.",
-    "settingsConfigError": "No se pudo cargar la configuración del dispositivo debido a un error de configuración del servidor.",
+    "settingsConfigError": "La configuración del dispositivo no se pudo cargar debido a un error de configuración del servidor.",
     "settingsFixPrompt": "Este error impide que se carguen otras configuraciones. Puede intentar solucionarlo restableciendo el diseño de la pantalla del dispositivo a un valor predeterminado seguro. Esto no afectará a otras configuraciones.",
     "settingsFixButton": "Restablecer configuración de pantalla y recargar",
     "settingsFixingButton": "Restableciendo...",
-    "settingsFixFailed": "No se pudo aplicar la corrección. Póngase en contacto con el soporte si el problema persiste."
+    "settingsFixFailed": "No se pudo aplicar la solución. Póngase en contacto con el soporte si el problema persiste."
   },
   "fullScreenImageViewer": {
     "close": "Cerrar visor de imágenes a pantalla completa",
@@ -317,7 +332,8 @@
     "street": "Calle",
     "dark": "Oscuro",
     "satellite": "Satélite",
-    "label": "Mapa que muestra la última ubicación conocida de todos los vehículos."
+    "label": "Mapa que muestra la última ubicación conocida de todos los vehículos.",
+    "adjusting": "Ajustando la vista del mapa..."
   },
   "geofenceMap": {
     "statusActive": "Activo",
@@ -339,7 +355,7 @@
     "createTitle": "Crear geocerca",
     "editTitle": "Editar geocerca",
     "closeAriaLabel": "Cerrar editor",
-    "drawPrompt": "Utilice las herramientas del mapa para dibujar una forma para su geocerca.",
+    "drawPrompt": "Use las herramientas en el mapa para dibujar una forma para su geocerca.",
     "nameLabel": "Nombre",
     "descriptionLabel": "Descripción",
     "radiusLabel": "Radio (metros)",
@@ -371,24 +387,24 @@
     "uploadButton": "Subir {{count}} geocercas"
   },
   "bulkGeofence": {
-    "templateTitle": "Descargar una plantilla de archivo CSV",
+    "templateTitle": "Descargar un archivo de plantilla CSV",
     "template": "Plantilla",
     "downloadAllTitle": "Descargar todas las geocercas como un archivo CSV",
     "downloadAll": "Descargar todo",
     "uploadCsvTitle": "Subir geocercas desde un archivo CSV",
     "uploadCsv": "Subir CSV",
     "create": "Crear geocerca",
-    "uploadErrorAlert": "Ocurrió un error durante la carga masiva. Es posible que algunas geocercas no se hayan creado. Por favor, revise la lista e inténtelo de nuevo."
+    "uploadErrorAlert": "Ocurrió un error durante la carga masiva. Es posible que algunas geocercas no se hayan creado. Revise la lista e intente de nuevo."
   },
   "bulkMessage": {
     "modalTitle": "Mensaje masivo para conductores",
-    "summary": "Este mensaje se enviará a todos los <strong>{{count}}</strong> vehículos filtrados actualmente.",
+    "summary": "Este mensaje se enviará a los <strong>{{count}}</strong> vehículos filtrados actualmente.",
     "sendingTitle": "Enviando mensajes...",
     "completeTitle": "Envío completado",
     "successMessage": "Enviado con éxito a {{count}} vehículo(s).",
     "errorMessage": "Error al enviar a {{count}} vehículo(s).",
     "messageLabel": "Mensaje",
-    "placeholder": "Introduzca el mensaje...",
+    "placeholder": "Escriba el mensaje...",
     "durationLabel": "Duración",
     "minutes": "{{count}} minutos",
     "submit": "Enviar mensaje"

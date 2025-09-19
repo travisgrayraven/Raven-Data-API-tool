@@ -1,5 +1,9 @@
 
-import React, { useEffect, useRef } from 'react';
+
+
+
+
+import React, { useEffect, useRef, useState } from 'react';
 import type { RavenDetails } from '../types';
 import { useTranslation } from '../i18n/i18n';
 
@@ -7,13 +11,17 @@ declare const L: any; // Declare Leaflet to TypeScript
 
 interface DashboardMapProps {
     ravens: RavenDetails[];
+    activeTab: 'map' | 'grid' | 'geofences';
 }
 
-export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
+export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens, activeTab }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
-    const markerClusterGroupRef = useRef<any>(null); // Ref for the cluster group
+    const markerClusterGroupRef = useRef<any>(null);
     const { t } = useTranslation();
+    const [isResizing, setIsResizing] = useState(false);
+    // FIX: Initialize useRef with an argument to resolve "Expected 1 arguments, but got 0" error.
+    const prevTab = useRef<string | undefined>(undefined);
 
     useEffect(() => {
         if (!mapContainer.current) return;
@@ -43,9 +51,8 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
             street.addTo(mapRef.current); // Add default layer
             L.control.layers(baseMaps).addTo(mapRef.current);
             
-            // Initialize the marker cluster group and add it to the map
             markerClusterGroupRef.current = L.markerClusterGroup({
-                disableClusteringAtZoom: 19, // OpenStreetMap tiles max zoom is 19
+                disableClusteringAtZoom: 19,
                 spiderfyOnMaxZoom: true,
             });
             mapRef.current.addLayer(markerClusterGroupRef.current);
@@ -54,11 +61,9 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
         const map = mapRef.current;
         const markerClusterGroup = markerClusterGroupRef.current;
         
-        // Clear existing markers from the cluster group
+        // Update markers from raven data
         markerClusterGroup.clearLayers();
-
         const validRavens = ravens.filter(r => r.last_known_location?.latitude && r.last_known_location?.longitude);
-
         if (validRavens.length > 0) {
             const markers = validRavens.map(raven => {
                 const { latitude, longitude } = raven.last_known_location!;
@@ -66,24 +71,53 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens }) => {
                 marker.bindPopup(`<b>${raven.name}</b>`);
                 return marker;
             });
-
             markerClusterGroup.addLayers(markers);
-            
-            // Fit map to markers - use the cluster group's bounds
-            map.fitBounds(markerClusterGroup.getBounds().pad(0.1));
         }
 
-        // This addresses the sizing issue by ensuring Leaflet re-checks the container's
-        // dimensions after the page has had a moment to fully render.
-        const timer = setTimeout(() => {
-            if (mapRef.current) {
-                mapRef.current.invalidateSize();
+        // Handle resizing and fitting bounds only when the map is visible
+        if (activeTab === 'map') {
+            const justSwitchedToMap = prevTab.current !== 'map';
+            if (justSwitchedToMap) {
+                setIsResizing(true);
             }
-        }, 100);
+            
+            const timer = setTimeout(() => {
+                if (map) {
+                    map.invalidateSize();
+                    if (markerClusterGroup.getLayers().length > 0) {
+                        map.fitBounds(markerClusterGroup.getBounds().pad(0.1));
+                    }
+                }
+                if (justSwitchedToMap) {
+                    setIsResizing(false);
+                }
+            }, 200);
+            
+            return () => clearTimeout(timer);
+        }
         
-        return () => clearTimeout(timer);
-        
-    }, [ravens, t]);
+    }, [ravens, t, activeTab]);
 
-    return <div ref={mapContainer} className="h-64 md:h-96 w-full rounded-lg shadow-md z-0" role="application" aria-label={t('dashboardMap.label')} />;
+    useEffect(() => {
+        prevTab.current = activeTab;
+    }, [activeTab]);
+
+    return (
+        <div className="relative h-64 md:h-96 w-full rounded-lg shadow-md">
+            {isResizing && (
+                <div className="absolute inset-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 z-10 flex items-center justify-center rounded-lg">
+                    <div className="text-center">
+                        <svg className="animate-spin h-8 w-8 text-raven-blue mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {t('dashboardMap.adjusting')}
+                        </p>
+                    </div>
+                </div>
+            )}
+            <div ref={mapContainer} className="h-full w-full rounded-lg z-0" role="application" aria-label={t('dashboardMap.label')} />
+        </div>
+    );
 };

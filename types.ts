@@ -100,14 +100,10 @@ export interface GeofenceFormData {
   notification: string;
 }
 
-export type Tab = 'map' | 'preview' | 'events' | 'settings' | 'logs';
+export type Tab = 'map' | 'preview' | 'media' | 'events' | 'settings' | 'logs';
 
 
 // --- Web Component Type Definitions ---
-
-// FIX: Added TypeScript definitions for the custom web components ('rc-live-preview-viewer' and 'rc-streaming-video-player')
-// to be recognized by JSX. This is done by augmenting the global JSX.IntrinsicElements interface, which resolves
-// errors like "Property 'rc-live-preview-viewer' does not exist on type 'JSX.IntrinsicElements'".
 
 /**
  * Props for the rc-live-preview-viewer web component.
@@ -136,12 +132,27 @@ interface RcStreamingVideoPlayerProps extends React.HTMLAttributes<HTMLElement> 
     forcereporting?: boolean;
 }
 
+/**
+ * Props for the rc-enhanced-video-access web component.
+ */
+interface RcEnhancedVideoAccessProps extends React.HTMLAttributes<HTMLElement> {
+    apidomain: string;
+    sessiontoken: string;
+    ravenid: string;
+    starttimestamp: string;
+    endtimestamp: string;
+    hidepreviewpopup?: boolean;
+    hidevideoslist?: boolean;
+    forcereporting?: boolean;
+}
+
 // Extend the global JSX namespace to include our custom elements.
 declare global {
     namespace JSX {
         interface IntrinsicElements {
             'rc-live-preview-viewer': React.DetailedHTMLProps<RcLivePreviewViewerProps, HTMLElement>;
             'rc-streaming-video-player': React.DetailedHTMLProps<RcStreamingVideoPlayerProps, HTMLElement>;
+            'rc-enhanced-video-access': React.DetailedHTMLProps<RcEnhancedVideoAccessProps, HTMLElement>;
         }
     }
 }

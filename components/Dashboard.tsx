@@ -471,7 +471,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 
                 <div id="map-panel" role="tabpanel" aria-labelledby="map-tab" hidden={activeTab !== 'map'}>
                     <div className="mb-6">
-                        <DashboardMap ravens={filteredAndSortedRavens} />
+                        <DashboardMap ravens={filteredAndSortedRavens} activeTab={activeTab} />
                     </div>
                     {filteredAndSortedRavens.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
