@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-// FIX: A direct import of '../types' is necessary to ensure its global JSX augmentations
-// for custom web components are applied. Build tools might otherwise tree-shake modules
-// that only appear to export types, preventing the global namespace from being extended.
+// FIX: Import 'types.ts' for its side-effects to make global JSX definitions available for web components.
 import '../types';
 import type { RavenDetails, ApiContextType, RavenSettings } from '../types';
 import { useTranslation } from '../i18n/i18n';
@@ -10,10 +8,10 @@ interface LivePreviewProps {
   raven: RavenDetails;
   api: ApiContextType;
   settings: RavenSettings | null;
-  isCabinCameraEnabled: boolean;
+  isActive: boolean;
 }
 
-export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings, isCabinCameraEnabled }) => {
+export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings, isActive }) => {
     const [mode, setMode] = useState<'preview' | 'stream'>('preview');
     const { t } = useTranslation();
 
@@ -28,6 +26,14 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings, 
     useEffect(() => {
         setSessionToken(api.token);
     }, [api.token]);
+
+    // When the tab becomes inactive, reset the mode to 'preview'.
+    // This ensures that if the user was streaming, the stream component is unmounted.
+    useEffect(() => {
+        if (!isActive) {
+            setMode('preview');
+        }
+    }, [isActive]);
     
     const apiDomain = useMemo(() => {
         try {
@@ -95,15 +101,13 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings, 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
             {/* 
-                Inject a style tag to customize web component controls.
-                When the cabin camera is disabled, hide the camera toggle.
+                Inject a style tag to visually hide the camera toggle button within the web component.
             */}
             <style>{`
                 rc-live-preview-viewer,
                 rc-streaming-video-player {
                     --media-control-background-color: transparent;
                     --media-control-active-background-color: transparent;
-                    ${!isCabinCameraEnabled ? '--media-control-camera-toggle-icon-url: none;' : ''}
                 }
             `}</style>
 
@@ -131,24 +135,22 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings, 
                 </div>
             </div>
 
-            {mode === 'preview' ? (
-                <div className="flex flex-col md:flex-row gap-6">
-                    <div className={`flex-1 min-w-0 ${!isCabinCameraEnabled ? 'md:max-w-2xl md:mx-auto' : ''}`}>
-                        {isCabinCameraEnabled && <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.roadCamera')}</h4>}
-                        <div className="relative w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
-                            <rc-live-preview-viewer
-                                ref={roadViewerRef}
-                                apidomain={apiDomain}
-                                sessiontoken={sessionToken}
-                                ravenid={raven.uuid}
-                                activecamera="road"
-                                inactivitytimeoutseconds="300"
-                            />
-                        </div>
-                    </div>
-                    {isCabinCameraEnabled && (
+            {isActive ? (
+                mode === 'preview' ? (
+                    <div className="flex flex-col md:flex-row gap-6">
                         <div className="flex-1 min-w-0">
-                            <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.cabinCamera')}</h4>
+                            <div className="relative w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
+                                <rc-live-preview-viewer
+                                    ref={roadViewerRef}
+                                    apidomain={apiDomain}
+                                    sessiontoken={sessionToken}
+                                    ravenid={raven.uuid}
+                                    activecamera="road"
+                                    inactivitytimeoutseconds="300"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
                             <div className="relative w-full mx-auto bg-black rounded-md overflow-hidden aspect-video">
                                 <rc-live-preview-viewer
                                     ref={cabinViewerRef}
@@ -160,21 +162,34 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ raven, api, settings, 
                                 />
                             </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <div>
+                        <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.stream')}</h4>
+                        <div className="relative w-full max-w-2xl mx-auto bg-black rounded-md overflow-hidden aspect-video">
+                            <rc-streaming-video-player
+                                ref={streamViewerRef}
+                                apidomain={apiDomain}
+                                sessiontoken={sessionToken}
+                                ravenid={raven.uuid}
+                                activecamera="road"
+                                inactivitytimeoutseconds="300"
+                                {...(isAudioSupported && { audiosupported: true })}
+                            />
+                        </div>
+                    </div>
+                )
             ) : (
-                <div>
-                    <h4 className="text-lg font-semibold mb-2 text-center">{t('detailView.livePreview.stream')}</h4>
-                    <div className="relative w-full max-w-2xl mx-auto bg-black rounded-md overflow-hidden aspect-video">
-                        <rc-streaming-video-player
-                            ref={streamViewerRef}
-                            apidomain={apiDomain}
-                            sessiontoken={sessionToken}
-                            ravenid={raven.uuid}
-                            activecamera="road"
-                            inactivitytimeoutseconds="300"
-                            {...(isAudioSupported && { audiosupported: true })}
-                        />
+                 <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex-1 min-w-0">
+                        <div className="relative w-full mx-auto bg-gray-100 dark:bg-black rounded-md overflow-hidden aspect-video flex items-center justify-center">
+                            <p className="text-gray-500 text-center p-2">{t('detailView.livePreview.roadCamera')} - {t('detailView.livePreview.paused')}</p>
+                        </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <div className="relative w-full mx-auto bg-gray-100 dark:bg-black rounded-md overflow-hidden aspect-video flex items-center justify-center">
+                            <p className="text-gray-500 text-center p-2">{t('detailView.livePreview.cabinCamera')} - {t('detailView.livePreview.paused')}</p>
+                        </div>
                     </div>
                 </div>
             )}

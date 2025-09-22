@@ -35,7 +35,6 @@
   "header": {
     "openSettings": "Ouvrir les paramètres utilisateur",
     "theme": "Thème",
-    "cabinCamera": "Afficher la caméra de cabine",
     "language": "Langue",
     "shareApp": "Partager l'application",
     "resetCredentials": "Réinitialiser les identifiants"
@@ -113,7 +112,9 @@
     "firstPage": "Aller à la première page",
     "previousPage": "Aller à la page précédente",
     "nextPage": "Aller à la page suivante",
-    "lastPage": "Aller à la dernière page"
+    "lastPage": "Aller à la dernière page",
+    "paused": "Vue Grille en Pause",
+    "pausedDescription": "Les aperçus sont mis en pause pour économiser les données lorsque l'onglet est inactif."
   },
   "time": {
     "justNow": "à l'instant",
@@ -142,13 +143,11 @@
       "satellite": "Satellite"
     },
     "media": {
-        "title": "Accès Vidéo Amélioré",
-        "startDate": "Date de début",
-        "startTime": "Heure de début",
-        "endDate": "Date de fin",
-        "endTime": "Heure de fin",
-        "loadMedia": "Charger Média",
-        "prompt": "Sélectionnez une plage de dates et d'heures, puis cliquez sur \"Charger Média\" pour afficher la chronologie."
+      "title": "Accès Vidéo Amélioré",
+      "startDate": "Date et heure de début",
+      "endDate": "Date et heure de fin",
+      "loadTimeline": "Charger la chronologie",
+      "prompt": "Sélectionnez une plage de dates et d'heures pour charger la chronologie média."
     },
     "events": {
       "title": "Événements récents",
@@ -162,11 +161,11 @@
       "noEvents": "Aucun événement trouvé pour les critères sélectionnés.",
       "location": "Position",
       "speed": "Vitesse",
-      "roadCam": "Caméra route",
-      "cabinCam": "Caméra cabine",
       "rawData": "Données brutes de l'événement",
       "reportTitle": "Rapport d'événements",
-      "timestamp": "Horodatage"
+      "timestamp": "Horodatage",
+      "watchStream": "Regarder le flux historique pour cet événement",
+      "historicalStreamTitle": "Flux historique : {{eventType}}"
     },
     "settings": {
       "title": "Paramètres de l'appareil",
@@ -185,9 +184,10 @@
       "title": "Vue en direct",
       "offlineTitle": "Raven est hors ligne",
       "offlineDescription": "L'aperçu et le flux en direct sont indisponibles lorsque l'appareil est hors ligne.",
-      "roadCamera": "Caméra route",
-      "cabinCamera": "Caméra cabine",
-      "stream": "Flux"
+      "roadCamera": "Route",
+      "cabinCamera": "Cabine",
+      "stream": "Flux",
+      "paused": "En pause"
     }
   },
   "settings": {
@@ -301,10 +301,6 @@
     "showQr": "Afficher le code QR",
     "generateNew": "Générer un nouveau lien",
     "generate": "Générer le lien de partage"
-  },
-  "historicalStream": {
-    "title": "Flux historique",
-    "playAriaLabel": "Lancer le flux historique pour cet événement"
   },
   "qrModal": {
     "close": "Fermer la modale du code QR",

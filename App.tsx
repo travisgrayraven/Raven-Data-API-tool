@@ -9,7 +9,6 @@ import { RavenDetailView } from './components/RavenDetailView';
 import { HeaderActions } from './components/HeaderActions';
 import { FullScreenImageViewer } from './components/FullScreenImageViewer';
 import { useTheme } from './hooks/useTheme';
-import { useCabinCamera } from './hooks/useCabinCamera';
 import { useTranslation } from './i18n/i18n';
 import { QRCodeModal } from './components/QRCodeModal';
 
@@ -42,7 +41,6 @@ const App: React.FC = () => {
 
 
     const [theme, setTheme] = useTheme();
-    const [isCabinCameraEnabled, setIsCabinCameraEnabled] = useCabinCamera();
     const { t } = useTranslation();
 
     // Register service worker for PWA functionality
@@ -259,7 +257,6 @@ const App: React.FC = () => {
                     logs={apiLogs} 
                     onImageClick={handleOpenImageViewer}
                     initialTab={initialDetailTab}
-                    isCabinCameraEnabled={isCabinCameraEnabled}
                 />;
             }
             return <Dashboard 
@@ -270,7 +267,6 @@ const App: React.FC = () => {
                 onRefreshData={handleRefreshData} 
                 isRefreshing={isRefreshing} 
                 api={api}
-                isCabinCameraEnabled={isCabinCameraEnabled}
             />;
         }
         
@@ -292,8 +288,6 @@ const App: React.FC = () => {
                              <HeaderActions 
                                 theme={theme} 
                                 setTheme={setTheme} 
-                                isCabinCameraEnabled={isCabinCameraEnabled}
-                                setIsCabinCameraEnabled={setIsCabinCameraEnabled}
                                 onReset={handleReset}
                                 onShare={handleOpenShareModal}
                              />

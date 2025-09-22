@@ -1,40 +1,40 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-// FIX: A direct import of '../types' is necessary to ensure its global JSX augmentations
-// for custom web components are applied. Build tools might otherwise tree-shake modules
-// that only appear to export types, preventing the global namespace from being extended.
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+// FIX: Import 'types.ts' for its side-effects to make global JSX definitions available for web components.
 import '../types';
-import type { RavenDetails, ApiContextType } from '../types';
+import type { RavenDetails, ApiContextType, RavenSettings } from '../types';
 import { useTranslation } from '../i18n/i18n';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface HistoricalStreamModalProps {
   isOpen: boolean;
   onClose: () => void;
+  startTimestamp?: string;
+  eventType?: string;
   raven: RavenDetails;
   api: ApiContextType;
-  startTimestamp: string | null;
-  isAudioSupported: boolean;
-  isCabinCameraEnabled: boolean;
+  settings: RavenSettings | null;
 }
 
 export const HistoricalStreamModal: React.FC<HistoricalStreamModalProps> = ({
   isOpen,
   onClose,
+  startTimestamp,
+  eventType,
   raven,
   api,
-  startTimestamp,
-  isAudioSupported,
-  isCabinCameraEnabled,
+  settings,
 }) => {
   const { t } = useTranslation();
   const modalRef = useFocusTrap<HTMLDivElement>(isOpen);
   const streamViewerRef = useRef<HTMLElement>(null);
+  
   const [sessionToken, setSessionToken] = useState(api.token);
 
+  // Keep the session token synchronized with the main app's token
   useEffect(() => {
     setSessionToken(api.token);
   }, [api.token]);
-
+  
   const apiDomain = useMemo(() => {
     try {
         const url = new URL(api.apiUrl);
@@ -46,16 +46,15 @@ export const HistoricalStreamModal: React.FC<HistoricalStreamModalProps> = ({
   }, [api.apiUrl]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
       }
     };
-
-    if (isOpen) {
-      window.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    }
+    window.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -63,6 +62,7 @@ export const HistoricalStreamModal: React.FC<HistoricalStreamModalProps> = ({
     };
   }, [isOpen, onClose]);
   
+  // Effect to handle session token refreshes for the web component
   useEffect(() => {
     const viewer = streamViewerRef.current;
     if (!viewer) return;
@@ -94,10 +94,12 @@ export const HistoricalStreamModal: React.FC<HistoricalStreamModalProps> = ({
     };
   }, [api.refreshToken, streamViewerRef.current]);
 
-
-  if (!isOpen || !startTimestamp) {
+  if (!isOpen) {
     return null;
   }
+
+  const isAudioSupported = settings?.audio?.streaming_audio_enabled === true;
+  const modalTitle = t('detailView.events.historicalStreamTitle', { eventType: eventType || 'Event' });
 
   return (
     <div
@@ -105,24 +107,17 @@ export const HistoricalStreamModal: React.FC<HistoricalStreamModalProps> = ({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="stream-modal-title"
+      aria-labelledby="historical-stream-title"
     >
-        <style>{`
-            rc-streaming-video-player {
-                --media-control-background-color: transparent;
-                --media-control-active-background-color: transparent;
-                ${!isCabinCameraEnabled ? '--media-control-camera-toggle-icon-url: none;' : ''}
-            }
-        `}</style>
-      <div
+      <div 
         ref={modalRef}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-4 sm:p-6 w-full max-w-2xl mx-4 relative focus:outline-none"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-4 sm:p-6 text-left relative w-full max-w-3xl mx-4 focus:outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
-            <h2 id="stream-modal-title" className="text-xl font-bold">{t('historicalStream.title')}</h2>
+            <h2 id="historical-stream-title" className="text-xl font-bold">{modalTitle}</h2>
             <button
-                className="p-1 text-gray-500 dark:text-gray-400 text-3xl hover:text-gray-800 dark:hover:text-gray-200 focus:outline-none"
+                className="p-1 -mr-2 text-gray-500 dark:text-gray-400 text-3xl hover:text-gray-800 dark:hover:text-gray-200 focus:outline-none"
                 onClick={onClose}
                 aria-label={t('common.close')}
             >
@@ -130,18 +125,25 @@ export const HistoricalStreamModal: React.FC<HistoricalStreamModalProps> = ({
             </button>
         </div>
         
-        <div className="relative w-full bg-black rounded-md overflow-hidden aspect-video">
-            <rc-streaming-video-player
-                ref={streamViewerRef}
-                apidomain={apiDomain}
-                sessiontoken={sessionToken}
-                ravenid={raven.uuid}
-                starttimestamp={startTimestamp}
-                activecamera="road"
-                inactivitytimeoutseconds="300"
-                {...(isAudioSupported && { audiosupported: true })}
-            />
-        </div>
+        {startTimestamp ? (
+             <div className="relative w-full bg-black rounded-md overflow-hidden aspect-video">
+                <rc-streaming-video-player
+                    ref={streamViewerRef}
+                    apidomain={apiDomain}
+                    sessiontoken={sessionToken}
+                    ravenid={raven.uuid}
+                    activecamera="road"
+                    starttimestamp={startTimestamp}
+                    seekintervalseconds="15"
+                    inactivitytimeoutseconds="90"
+                    {...(isAudioSupported && { audiosupported: true })}
+                />
+            </div>
+        ) : (
+            <div className="w-full aspect-video flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-md">
+                <p>{t('common.error')}: Invalid start time.</p>
+            </div>
+        )}
       </div>
     </div>
   );

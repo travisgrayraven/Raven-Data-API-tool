@@ -35,7 +35,6 @@
   "header": {
     "openSettings": "Open user settings",
     "theme": "Theme",
-    "cabinCamera": "Show Cabin Camera",
     "language": "Language",
     "shareApp": "Share App",
     "resetCredentials": "Reset Credentials"
@@ -113,7 +112,9 @@
     "firstPage": "Go to first page",
     "previousPage": "Go to previous page",
     "nextPage": "Go to next page",
-    "lastPage": "Go to last page"
+    "lastPage": "Go to last page",
+    "paused": "Grid View Paused",
+    "pausedDescription": "Previews are paused to save data while the tab is inactive."
   },
   "time": {
     "justNow": "just now",
@@ -142,13 +143,11 @@
         "satellite": "Satellite"
     },
     "media": {
-        "title": "Enhanced Video Access",
-        "startDate": "Start Date",
-        "startTime": "Start Time",
-        "endDate": "End Date",
-        "endTime": "End Time",
-        "loadMedia": "Load Media",
-        "prompt": "Select a date and time range and click \"Load Media\" to view the timeline."
+      "title": "Enhanced Video Access",
+      "startDate": "Start Date & Time",
+      "endDate": "End Date & Time",
+      "loadTimeline": "Load Media Timeline",
+      "prompt": "Select a date and time range to load the media timeline."
     },
     "events": {
         "title": "Recent Events",
@@ -162,11 +161,11 @@
         "noEvents": "No events found for the selected criteria.",
         "location": "Location",
         "speed": "Speed",
-        "roadCam": "Road Cam",
-        "cabinCam": "Cabin Cam",
         "rawData": "Raw Event Data",
         "reportTitle": "Event Report",
-        "timestamp": "Timestamp"
+        "timestamp": "Timestamp",
+        "watchStream": "Watch historical stream for this event",
+        "historicalStreamTitle": "Historical Stream: {{eventType}}"
     },
     "settings": {
         "title": "Device Settings",
@@ -185,9 +184,10 @@
         "title": "Live View",
         "offlineTitle": "Raven is Offline",
         "offlineDescription": "Live preview & stream are unavailable when the device is offline.",
-        "roadCamera": "Road Camera",
-        "cabinCamera": "Cabin Camera",
-        "stream": "Stream"
+        "roadCamera": "Road",
+        "cabinCamera": "Cabin",
+        "stream": "Stream",
+        "paused": "Paused"
     }
   },
   "settings": {
@@ -301,10 +301,6 @@
       "showQr": "Show QR Code",
       "generateNew": "Generate New Link",
       "generate": "Generate Trip Share Link"
-  },
-  "historicalStream": {
-    "title": "Historical Stream",
-    "playAriaLabel": "Play historical stream for this event"
   },
   "qrModal": {
       "close": "Close QR code modal",

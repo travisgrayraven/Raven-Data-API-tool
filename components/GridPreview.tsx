@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { RavenDetails, ApiContextType, Tab } from '../types';
 import { useTranslation } from '../i18n/i18n';
@@ -7,19 +9,15 @@ interface GridPreviewProps {
   ravens: RavenDetails[];
   api: ApiContextType;
   onSelectRaven: (raven: RavenDetails, initialTab: Tab) => void;
-  isCabinCameraEnabled: boolean;
+  isActive: boolean;
 }
 
-export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectRaven, isCabinCameraEnabled }) => {
+export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectRaven, isActive }) => {
     const [activeCamera, setActiveCamera] = useState<'road' | 'cabin'>('road');
     const [sessionToken, setSessionToken] = useState(api.token);
-    const viewerRefs = useRef<Map<string, HTMLElement>>(new Map());
     const isRefreshingToken = useRef(false);
     const { t } = useTranslation();
     const [currentPage, setCurrentPage] = useState(1);
-    
-    // State to track the number of mounted viewers to correctly re-run the event listener effect
-    const [viewerCount, setViewerCount] = useState(0);
 
     const ITEMS_PER_PAGE = 20;
     const totalPages = Math.ceil(ravens.length / ITEMS_PER_PAGE);
@@ -63,40 +61,6 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectR
             isRefreshingToken.current = false;
         }
     }, [api]);
-
-    // Callbacks to manage the map of viewer refs from child components
-    const onViewerMount = useCallback((uuid: string, node: HTMLElement) => {
-        viewerRefs.current.set(uuid, node);
-        setViewerCount(prev => prev + 1);
-    }, []);
-
-    const onViewerUnmount = useCallback((uuid: string) => {
-        viewerRefs.current.delete(uuid);
-        setViewerCount(prev => prev - 1);
-    }, []);
-
-    useEffect(() => {
-        const handleAuthError = (e: Event) => {
-            const detail = (e as CustomEvent).detail;
-            console.error(`Grid Preview Auth Error: ${detail.subtype}`, detail.data);
-            if (detail.subtype === 'forbidden') {
-                handleSessionExpired();
-            }
-        };
-
-        const refsMap = viewerRefs.current;
-        refsMap.forEach(viewer => {
-            viewer.addEventListener('sessionExpired', handleSessionExpired);
-            viewer.addEventListener('authError', handleAuthError);
-        });
-
-        return () => {
-            refsMap.forEach(viewer => {
-                viewer.removeEventListener('sessionExpired', handleSessionExpired);
-                viewer.removeEventListener('authError', handleAuthError);
-            });
-        };
-    }, [viewerCount, handleSessionExpired]); // Re-attach listeners when the set of viewers changes
     
     const PaginationControls = () => {
         if (totalPages <= 1) return null;
@@ -146,6 +110,19 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectR
         );
     };
 
+    if (!isActive) {
+        return (
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-inner">
+                <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-soft-grey dark:border-gray-700">
+                     <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                    </svg>
+                    <h4 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">{t('gridPreview.paused')}</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('gridPreview.pausedDescription')}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="mt-4">
@@ -153,33 +130,30 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectR
                 rc-live-preview-viewer {
                     --media-control-background-color: transparent;
                     --media-control-active-background-color: transparent;
-                    ${!isCabinCameraEnabled ? '--media-control-camera-toggle-icon-url: none;' : ''}
                 }
             `}</style>
-            {isCabinCameraEnabled && (
-                <div className="flex justify-center mb-6">
-                    <div className="inline-flex rounded-md shadow-sm bg-gray-100 dark:bg-gray-700/50 p-1" role="group">
-                        <button
-                            type="button"
-                            onClick={() => setActiveCamera('road')}
-                            className={`px-6 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                                activeCamera === 'road' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
-                            }`}
-                        >
-                            {t('detailView.livePreview.roadCamera')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveCamera('cabin')}
-                            className={`px-6 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                                activeCamera === 'cabin' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
-                            }`}
-                        >
-                            {t('detailView.livePreview.cabinCamera')}
-                        </button>
-                    </div>
+            <div className="flex justify-center mb-6">
+                <div className="inline-flex rounded-md shadow-sm bg-gray-100 dark:bg-gray-700/50 p-1" role="group">
+                    <button
+                        type="button"
+                        onClick={() => setActiveCamera('road')}
+                        className={`px-6 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                            activeCamera === 'road' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
+                        }`}
+                    >
+                        {t('detailView.livePreview.roadCamera')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveCamera('cabin')}
+                        className={`px-6 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                            activeCamera === 'cabin' ? 'bg-white dark:bg-charcoal-grey/20 text-raven-blue dark:text-white shadow' : 'text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50'
+                        }`}
+                    >
+                        {t('detailView.livePreview.cabinCamera')}
+                    </button>
                 </div>
-            )}
+            </div>
 
             <PaginationControls />
 
@@ -191,12 +165,11 @@ export const GridPreview: React.FC<GridPreviewProps> = ({ ravens, api, onSelectR
                         <GridItem
                             key={raven.uuid}
                             raven={raven}
-                            apiDomain={apiDomain}
+                            activeCamera={activeCamera}
                             sessionToken={sessionToken}
-                            activeCamera={isCabinCameraEnabled ? activeCamera : 'road'}
+                            apiDomain={apiDomain}
                             onSelectRaven={onSelectRaven}
-                            onViewerMount={onViewerMount}
-                            onViewerUnmount={onViewerUnmount}
+                            handleSessionExpired={handleSessionExpired}
                         />
                     ))}
                 </div>

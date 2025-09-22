@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-// FIX: A direct import of '../types' is necessary to ensure its global JSX augmentations
-// for custom web components are applied. Build tools might otherwise tree-shake modules
-// that only appear to export types, preventing the global namespace from being extended.
+import React, { useState, useEffect, useRef } from 'react';
+// FIX: Import 'types.ts' for its side-effects to make global JSX definitions available for web components.
 import '../types';
 import type { RavenDetails, Tab } from '../types';
 import { useTranslation } from '../i18n/i18n';
+
+interface GridItemProps {
+    raven: RavenDetails;
+    activeCamera: 'road' | 'cabin';
+    sessionToken: string;
+    apiDomain: string;
+    onSelectRaven: (raven: RavenDetails, initialTab: Tab) => void;
+    handleSessionExpired: () => void;
+}
 
 const getRavenStatus = (raven: RavenDetails, t: (key: string) => string) => {
     if (raven.unplugged) {
@@ -39,38 +46,30 @@ const getRavenStatus = (raven: RavenDetails, t: (key: string) => string) => {
     };
 };
 
-interface GridItemProps {
-    raven: RavenDetails;
-    apiDomain: string;
-    sessionToken: string;
-    activeCamera: 'road' | 'cabin';
-    onSelectRaven: (raven: RavenDetails, initialTab: Tab) => void;
-    onViewerMount: (uuid: string, node: HTMLElement) => void;
-    onViewerUnmount: (uuid: string) => void;
-}
-
-export const GridItem: React.FC<GridItemProps> = ({ raven, apiDomain, sessionToken, activeCamera, onSelectRaven, onViewerMount, onViewerUnmount }) => {
+export const GridItem: React.FC<GridItemProps> = ({ raven, activeCamera, sessionToken, apiDomain, onSelectRaven, handleSessionExpired }) => {
     const { t } = useTranslation();
-    const containerRef = useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLDivElement | null>(null);
+    const viewerRef = useRef<HTMLElement | null>(null);
     const [isVisible, setIsVisible] = useState(false);
     const status = getRavenStatus(raven, t);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
-                // If the item is intersecting the viewport, set it to visible
+                // When the element is intersecting the viewport, set isVisible to true
                 if (entry.isIntersecting) {
                     setIsVisible(true);
-                    observer.disconnect(); // Disconnect once visible to save resources
+                    // We only need to do this once, so disconnect the observer
+                    observer.disconnect();
                 }
             },
             {
-                // Pre-load viewers that are within 200px of the viewport for a smoother scrolling experience
+                // Optional: Start loading when the item is 200px away from the viewport
                 rootMargin: '200px',
             }
         );
 
-        const currentRef = containerRef.current;
+        const currentRef = ref.current;
         if (currentRef) {
             observer.observe(currentRef);
         }
@@ -82,23 +81,30 @@ export const GridItem: React.FC<GridItemProps> = ({ raven, apiDomain, sessionTok
         };
     }, []);
 
-    const viewerRef = useCallback((node: HTMLElement | null) => {
-        if (node) {
-            onViewerMount(raven.uuid, node);
-        }
-    }, [raven.uuid, onViewerMount]);
-    
-    // Effect to notify parent when this component unmounts, to clean up refs
+    // Effect for handling authentication errors from the web component
     useEffect(() => {
-        const uuid = raven.uuid;
-        return () => {
-            onViewerUnmount(uuid);
-        };
-    }, [raven.uuid, onViewerUnmount]);
+        if (!isVisible || !viewerRef.current) return;
 
+        const handleAuthError = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            console.error(`Grid Item Auth Error for ${raven.name}: ${detail.subtype}`, detail.data);
+            if (detail.subtype === 'forbidden') {
+                handleSessionExpired();
+            }
+        };
+        
+        const viewer = viewerRef.current;
+        viewer.addEventListener('sessionExpired', handleSessionExpired);
+        viewer.addEventListener('authError', handleAuthError);
+
+        return () => {
+            viewer.removeEventListener('sessionExpired', handleSessionExpired);
+            viewer.removeEventListener('authError', handleAuthError);
+        };
+    }, [isVisible, handleSessionExpired, raven.name]);
 
     return (
-        <div ref={containerRef} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 flex flex-col h-full">
+        <div ref={ref} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 min-h-[215px]">
             <div className="flex justify-between items-center mb-2 gap-2">
                  <button 
                     onClick={() => onSelectRaven(raven, 'preview')}
@@ -112,7 +118,7 @@ export const GridItem: React.FC<GridItemProps> = ({ raven, apiDomain, sessionTok
                     <span className="text-xs font-semibold">{status.text}</span>
                 </div>
             </div>
-            <div className="relative w-full bg-black rounded-md overflow-hidden aspect-video mt-auto">
+            <div className="relative w-full bg-black rounded-md overflow-hidden aspect-video">
                 {isVisible ? (
                     raven.online ? (
                         <rc-live-preview-viewer
@@ -131,10 +137,9 @@ export const GridItem: React.FC<GridItemProps> = ({ raven, apiDomain, sessionTok
                         </div>
                     )
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-700" aria-hidden="true">
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.776 48.776 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
                 )}

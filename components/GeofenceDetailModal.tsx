@@ -3,8 +3,6 @@
 
 
 
-
-
 import React, { useState, useEffect } from 'react';
 import type { Geofence } from '../types';
 
