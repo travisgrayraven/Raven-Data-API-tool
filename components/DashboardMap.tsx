@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useRef, useState } from 'react';
 import type { RavenDetails } from '../types';
 import { useTranslation } from '../i18n/i18n';
@@ -7,10 +8,11 @@ declare const L: any; // Declare Leaflet to TypeScript
 
 interface DashboardMapProps {
     ravens: RavenDetails[];
+    selectedRavenUuids: Set<string>;
     activeTab: 'map' | 'grid' | 'geofences';
 }
 
-export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens, activeTab }) => {
+export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens, selectedRavenUuids, activeTab }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
     const markerClusterGroupRef = useRef<any>(null);
@@ -63,7 +65,17 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens, activeTab })
         if (validRavens.length > 0) {
             const markers = validRavens.map(raven => {
                 const { latitude, longitude } = raven.last_known_location!;
-                const marker = L.marker([latitude, longitude]);
+                const isSelected = selectedRavenUuids.has(raven.uuid);
+
+                const marker = L.circleMarker([latitude, longitude], {
+                    radius: isSelected ? 10 : 6,
+                    fillColor: isSelected ? '#1461D1' : '#787882',
+                    color: '#fff',
+                    weight: isSelected ? 2 : 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+                
                 marker.bindPopup(`<b>${raven.name}</b>`);
                 return marker;
             });
@@ -92,7 +104,7 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens, activeTab })
             return () => clearTimeout(timer);
         }
         
-    }, [ravens, t, activeTab]);
+    }, [ravens, selectedRavenUuids, t, activeTab]);
 
     useEffect(() => {
         prevTab.current = activeTab;

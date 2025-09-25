@@ -1,3 +1,4 @@
+
 {
   "common": {
     "error": "Error",
@@ -88,6 +89,11 @@
       "button": "Nearest",
       "title": "Find Nearest Vehicles"
     }
+  },
+  "selection": {
+    "count": "{{count}} Selected",
+    "selectAll": "Select All",
+    "clear": "Clear Selection"
   },
   "ravenCard": {
     "unnamedVehicle": "Unnamed Vehicle",

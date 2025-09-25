@@ -1,15 +1,21 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import type { RavenDetails } from '../types';
 import { useTranslation } from '../i18n/i18n';
 
 interface RavenCardProps {
   raven: RavenDetails;
   onSelect: () => void;
+  isSelectionMode: boolean;
+  isSelected: boolean;
+  onStartSelectionMode: (uuid: string) => void;
+  onToggleSelection: (uuid: string) => void;
 }
 
-export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
+export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect, isSelectionMode, isSelected, onStartSelectionMode, onToggleSelection }) => {
     const { t } = useTranslation();
+    const pressTimer = useRef<number | null>(null);
+    const longPressed = useRef(false);
 
     // Time formatting helper
     const formatTimeAgo = (isoString: string | undefined): string | null => {
@@ -34,6 +40,32 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
 
         const years = Math.floor(days / 365);
         return t('time.yearsAgo', { count: years });
+    };
+    
+    const handlePressStart = () => {
+        longPressed.current = false;
+        pressTimer.current = window.setTimeout(() => {
+            longPressed.current = true;
+            onStartSelectionMode(raven.uuid);
+        }, 500); // 500ms for long press
+    };
+
+    const handlePressEnd = () => {
+        if (pressTimer.current) {
+            clearTimeout(pressTimer.current);
+            pressTimer.current = null;
+        }
+    };
+
+    const handleClick = () => {
+        if (longPressed.current) {
+            return;
+        }
+        if (isSelectionMode) {
+            onToggleSelection(raven.uuid);
+        } else {
+            onSelect();
+        }
     };
 
     const { make, model, year } = raven.vehicle_info || {};
@@ -93,16 +125,31 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
 
     return (
         <div
-            onClick={onSelect}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 cursor-pointer transform hover:scale-105 transition-transform duration-200 flex flex-col group h-full border border-transparent hover:border-raven-blue"
+            onClick={handleClick}
+            onMouseDown={handlePressStart}
+            onMouseUp={handlePressEnd}
+            onMouseLeave={handlePressEnd}
+            onTouchStart={handlePressStart}
+            onTouchEnd={handlePressEnd}
+            className={`relative bg-white dark:bg-gray-800 rounded-lg p-5 cursor-pointer transform hover:scale-105 transition-transform duration-200 flex flex-col group h-full border-2 ${isSelected ? 'border-raven-blue dark:border-sky-blue' : 'border-transparent'}`}
             role="button"
             tabIndex={0}
-            onKeyPress={(e) => e.key === 'Enter' && onSelect()}
+            onKeyPress={(e) => e.key === 'Enter' && handleClick()}
             aria-label={t('ravenCard.viewDetails', { vehicleName: title })}
+            aria-checked={isSelectionMode ? isSelected : undefined}
         >
+             <div className={`absolute top-3 left-3 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-200 z-10 ${isSelectionMode ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                {isSelected ? (
+                    <div className="h-full w-full rounded-full bg-raven-blue border-2 border-white dark:border-gray-800 flex items-center justify-center shadow-md">
+                        <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                ) : (
+                    <div className="h-full w-full rounded-full bg-white/70 dark:bg-gray-600/70 backdrop-blur-sm border-2 border-gray-400 dark:border-gray-500 shadow"></div>
+                )}
+            </div>
             {/* Card Header */}
             <div className="flex justify-between items-start">
-                <div className="flex-grow">
+                <div className="flex-grow pl-8">
                     <h3 className="text-lg font-bold truncate pr-2 text-gray-900 dark:text-white" title={title}>
                         {title}
                     </h3>
@@ -120,7 +167,7 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect }) => {
 
             {/* Last Report Time */}
             {formattedLastReport && (
-                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5" title={t('ravenCard.lastReportTitle', { time: new Date(lastReportTime!).toLocaleString() })}>
+                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 pl-8" title={t('ravenCard.lastReportTitle', { time: new Date(lastReportTime!).toLocaleString() })}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     <span>{t('ravenCard.lastReport', { time: formattedLastReport })}</span>
                 </div>

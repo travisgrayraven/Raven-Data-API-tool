@@ -48,6 +48,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
 
   const [isNearestModalOpen, setIsNearestModalOpen] = useState(false);
   const [nearestModalTrigger, setNearestModalTrigger] = useState<HTMLElement | null>(null);
+  
+  // State for vehicle selection
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedRavenUuids, setSelectedRavenUuids] = useState<Set<string>>(new Set());
 
   const { t } = useTranslation();
 
@@ -76,6 +80,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [onRefreshData, isRefreshing]);
+
+  // Effect to exit selection mode with Escape key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isSelectionMode) {
+        handleClearSelection();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSelectionMode]);
 
   const getRavenStatus = (raven: RavenDetails): VehicleStatus => {
     if (raven.unplugged || !raven.online) {
@@ -149,6 +166,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
 
     return processedRavens;
   }, [ravens, filter, sortBy, searchQuery, statusFilter]);
+  
+  // Derived state for what to show in Grid, Nearest, etc.
+  const ravensForAction = useMemo(() => {
+    if (isSelectionMode && selectedRavenUuids.size > 0) {
+        // Create a map for quick lookup of selected ravens to preserve sort order
+        const selectedRavensMap = new Map(
+            filteredAndSortedRavens
+                .filter(r => selectedRavenUuids.has(r.uuid))
+                .map(r => [r.uuid, r])
+        );
+        // Return the selected ravens in the original sorted order
+        return filteredAndSortedRavens.filter(r => selectedRavensMap.has(r.uuid));
+    }
+    return filteredAndSortedRavens;
+  }, [isSelectionMode, selectedRavenUuids, filteredAndSortedRavens]);
+
 
   const filteredGeofences = useMemo(() => {
       const query = geofenceSearchQuery.trim().toLowerCase();
@@ -175,7 +208,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
 
     const csvRows = [headers.join(',')];
 
-    filteredAndSortedRavens.forEach(raven => {
+    ravensForAction.forEach(raven => {
         let statusText: string;
         if (raven.unplugged) statusText = 'Unplugged';
         else if (!raven.online) statusText = 'Offline';
@@ -295,7 +328,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     };
 
     const results = await processWithConcurrency(
-        filteredAndSortedRavens,
+        ravensForAction,
         processor,
         5 // Concurrency limit
     );
@@ -328,6 +361,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     setIsNearestModalOpen(false);
     nearestModalTrigger?.focus();
   }, [nearestModalTrigger]);
+  
+  // Selection mode handlers
+  const handleStartSelectionMode = useCallback((uuid: string) => {
+    setIsSelectionMode(true);
+    setSelectedRavenUuids(new Set([uuid]));
+  }, []);
+
+  const handleToggleSelection = useCallback((uuid: string) => {
+      setSelectedRavenUuids(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(uuid)) {
+              newSet.delete(uuid);
+          } else {
+              newSet.add(uuid);
+          }
+          // If the set becomes empty, exit selection mode
+          if (newSet.size === 0) {
+              setIsSelectionMode(false);
+          }
+          return newSet;
+      });
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+      setIsSelectionMode(false);
+      setSelectedRavenUuids(new Set());
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+      const allFilteredUuids = new Set(filteredAndSortedRavens.map(r => r.uuid));
+      setSelectedRavenUuids(allFilteredUuids);
+  }, [filteredAndSortedRavens]);
 
 
   const statusInfo: { [key in VehicleStatus]: { label: string; color: string } } = {
@@ -393,115 +458,143 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
         ) : (
             <>
                 {(activeTab === 'map' || activeTab === 'grid') && (
-                    <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-                        {/* Left-aligned filters */}
-                        <div className="flex items-center gap-4 flex-wrap">
-                            <div className="w-full sm:w-auto lg:w-64">
-                                <label htmlFor="search" className="sr-only">{t('dashboard.searchPlaceholder')}</label>
-                                <input
-                                    id="search"
-                                    type="text"
-                                    placeholder={t('dashboard.searchPlaceholder')}
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
-                                />
-                            </div>
-                            <div className="flex items-center p-1 space-x-1 bg-gray-100 dark:bg-gray-900/50 rounded-lg" role="group" aria-label={t('dashboard.status.filterLabel')}>
-                                {(['driving', 'parked', 'offline'] as VehicleStatus[]).map((status) => (
-                                    <button
-                                        key={status}
-                                        onClick={() => handleStatusFilterChange(status)}
-                                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors duration-200 flex items-center gap-2 ${
-                                            statusFilter.has(status)
-                                                ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow'
-                                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200/70 dark:hover:bg-gray-800/50'
-                                        }`}
-                                        aria-pressed={statusFilter.has(status)}
-                                        title={t('dashboard.status.filterTitle', { status: statusInfo[status].label })}
-                                    >
-                                        <span className={`h-2 w-2 rounded-full ${statusInfo[status].color}`} aria-hidden="true"></span>
-                                        <span>{statusInfo[status].label}</span>
+                    <div className="flex flex-wrap justify-between items-center mb-6 gap-4 min-h-[44px]">
+                        {/* Left side: either filters or selection bar */}
+                        <div className="flex-grow">
+                             {isSelectionMode ? (
+                                <div className="flex w-full justify-between items-center bg-raven-blue/10 dark:bg-raven-blue/20 px-4 py-2 rounded-lg">
+                                    <div className="flex items-center gap-4">
+                                        <button onClick={handleClearSelection} className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white" aria-label={t('selection.clear')}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                        <span className="font-semibold text-gray-800 dark:text-gray-100">{t('selection.count', { count: selectedRavenUuids.size })}</span>
+                                    </div>
+                                    <button onClick={handleSelectAll} className="text-sm font-medium text-raven-blue hover:underline">
+                                        {t('selection.selectAll')}
                                     </button>
-                                ))}
-                            </div>
-                            <div className="w-full sm:w-auto">
-                                <label htmlFor="filter" className="sr-only">{t('dashboard.filter.label')}</label>
-                                <select id="filter" value={filter} onChange={(e) => setFilter(e.target.value as FilterOption)} className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
-                                    <option value="30d">{t('dashboard.filter.30d')}</option>
-                                    <option value="7d">{t('dashboard.filter.7d')}</option>
-                                    <option value="48h">{t('dashboard.filter.48h')}</option>
-                                    <option value="24h">{t('dashboard.filter.24h')}</option>
-                                    <option value="12h">{t('dashboard.filter.12h')}</option>
-                                    <option value="1h">{t('dashboard.filter.1h')}</option>
-                                    <option value="all">{t('dashboard.filter.all')}</option>
-                                </select>
-                            </div>
-                            <div className="w-full sm:w-auto">
-                                <label htmlFor="sort" className="sr-only">{t('dashboard.sort.label')}</label>
-                                <select id="sort" value={sortBy} onChange={(e) => setSortBy(e.target.value as 'persona' | 'time')} className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
-                                    <option value="persona">{t('dashboard.sort.name')}</option>
-                                    <option value="time">{t('dashboard.sort.time')}</option>
-                                </select>
-                            </div>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-4 flex-wrap">
+                                    <div className="w-full sm:w-auto lg:w-64">
+                                        <label htmlFor="search" className="sr-only">{t('dashboard.searchPlaceholder')}</label>
+                                        <input
+                                            id="search"
+                                            type="text"
+                                            placeholder={t('dashboard.searchPlaceholder')}
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue"
+                                        />
+                                    </div>
+                                    <div className="flex items-center p-1 space-x-1 bg-gray-100 dark:bg-gray-900/50 rounded-lg" role="group" aria-label={t('dashboard.status.filterLabel')}>
+                                        {(['driving', 'parked', 'offline'] as VehicleStatus[]).map((status) => (
+                                            <button
+                                                key={status}
+                                                onClick={() => handleStatusFilterChange(status)}
+                                                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors duration-200 flex items-center gap-2 ${
+                                                    statusFilter.has(status)
+                                                        ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow'
+                                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200/70 dark:hover:bg-gray-800/50'
+                                                }`}
+                                                aria-pressed={statusFilter.has(status)}
+                                                title={t('dashboard.status.filterTitle', { status: statusInfo[status].label })}
+                                            >
+                                                <span className={`h-2 w-2 rounded-full ${statusInfo[status].color}`} aria-hidden="true"></span>
+                                                <span>{statusInfo[status].label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="w-full sm:w-auto">
+                                        <label htmlFor="filter" className="sr-only">{t('dashboard.filter.label')}</label>
+                                        <select id="filter" value={filter} onChange={(e) => setFilter(e.target.value as FilterOption)} className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
+                                            <option value="30d">{t('dashboard.filter.30d')}</option>
+                                            <option value="7d">{t('dashboard.filter.7d')}</option>
+                                            <option value="48h">{t('dashboard.filter.48h')}</option>
+                                            <option value="24h">{t('dashboard.filter.24h')}</option>
+                                            <option value="12h">{t('dashboard.filter.12h')}</option>
+                                            <option value="1h">{t('dashboard.filter.1h')}</option>
+                                            <option value="all">{t('dashboard.filter.all')}</option>
+                                        </select>
+                                    </div>
+                                    <div className="w-full sm:w-auto">
+                                        <label htmlFor="sort" className="sr-only">{t('dashboard.sort.label')}</label>
+                                        <select id="sort" value={sortBy} onChange={(e) => setSortBy(e.target.value as 'persona' | 'time')} className="block w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 pl-3 pr-8 text-base focus:outline-none focus:ring-raven-blue focus:border-raven-blue">
+                                            <option value="persona">{t('dashboard.sort.name')}</option>
+                                            <option value="time">{t('dashboard.sort.time')}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Right-aligned actions */}
+                        {/* Right side: always visible actions */}
                         <div className="flex items-center gap-2">
-                             <button
+                            <button
                                 onClick={handleOpenNearestModal}
-                                disabled={isRefreshing || ravens.length === 0}
+                                disabled={isRefreshing || ravensForAction.length === 0}
                                 className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sky-blue hover:bg-sky-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-blue disabled:bg-sky-blue/50 disabled:cursor-not-allowed"
                                 title={t('dashboard.nearest.title')}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
                                 <span>{t('dashboard.nearest.button')}</span>
                             </button>
-                            {activeTab === 'map' && (
-                              <>
-                                <button
-                                    onClick={handleOpenBulkMessageModal}
-                                    disabled={isRefreshing || filteredAndSortedRavens.length === 0}
-                                    className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
-                                    aria-label={t('dashboard.bulkMessageTitle')}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15h14a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>
-                                    <span>{t('dashboard.bulkMessage')}</span>
-                                </button>
-                                <button
-                                    onClick={handleExportToCSV}
-                                    className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-charcoal-grey hover:bg-charcoal-grey/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-charcoal-grey disabled:bg-charcoal-grey/50 disabled:cursor-not-allowed"
-                                    aria-label={t('dashboard.exportCsvTitle')}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                    <span>{t('dashboard.exportCsv')}</span>
-                                </button>
-                              </>
-                            )}
-                            <button 
-                                onClick={onRefreshData} 
-                                disabled={isRefreshing}
-                                className="flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
-                                aria-label={isRefreshing ? t('common.refreshing') : t('common.refresh')}
+                            
+                            <button
+                                onClick={handleOpenBulkMessageModal}
+                                disabled={isRefreshing || ravensForAction.length === 0}
+                                className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
+                                aria-label={t('dashboard.bulkMessageTitle')}
                             >
-                                {isRefreshing ? (
-                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" /></svg>
-                                )}
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15h14a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>
+                                <span>{t('dashboard.bulkMessage')}</span>
                             </button>
+                            <button
+                                onClick={handleExportToCSV}
+                                disabled={isRefreshing || ravensForAction.length === 0}
+                                className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-charcoal-grey hover:bg-charcoal-grey/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-charcoal-grey disabled:bg-charcoal-grey/50 disabled:cursor-not-allowed"
+                                aria-label={t('dashboard.exportCsvTitle')}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                <span>{t('dashboard.exportCsv')}</span>
+                            </button>
+                            {!isSelectionMode && (
+                                <button 
+                                    onClick={onRefreshData} 
+                                    disabled={isRefreshing}
+                                    className="flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-raven-blue hover:bg-raven-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-raven-blue disabled:bg-raven-blue/50 disabled:cursor-not-allowed"
+                                    aria-label={isRefreshing ? t('common.refreshing') : t('common.refresh')}
+                                >
+                                    {isRefreshing ? (
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" /></svg>
+                                    )}
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}
                 
                 <div id="map-panel" role="tabpanel" aria-labelledby="map-tab" hidden={activeTab !== 'map'}>
                     <div className="mb-6">
-                        <DashboardMap ravens={filteredAndSortedRavens} activeTab={activeTab} />
+                        <DashboardMap 
+                            ravens={filteredAndSortedRavens} 
+                            selectedRavenUuids={selectedRavenUuids}
+                            activeTab={activeTab} 
+                        />
                     </div>
                     {filteredAndSortedRavens.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredAndSortedRavens.map(raven => (
-                                <RavenCard key={raven.uuid} raven={raven} onSelect={() => onSelectRaven(raven)} />
+                                <RavenCard 
+                                    key={raven.uuid} 
+                                    raven={raven} 
+                                    onSelect={() => onSelectRaven(raven)}
+                                    isSelectionMode={isSelectionMode}
+                                    isSelected={selectedRavenUuids.has(raven.uuid)}
+                                    onStartSelectionMode={handleStartSelectionMode}
+                                    onToggleSelection={handleToggleSelection}
+                                />
                             ))}
                         </div>
                     ) : (
@@ -513,7 +606,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 </div>
                 
                 <div id="grid-panel" role="tabpanel" aria-labelledby="grid-tab" hidden={activeTab !== 'grid'}>
-                    {api && <GridPreview ravens={filteredAndSortedRavens} api={api} onSelectRaven={onSelectRaven} isActive={activeTab === 'grid'} />}
+                    {api && <GridPreview ravens={ravensForAction} api={api} onSelectRaven={onSelectRaven} isActive={activeTab === 'grid'} />}
                 </div>
 
                 <div id="geofences-panel" role="tabpanel" aria-labelledby="geofences-tab" hidden={activeTab !== 'geofences'}>
@@ -559,7 +652,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 isOpen={isBulkMessageModalOpen}
                 onClose={handleCloseBulkMessageModal}
                 onSubmit={handleSendBulkMessage}
-                vehicleCount={filteredAndSortedRavens.length}
+                vehicleCount={ravensForAction.length}
                 isSending={isSendingBulkMessage}
                 sendResult={bulkSendResult}
             />
@@ -568,7 +661,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
             <NearestVehiclesModal
                 isOpen={isNearestModalOpen}
                 onClose={handleCloseNearestModal}
-                ravens={ravens}
+                ravens={ravensForAction}
             />
         )}
     </div>

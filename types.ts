@@ -1,4 +1,4 @@
-/// <reference types="react" />
+// FIX: Removed redundant triple-slash directive which can cause issues in module-based projects.
 import React from 'react';
 
 export interface RavenSummary {
@@ -150,9 +150,11 @@ interface RcEnhancedVideoAccessProps extends React.HTMLAttributes<HTMLElement> {
 // Extend the global JSX namespace to include our custom elements.
 declare global {
     namespace JSX {
-        // FIX: Extend React's original IntrinsicElements interface to avoid overwriting it.
-        // This resolves numerous errors where standard HTML tags were not recognized.
-        interface IntrinsicElements extends React.JSX.IntrinsicElements {
+        // FIX: The `extends React.JSX.IntrinsicElements` clause was incorrectly overwriting the base JSX types.
+        // Removing it allows TypeScript's declaration merging to correctly add custom element types while
+        // preserving standard HTML element types. This resolves the widespread "Property 'div' does not exist
+        // on type 'JSX.IntrinsicElements'" errors.
+        interface IntrinsicElements {
             'rc-live-preview-viewer': React.DetailedHTMLProps<RcLivePreviewViewerProps, HTMLElement>;
             'rc-streaming-video-player': React.DetailedHTMLProps<RcStreamingVideoPlayerProps, HTMLElement>;
             'rc-enhanced-video-access': React.DetailedHTMLProps<RcEnhancedVideoAccessProps, HTMLElement>;

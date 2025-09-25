@@ -1,3 +1,4 @@
+
 {
   "common": {
     "error": "Erreur",
@@ -88,6 +89,11 @@
       "button": "Proches",
       "title": "Trouver les véhicules les plus proches"
     }
+  },
+  "selection": {
+    "count": "{{count}} sélectionnés",
+    "selectAll": "Tout sélectionner",
+    "clear": "Effacer la sélection"
   },
   "ravenCard": {
     "unnamedVehicle": "Véhicule sans nom",
