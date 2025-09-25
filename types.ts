@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import React from 'react';
 
 export interface RavenSummary {
@@ -149,7 +150,9 @@ interface RcEnhancedVideoAccessProps extends React.HTMLAttributes<HTMLElement> {
 // Extend the global JSX namespace to include our custom elements.
 declare global {
     namespace JSX {
-        interface IntrinsicElements {
+        // FIX: Extend React's original IntrinsicElements interface to avoid overwriting it.
+        // This resolves numerous errors where standard HTML tags were not recognized.
+        interface IntrinsicElements extends React.JSX.IntrinsicElements {
             'rc-live-preview-viewer': React.DetailedHTMLProps<RcLivePreviewViewerProps, HTMLElement>;
             'rc-streaming-video-player': React.DetailedHTMLProps<RcStreamingVideoPlayerProps, HTMLElement>;
             'rc-enhanced-video-access': React.DetailedHTMLProps<RcEnhancedVideoAccessProps, HTMLElement>;

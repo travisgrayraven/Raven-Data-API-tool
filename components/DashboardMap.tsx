@@ -1,8 +1,4 @@
 
-
-
-
-
 import React, { useEffect, useRef, useState } from 'react';
 import type { RavenDetails } from '../types';
 import { useTranslation } from '../i18n/i18n';

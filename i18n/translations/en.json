@@ -1,4 +1,3 @@
-
 {
   "common": {
     "error": "Error",
@@ -84,7 +83,11 @@
     "exportCsvTitle": "Export to CSV",
     "noVehiclesFound": "No Vehicles Found",
     "noVehiclesDescription": "The API returned an empty list of vehicles.",
-    "noFilteredVehiclesDescription": "No vehicles match the current filter criteria."
+    "noFilteredVehiclesDescription": "No vehicles match the current filter criteria.",
+    "nearest": {
+      "button": "Nearest",
+      "title": "Find Nearest Vehicles"
+    }
   },
   "ravenCard": {
     "unnamedVehicle": "Unnamed Vehicle",
@@ -409,5 +412,22 @@
     "durationLabel": "Duration",
     "minutes": "{{count}} minutes",
     "submit": "Send Message"
+  },
+  "nearestVehiclesModal": {
+    "title": "Find Nearest Vehicles",
+    "addressPlaceholder": "Enter an address...",
+    "findButton": "Find",
+    "findingButton": "Finding...",
+    "vehicleStatusLabel": "Include vehicles that are:",
+    "drivingOnly": "Driving",
+    "drivingAndParked": "Driving & Parked",
+    "calculateRouteLabel": "Calculate Driving ETA (Top 3)",
+    "resultsHeader": "Top 10 Nearest Vehicles:",
+    "resultsTimestamp": "As of {{time}}",
+    "kmAway": "{{distance}} km away",
+    "drivingEta": "{{distance}} km (est. {{duration}} mins)",
+    "noResults": "No active vehicles found matching the criteria.",
+    "addressNotFound": "Could not find a location for the specified address. Please try again.",
+    "enterAddressPrompt": "Enter an address and click 'Find' to see the nearest vehicles."
   }
 }

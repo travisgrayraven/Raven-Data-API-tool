@@ -1,6 +1,6 @@
 
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import type { RavenDetails, Geofence, ApiContextType, GeofenceFormData, Tab } from '../types';
 import { RavenCard } from './RavenCard';
 import { DashboardMap } from './DashboardMap';
@@ -10,6 +10,7 @@ import { createGeofence, updateGeofence, deleteGeofence, setDriverMessage, proce
 import { BulkGeofenceActions } from './BulkGeofenceActions';
 import { GridPreview } from './GridPreview';
 import { BulkMessageModal } from './BulkMessageModal';
+import { NearestVehiclesModal } from './NearestVehiclesModal';
 import { useTranslation } from '../i18n/i18n';
 
 interface DashboardProps {
@@ -44,6 +45,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
   const [bulkMessageTrigger, setBulkMessageTrigger] = useState<HTMLElement | null>(null);
   const [bulkSendResult, setBulkSendResult] = useState<{success: number, error: number} | null>(null);
   const [isSendingBulkMessage, setIsSendingBulkMessage] = useState(false);
+
+  const [isNearestModalOpen, setIsNearestModalOpen] = useState(false);
+  const [nearestModalTrigger, setNearestModalTrigger] = useState<HTMLElement | null>(null);
+
   const { t } = useTranslation();
 
   // Auto-refresh logic
@@ -314,6 +319,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
     });
   };
 
+  const handleOpenNearestModal = useCallback(() => {
+    setNearestModalTrigger(document.activeElement as HTMLElement);
+    setIsNearestModalOpen(true);
+  }, []);
+
+  const handleCloseNearestModal = useCallback(() => {
+    setIsNearestModalOpen(false);
+    nearestModalTrigger?.focus();
+  }, [nearestModalTrigger]);
+
+
   const statusInfo: { [key in VehicleStatus]: { label: string; color: string } } = {
     driving: { label: t('dashboard.status.driving'), color: 'bg-green-500' },
     parked: { label: t('dashboard.status.parked'), color: 'bg-raven-blue' },
@@ -432,6 +448,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
 
                         {/* Right-aligned actions */}
                         <div className="flex items-center gap-2">
+                             <button
+                                onClick={handleOpenNearestModal}
+                                disabled={isRefreshing || ravens.length === 0}
+                                className="flex items-center justify-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sky-blue hover:bg-sky-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-blue disabled:bg-sky-blue/50 disabled:cursor-not-allowed"
+                                title={t('dashboard.nearest.title')}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+                                <span>{t('dashboard.nearest.button')}</span>
+                            </button>
                             {activeTab === 'map' && (
                               <>
                                 <button
@@ -537,6 +562,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 vehicleCount={filteredAndSortedRavens.length}
                 isSending={isSendingBulkMessage}
                 sendResult={bulkSendResult}
+            />
+        )}
+        {isNearestModalOpen && (
+            <NearestVehiclesModal
+                isOpen={isNearestModalOpen}
+                onClose={handleCloseNearestModal}
+                ravens={ravens}
             />
         )}
     </div>

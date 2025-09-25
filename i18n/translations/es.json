@@ -1,4 +1,3 @@
-
 {
   "common": {
     "error": "Error",
@@ -84,7 +83,11 @@
     "exportCsvTitle": "Exportar a CSV",
     "noVehiclesFound": "No se encontraron vehículos",
     "noVehiclesDescription": "La API devolvió una lista de vehículos vacía.",
-    "noFilteredVehiclesDescription": "Ningún vehículo coincide con los criterios de filtro actuales."
+    "noFilteredVehiclesDescription": "Ningún vehículo coincide con los criterios de filtro actuales.",
+    "nearest": {
+      "button": "Cercanos",
+      "title": "Encontrar vehículos más cercanos"
+    }
   },
   "ravenCard": {
     "unnamedVehicle": "Vehículo sin nombre",
@@ -409,5 +412,22 @@
     "durationLabel": "Duración",
     "minutes": "{{count}} minutos",
     "submit": "Enviar mensaje"
+  },
+  "nearestVehiclesModal": {
+    "title": "Encontrar Vehículos Más Cercanos",
+    "addressPlaceholder": "Introduzca una dirección...",
+    "findButton": "Encontrar",
+    "findingButton": "Buscando...",
+    "vehicleStatusLabel": "Incluir vehículos que están:",
+    "drivingOnly": "Conduciendo",
+    "drivingAndParked": "Conduciendo y Estacionados",
+    "calculateRouteLabel": "Calcular ETA (Top 3)",
+    "resultsHeader": "Los 10 vehículos más cercanos:",
+    "resultsTimestamp": "A las {{time}}",
+    "kmAway": "a {{distance}} km",
+    "drivingEta": "{{distance}} km (est. {{duration}} min)",
+    "noResults": "No se encontraron vehículos activos que coincidan con los criterios.",
+    "addressNotFound": "No se pudo encontrar una ubicación para la dirección especificada. Por favor, inténtelo de nuevo.",
+    "enterAddressPrompt": "Introduzca una dirección y haga clic en 'Encontrar' para ver los vehículos más cercanos."
   }
 }
