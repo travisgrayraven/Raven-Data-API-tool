@@ -1,4 +1,5 @@
 
+
 {
   "common": {
     "error": "Error",
@@ -50,6 +51,7 @@
       "map": "Mapa",
       "grid": "Cuadrícula",
       "geofences": "Geocercas",
+      "refueling": "Repostaje",
       "label": "Pestañas principales del panel"
     },
     "mapView": "Vista de Mapa",
@@ -435,5 +437,18 @@
     "noResults": "No se encontraron vehículos activos que coincidan con los criterios.",
     "addressNotFound": "No se pudo encontrar una ubicación para la dirección especificada. Por favor, inténtelo de nuevo.",
     "enterAddressPrompt": "Introduzca una dirección y haga clic en 'Encontrar' para ver los vehículos más cercanos."
+  },
+  "refuelingReport": {
+    "title": "Informe de eventos de repostaje",
+    "description": "Seleccione un rango de fechas para encontrar eventos de repostaje para los vehículos seleccionados.",
+    "fetchButton": "Obtener eventos",
+    "noEvents": "No se encontraron eventos de repostaje para los vehículos y el rango de fechas seleccionados.",
+    "prompt": "Seleccione un rango de fechas y haga clic en 'Obtener eventos' para comenzar.",
+    "exportPdf": "PDF",
+    "table": {
+      "vehicle": "Vehículo",
+      "timestamp": "Fecha y Hora",
+      "location": "Ubicación"
+    }
   }
 }

@@ -80,7 +80,8 @@ export const RavenCard: React.FC<RavenCardProps> = ({ raven, onSelect, isSelecti
     const formattedLastReport = formatTimeAgo(lastReportTime);
 
     // Vehicle Status Logic
-    let statusText: string, statusIcon: JSX.Element, statusColor: string, statusTitle: string;
+    // FIX: Changed JSX.Element to React.ReactNode to resolve namespace error.
+    let statusText: string, statusIcon: React.ReactNode, statusColor: string, statusTitle: string;
 
     if (raven.unplugged) {
         statusText = t('ravenCard.status.unplugged');

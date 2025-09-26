@@ -18,7 +18,6 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens, selectedRave
     const markerClusterGroupRef = useRef<any>(null);
     const { t } = useTranslation();
     const [isResizing, setIsResizing] = useState(false);
-    // FIX: Initialize useRef with an argument to resolve "Expected 1 arguments, but got 0" error.
     const prevTab = useRef<string | undefined>(undefined);
 
     useEffect(() => {
@@ -67,13 +66,15 @@ export const DashboardMap: React.FC<DashboardMapProps> = ({ ravens, selectedRave
                 const { latitude, longitude } = raven.last_known_location!;
                 const isSelected = selectedRavenUuids.has(raven.uuid);
 
-                const marker = L.circleMarker([latitude, longitude], {
-                    radius: isSelected ? 10 : 6,
-                    fillColor: isSelected ? '#1461D1' : '#787882',
-                    color: '#fff',
-                    weight: isSelected ? 2 : 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
+                const marker = L.marker([latitude, longitude], {
+                    zIndexOffset: isSelected ? 1000 : 0,
+                });
+                
+                // Apply a class for selection styling after the marker is added to the map
+                marker.on('add', function() {
+                    if (isSelected && this._icon) {
+                        L.DomUtil.addClass(this._icon, 'selected-marker');
+                    }
                 });
                 
                 marker.bindPopup(`<b>${raven.name}</b>`);

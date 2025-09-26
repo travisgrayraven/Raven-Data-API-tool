@@ -147,13 +147,12 @@ interface RcEnhancedVideoAccessProps extends React.HTMLAttributes<HTMLElement> {
     forcereporting?: boolean;
 }
 
-// Extend the global JSX namespace to include our custom elements.
+// FIX: The JSX.IntrinsicElements interface was being redefined instead of augmented.
+// This caused all standard HTML element types (like 'div', 'p', etc.) to be removed from TypeScript's
+// type checking, leading to widespread errors. By augmenting `JSX.IntrinsicElements` inside a `declare global`
+// block, we are now correctly adding our custom web component types without losing the standard ones.
 declare global {
     namespace JSX {
-        // FIX: The `extends React.JSX.IntrinsicElements` clause was incorrectly overwriting the base JSX types.
-        // Removing it allows TypeScript's declaration merging to correctly add custom element types while
-        // preserving standard HTML element types. This resolves the widespread "Property 'div' does not exist
-        // on type 'JSX.IntrinsicElements'" errors.
         interface IntrinsicElements {
             'rc-live-preview-viewer': React.DetailedHTMLProps<RcLivePreviewViewerProps, HTMLElement>;
             'rc-streaming-video-player': React.DetailedHTMLProps<RcStreamingVideoPlayerProps, HTMLElement>;

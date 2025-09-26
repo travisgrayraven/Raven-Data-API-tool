@@ -267,6 +267,7 @@ const App: React.FC = () => {
                 onRefreshData={handleRefreshData} 
                 isRefreshing={isRefreshing} 
                 api={api}
+                onImageClick={handleOpenImageViewer}
             />;
         }
         

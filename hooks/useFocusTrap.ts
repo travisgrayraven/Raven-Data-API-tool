@@ -33,13 +33,19 @@ export const useFocusTrap = <T extends HTMLElement>(isOpen: boolean) => {
 
     if (e.shiftKey) { // Shift + Tab
       if (document.activeElement === firstElement) {
-        lastElement.focus();
         e.preventDefault();
+        // FIX: Add type guard to ensure lastElement is an HTMLElement before calling focus.
+        if (lastElement instanceof HTMLElement) {
+          lastElement.focus();
+        }
       }
     } else { // Tab
       if (document.activeElement === lastElement) {
-        firstElement.focus();
         e.preventDefault();
+        // FIX: Add type guard to ensure firstElement is an HTMLElement before calling focus.
+        if (firstElement instanceof HTMLElement) {
+          firstElement.focus();
+        }
       }
     }
   }, []);

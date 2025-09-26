@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import type { RavenDetails, Geofence, ApiContextType, GeofenceFormData, Tab } from '../types';
 import { RavenCard } from './RavenCard';
@@ -11,6 +12,7 @@ import { BulkGeofenceActions } from './BulkGeofenceActions';
 import { GridPreview } from './GridPreview';
 import { BulkMessageModal } from './BulkMessageModal';
 import { NearestVehiclesModal } from './NearestVehiclesModal';
+import { RefuelingReport } from './RefuelingReport';
 import { useTranslation } from '../i18n/i18n';
 
 interface DashboardProps {
@@ -21,13 +23,15 @@ interface DashboardProps {
   onRefreshData: () => void;
   isRefreshing: boolean;
   api: ApiContextType | null;
+  onImageClick: (images: string[], index: number) => void;
 }
 
 type FilterOption = '30d' | '7d' | '48h' | '24h' | '12h' | '1h' | 'all';
 type VehicleStatus = 'driving' | 'parked' | 'offline';
+type DashboardTab = 'map' | 'grid' | 'geofences' | 'refueling';
 
-export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGeofences, onSelectRaven, onRefreshData, isRefreshing, api }) => {
-  const [activeTab, setActiveTab] = useState<'map' | 'grid' | 'geofences'>('map');
+export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGeofences, onSelectRaven, onRefreshData, isRefreshing, api, onImageClick }) => {
+  const [activeTab, setActiveTab] = useState<DashboardTab>('map');
   const [filter, setFilter] = useState<FilterOption>('7d');
   const [sortBy, setSortBy] = useState<'persona' | 'time'>('persona');
   const [searchQuery, setSearchQuery] = useState('');
@@ -447,6 +451,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                 >
                     {t('dashboard.tabs.geofences')}
                 </button>
+                <button
+                    id="refueling-tab"
+                    role="tab"
+                    aria-selected={activeTab === 'refueling'}
+                    aria-controls="refueling-panel"
+                    onClick={() => setActiveTab('refueling')}
+                    className={`${
+                        activeTab === 'refueling'
+                        ? 'border-raven-blue text-raven-blue'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600'
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                >
+                    {t('dashboard.tabs.refueling')}
+                </button>
             </nav>
         </div>
         
@@ -457,7 +475,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
             </div>
         ) : (
             <>
-                {(activeTab === 'map' || activeTab === 'grid') && (
+                {(activeTab === 'map' || activeTab === 'grid' || activeTab === 'refueling') && (
                     <div className="flex flex-wrap justify-between items-center mb-6 gap-4 min-h-[44px]">
                         {/* Left side: either filters or selection bar */}
                         <div className="flex-grow">
@@ -633,6 +651,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ ravens, geofences, onSetGe
                         geofences={filteredGeofences} 
                         onSelectGeofence={(g) => handleOpenEditor('edit', g)}
                     />
+                </div>
+                <div id="refueling-panel" role="tabpanel" aria-labelledby="refueling-tab" hidden={activeTab !== 'refueling'}>
+                   {api && <RefuelingReport ravens={ravensForAction} api={api} isActive={activeTab === 'refueling'} onImageClick={onImageClick} />}
                 </div>
             </>
         )}

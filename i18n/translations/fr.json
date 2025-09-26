@@ -1,4 +1,5 @@
 
+
 {
   "common": {
     "error": "Erreur",
@@ -50,6 +51,7 @@
       "map": "Carte",
       "grid": "Grille",
       "geofences": "Géorepérages",
+      "refueling": "Ravitaillement",
       "label": "Onglets principaux du tableau de bord"
     },
     "mapView": "Vue Carte",
@@ -435,5 +437,18 @@
     "noResults": "Aucun véhicule actif trouvé correspondant aux critères.",
     "addressNotFound": "Impossible de trouver un emplacement pour l'adresse spécifiée. Veuillez réessayer.",
     "enterAddressPrompt": "Entrez une adresse et cliquez sur 'Trouver' pour voir les véhicules les plus proches."
+  },
+  "refuelingReport": {
+    "title": "Rapport d'événements de ravitaillement",
+    "description": "Sélectionnez une plage de dates pour trouver les événements de ravitaillement pour les véhicules sélectionnés.",
+    "fetchButton": "Obtenir les événements",
+    "noEvents": "Aucun événement de ravitaillement trouvé pour les véhicules et la plage de dates sélectionnés.",
+    "prompt": "Sélectionnez une plage de dates et cliquez sur 'Obtenir les événements' pour commencer.",
+    "exportPdf": "PDF",
+    "table": {
+      "vehicle": "Véhicule",
+      "timestamp": "Date et heure",
+      "location": "Emplacement"
+    }
   }
 }

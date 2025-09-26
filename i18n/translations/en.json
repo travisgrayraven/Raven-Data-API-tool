@@ -1,4 +1,5 @@
 
+
 {
   "common": {
     "error": "Error",
@@ -50,6 +51,7 @@
       "map": "Map",
       "grid": "Grid",
       "geofences": "Geofences",
+      "refueling": "Refueling",
       "label": "Main dashboard tabs"
     },
     "mapView": "Map View",
@@ -435,5 +437,18 @@
     "noResults": "No active vehicles found matching the criteria.",
     "addressNotFound": "Could not find a location for the specified address. Please try again.",
     "enterAddressPrompt": "Enter an address and click 'Find' to see the nearest vehicles."
+  },
+  "refuelingReport": {
+    "title": "Refueling Events Report",
+    "description": "Select a date range to find refueling events for the selected vehicles.",
+    "fetchButton": "Fetch Events",
+    "noEvents": "No refueling events found for the selected vehicles and date range.",
+    "prompt": "Select a date range and click 'Fetch Events' to begin.",
+    "exportPdf": "PDF",
+    "table": {
+      "vehicle": "Vehicle",
+      "timestamp": "Date & Time",
+      "location": "Location"
+    }
   }
 }

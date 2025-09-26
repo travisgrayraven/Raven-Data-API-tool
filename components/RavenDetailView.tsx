@@ -2,6 +2,8 @@
 
 
 
+
+
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { RavenDetails, RavenEvent, RavenSettings, ApiContextType, ApiLogEntry, Tab } from '../types';
 import { getRavenEvents, getRavenSettings, updateRavenSettings, getMediaUrlViaProxy, processWithConcurrency } from '../services/ravenApi';
@@ -422,10 +424,27 @@ const EventsView: React.FC<{
             const imageBoxWidth = 80;
             const imageBoxHeight = 60;
     
+            // Vehicle Header
             doc.setFontSize(18);
             doc.text(`${raven.name} - ${t('detailView.events.reportTitle')}`, leftMargin, y);
             y += 8;
     
+            doc.setFontSize(10);
+            doc.setTextColor(100); // Grey color for sub-header
+            const vehicleInfoText: string[] = [];
+            if (raven.vehicle_vin) vehicleInfoText.push(`VIN: ${raven.vehicle_vin}`);
+            if (raven.vehicle_info) {
+                const { year, make, model } = raven.vehicle_info;
+                if (year && make && model) {
+                    vehicleInfoText.push(`${year} ${make} ${model}`);
+                }
+            }
+            if (vehicleInfoText.length > 0) {
+                doc.text(vehicleInfoText.join(' | '), leftMargin, y);
+                y += 8;
+            }
+            doc.setTextColor(0); // Reset text color
+
             for (const event of filteredEvents) {
                 const mediaIds = [...(event.road_media_ids || []), ...(event.cabin_media_ids || [])];
                 
